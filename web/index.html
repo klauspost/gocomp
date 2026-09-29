@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Go compression benchmarks</title>
+<!-- Inline so there is no second request and no 404 in the console. A long bar
+     over a short one: input, then output. -->
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect y='2' width='14' height='4' rx='1' fill='%234457c0'/><rect y='10' width='6' height='4' rx='1' fill='%23e8480e'/></svg>">
+<link rel="stylesheet" href="./css/tokens.css">
+<link rel="stylesheet" href="./css/app.css">
+
+<!-- Chart.js 4 ships an ESM build with bare specifiers a browser cannot
+     resolve on its own, so the vendored copies are mapped here. The files are
+     byte-identical to the npm distribution; see vendor/PROVENANCE.txt. -->
+<script type="importmap">
+{ "imports": {
+    "chart.js":         "./vendor/chart.esm.js",
+    "chart.js/helpers": "./vendor/chart-helpers.esm.js",
+    "@kurkle/color":    "./vendor/kurkle-color.esm.js"
+} }
+</script>
+</head>
+<body>
+
+<header>
+  <h1>Go compression benchmarks</h1>
+  <p id="subtitle" class="sub"></p>
+  <span class="spacer"></span>
+  <button id="theme-toggle" title="Cycle theme: auto, light, dark">Theme: auto</button>
+  <button id="copy-link" title="Copy a link to this exact view">Copy link</button>
+</header>
+
+<div id="filters" class="filters"></div>
+<div id="banner" class="banner" role="status" aria-live="polite"></div>
+
+<main id="cards" class="grid"></main>
+
+<footer>
+  Every value is the best of N passes (minimum wall time) measured purely in memory.
+  Codecs marked as having no concurrency ignore the thread count; variation across
+  thread counts for those is scheduler and GC effect, not the codec.
+</footer>
+
+<script type="module" src="./js/app.js"></script>
+</body>
+</html>

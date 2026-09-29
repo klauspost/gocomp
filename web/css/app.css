@@ -1,0 +1,398 @@
+* { box-sizing: border-box; }
+
+body {
+  margin: 0 auto;
+  max-width: 1760px;
+  padding: 0 clamp(16px, 2.5vw, 40px) 72px;
+  background: var(--surface-0);
+  color: var(--text-primary);
+  font: 14px/1.55 system-ui, -apple-system, 'Segoe UI', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Its own token, not --series-1: a series colour is a data token, and it is
+   chosen against a 3:1 mark floor rather than the 4.5:1 text needs. */
+a { color: var(--link); }
+
+/* One visible focus treatment for everything, because the controls below are
+   a mix of buttons, summaries, selects and checkboxes, and a ring that moves
+   between them unchanged is the one that gets noticed. The outline follows
+   each element's own radius, so nothing here may set one: doing that would
+   reshape a pill-shaped chip the moment it took focus. */
+:focus-visible {
+  outline: 2px solid var(--text-primary);
+  outline-offset: 2px;
+}
+
+/* Thin scrollbars: a full-width native bar inside a 200px popover is most of
+   the popover. */
+.checks,
+.table-wrap {
+  scrollbar-width: thin;
+  scrollbar-color: var(--axis) transparent;
+}
+
+/* ---------------------------------------------------------------- header */
+
+header {
+  display: flex;
+  align-items: center;
+  gap: 8px 16px;
+  padding: 26px 0 18px;
+  flex-wrap: wrap;
+}
+header h1 {
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  margin: 0;
+}
+header p { margin: 0; color: var(--text-secondary); font-size: 13px; }
+header .spacer { flex: 1; }
+
+button {
+  font: inherit;
+  color: var(--text-secondary);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 5px 11px;
+  cursor: pointer;
+  transition: background 110ms, color 110ms, border-color 110ms;
+}
+button:hover { background: var(--wash); color: var(--text-primary); }
+
+/* ------------------------------------------------------------- filter row */
+
+/* One row, above everything it scopes. No chart card owns a filter. It is
+   lifted off the page rather than ruled off it: a border round every group on
+   the page flattens all of them to the same importance. */
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px 18px;
+  align-items: flex-end;
+  padding: 15px 18px;
+  background: var(--surface-1);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-1);
+  margin-bottom: 14px;
+}
+.filter { display: flex; flex-direction: column; gap: 5px; }
+.filter > .head { display: flex; align-items: baseline; gap: 8px; }
+.filter .lab {
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+.filter .clear {
+  font-size: 11.5px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text-muted);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.filter .clear:hover { background: none; color: var(--text-primary); }
+
+.filter select,
+.drop > summary {
+  font: inherit;
+  color: var(--text-primary);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 6px 10px;
+  min-height: 33px;
+  min-width: 132px;
+  cursor: pointer;
+  transition: border-color 110ms, box-shadow 110ms;
+}
+.filter select:hover,
+.drop > summary:hover { border-color: var(--text-muted); }
+
+/* Collapsed, so a 15-codec list and a one-line dropdown are the same height
+   and the row stays a row. The panel floats rather than pushing the layout
+   around when it opens. */
+.drop { position: relative; }
+.drop > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  max-width: 230px;
+  list-style: none;
+}
+.drop > summary::-webkit-details-marker { display: none; }
+.drop > summary .val { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* A chevron rather than the native disclosure triangle, which sits at a
+   different optical weight from everything else in the row. */
+.drop > summary::after {
+  content: '';
+  flex: none;
+  width: 6px;
+  height: 6px;
+  margin-bottom: 2px;
+  border-right: 1.5px solid var(--text-muted);
+  border-bottom: 1.5px solid var(--text-muted);
+  transform: rotate(45deg);
+  transition: transform 140ms;
+}
+.drop[open] > summary { border-color: var(--text-muted); box-shadow: var(--shadow-1); }
+.drop[open] > summary::after { transform: rotate(-135deg); margin-bottom: -2px; }
+.drop > .checks {
+  position: absolute;
+  z-index: 5;
+  top: calc(100% + 5px);
+  left: 0;
+  min-width: 100%;
+  box-shadow: var(--shadow-2);
+}
+
+/* One click per value, no ctrl+click, and no chance of wiping the selection
+   by clicking the wrong row. */
+.checks {
+  display: flex;
+  flex-direction: column;
+  max-height: 210px;
+  overflow-y: auto;
+  padding: 5px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+}
+.checks label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px;
+  border-radius: var(--r-sm);
+  white-space: nowrap;
+  cursor: pointer;
+}
+.checks label:hover { background: var(--wash); }
+.checks input { margin: 0; cursor: pointer; accent-color: var(--fill); }
+
+/* A track with the active option lifted out of it, rather than three adjacent
+   bordered rectangles sharing edges. */
+.segment {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  background: var(--wash);
+  border-radius: var(--r-md);
+  min-height: 33px;
+}
+.segment button {
+  border: 0;
+  background: none;
+  border-radius: var(--r-sm);
+  padding: 3px 11px;
+}
+.segment button[aria-pressed='true'] {
+  background: var(--surface-2);
+  color: var(--text-primary);
+  font-weight: 600;
+  box-shadow: var(--shadow-1);
+}
+
+.chips { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; min-height: 33px; }
+.chips button {
+  padding: 3px 11px;
+  border-radius: 999px;
+  font-variant-numeric: tabular-nums;
+}
+.chips button[aria-pressed='true'] {
+  background: var(--fill);
+  border-color: var(--fill);
+  color: var(--on-fill);
+  font-weight: 600;
+}
+.chips button[aria-pressed='true']:hover { color: var(--on-fill); opacity: 0.88; }
+
+/* --------------------------------------------------------------- banner */
+
+/* Tinted rather than ruled. It has to be noticed without competing with the
+   charts it is a caveat about. */
+.banner {
+  border: 1px solid color-mix(in srgb, var(--status-warning) 40%, transparent);
+  background: color-mix(in srgb, var(--status-warning) 8%, var(--surface-1));
+  border-radius: var(--r-lg);
+  padding: 12px 16px;
+  margin-bottom: 14px;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+.banner:empty { display: none; }
+.banner ul { margin: 4px 0 0; padding-left: 20px; }
+.banner li { margin-top: 2px; }
+.banner strong { color: var(--text-primary); font-weight: 600; }
+
+/* ---------------------------------------------------------------- cards */
+
+.grid { display: grid; gap: 14px; }
+
+figure.card {
+  margin: 0;
+  background: var(--surface-1);
+  border-radius: var(--r-lg);
+  padding: 18px 20px 20px;
+  box-shadow: var(--shadow-1);
+  transition: opacity 120ms;
+}
+/* Refetch holds the previous render rather than flashing a skeleton. */
+figure.card[data-loading='1'] { opacity: 0.45; pointer-events: none; }
+
+figure.card > figcaption {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+figcaption h2 {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+figcaption .sub { color: var(--text-secondary); font-size: 12.5px; }
+figcaption .spacer { flex: 1; }
+
+.panels { display: flex; gap: 20px; flex-wrap: wrap; }
+.panel { flex: 1 1 380px; min-width: 300px; }
+.panel > h3 {
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin: 0 0 6px;
+}
+
+/* The box includes the x-axis band, so the card never gets a nested scroll.
+   The ranking card overrides this inline: its height comes from its bar count.
+   Everything else gets room for a speed axis that now runs vertically. */
+.chart-box { position: relative; height: 442px; }
+.chart-box canvas { width: 100%; height: 100%; }
+
+/* --------------------------------------------------------------- legend */
+
+.legend { display: flex; flex-wrap: wrap; gap: 2px 6px; margin-top: 12px; align-items: center; }
+.legend button {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  border: none;
+  background: none;
+  padding: 3px 9px;
+  border-radius: 999px;
+  color: var(--text-secondary);
+}
+.legend button:hover { background: var(--wash); }
+.legend button[aria-pressed='true'] { color: var(--text-primary); font-weight: 600; }
+.legend .key { width: 16px; height: 2px; border-radius: 1px; flex: none; }
+/* The legend key is a line segment, so what reads there is the slot's dash
+   pattern, one per slot and matching the chart's borderDash. A mask keeps
+   `background` free to carry the colour; the shape classes further down apply
+   to the swatches instead. Slot 1 is solid and needs no mask. */
+.legend .key.square { -webkit-mask-image: repeating-linear-gradient(90deg, #000 0 6px, transparent 6px 9px); mask-image: repeating-linear-gradient(90deg, #000 0 6px, transparent 6px 9px); }
+.legend .key.triangle { -webkit-mask-image: repeating-linear-gradient(90deg, #000 0 2px, transparent 2px 5px); mask-image: repeating-linear-gradient(90deg, #000 0 2px, transparent 2px 5px); }
+.legend .key.diamond { -webkit-mask-image: repeating-linear-gradient(90deg, #000 0 9px, transparent 9px 12px, #000 12px 14px, transparent 14px 17px); mask-image: repeating-linear-gradient(90deg, #000 0 9px, transparent 9px 12px, #000 12px 14px, transparent 17px); }
+.legend .key.ex { -webkit-mask-image: repeating-linear-gradient(90deg, #000 0 1px, transparent 1px 4px); mask-image: repeating-linear-gradient(90deg, #000 0 1px, transparent 1px 4px); }
+.legend .key.plus { -webkit-mask-image: repeating-linear-gradient(90deg, #000 0 12px, transparent 12px 16px); mask-image: repeating-linear-gradient(90deg, #000 0 12px, transparent 12px 16px); }
+.legend .key.triangleDown { -webkit-mask-image: repeating-linear-gradient(90deg, #000 0 4px, transparent 4px 6px, #000 6px 7px, transparent 7px 9px, #000 9px 10px, transparent 10px 12px); mask-image: repeating-linear-gradient(90deg, #000 0 4px, transparent 4px 6px, #000 6px 7px, transparent 7px 9px, #000 9px 10px, transparent 10px 12px); }
+.legend .key.star { -webkit-mask-image: repeating-linear-gradient(90deg, #000 0 3px, transparent 3px 6px, #000 6px 15px, transparent 15px 18px); mask-image: repeating-linear-gradient(90deg, #000 0 3px, transparent 3px 6px, #000 6px 15px, transparent 15px 18px); }
+.legend .hint { color: var(--text-muted); font-size: 12px; margin-left: 6px; }
+
+/* -------------------------------------------------------------- tooltip */
+
+.tip {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 80ms;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 8px 10px;
+  box-shadow: var(--shadow-2);
+  white-space: nowrap;
+  z-index: 3;
+}
+.tip[data-show='1'] { opacity: 1; }
+.tip .tt-head { color: var(--text-primary); font-weight: 600; margin-bottom: 3px; }
+.tip .tt-row { display: flex; align-items: center; gap: 7px; }
+.tip .tt-key { width: 14px; height: 2px; border-radius: 1px; flex: none; }
+.tip .tt-val { color: var(--text-primary); font-weight: 600; font-variant-numeric: tabular-nums; }
+.tip .tt-name { color: var(--text-secondary); }
+.tip .tt-note { color: var(--text-muted); font-size: 12px; margin-top: 3px; }
+
+/* ---------------------------------------------------------------- table */
+
+.table-wrap { overflow: auto; max-height: 460px; margin-top: 4px; }
+table { border-collapse: collapse; width: 100%; font-size: 13px; }
+th, td {
+  text-align: left;
+  padding: 5px 14px 5px 0;
+  white-space: nowrap;
+}
+/* Only the header is ruled. A line under every row turns a table into a grid,
+   and the rows are already separated by their own hover band. */
+td { border-top: 1px solid color-mix(in srgb, var(--border) 55%, transparent); }
+th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--surface-1);
+  border-bottom: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  cursor: pointer;
+  user-select: none;
+}
+th:hover { color: var(--text-primary); }
+th[aria-sort='ascending']::after { content: ' \25B2'; font-size: 9px; color: var(--text-muted); }
+th[aria-sort='descending']::after { content: ' \25BC'; font-size: 9px; color: var(--text-muted); }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+tbody tr { cursor: pointer; }
+tbody tr:hover { background: var(--wash); }
+.ident { display: flex; align-items: center; gap: 7px; }
+.ident .dot { width: 11px; height: 11px; border-radius: 50%; flex: none; }
+/* Slot shapes mirror the chart's pointStyle, so identity survives a greyscale
+   print and colour-vision deficiency. Slot 1 is the bare circle above. */
+.ident .dot.square { border-radius: 1px; }
+.ident .dot.triangle { border-radius: 0; clip-path: polygon(50% 0, 100% 100%, 0 100%); }
+.ident .dot.diamond { border-radius: 1px; clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%); }
+.ident .dot.ex { border-radius: 0; clip-path: polygon(20% 0, 50% 30%, 80% 0, 100% 20%, 70% 50%, 100% 80%, 80% 100%, 50% 70%, 20% 100%, 0 80%, 30% 50%, 0 20%); }
+.ident .dot.plus { border-radius: 0; clip-path: polygon(36% 0, 64% 0, 64% 36%, 100% 36%, 100% 64%, 64% 64%, 64% 100%, 36% 100%, 36% 64%, 0 64%, 0 36%, 36% 36%); }
+.ident .dot.triangleDown { border-radius: 0; clip-path: polygon(0 0, 100% 0, 50% 100%); }
+.ident .dot.star { border-radius: 0; clip-path: polygon(50% 0, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%); }
+
+details.table-twin { margin-top: 12px; }
+details.table-twin > summary {
+  display: inline-block;
+  cursor: pointer;
+  color: var(--text-secondary);
+  font-size: 12.5px;
+  padding: 3px 9px 3px 4px;
+  border-radius: var(--r-sm);
+}
+details.table-twin > summary:hover { background: var(--wash); color: var(--text-primary); }
+
+.empty { color: var(--text-muted); padding: 48px 0; text-align: center; }
+
+dl.meta { display: grid; grid-template-columns: max-content 1fr; gap: 4px 20px; margin: 0; }
+dl.meta dt { color: var(--text-muted); }
+dl.meta dd { margin: 0; font-variant-numeric: tabular-nums; }
+/* The run each set of library versions belongs to. */
+dl.meta .run { color: var(--text-primary); font-weight: 600; }
+dl.meta .sep { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); }
+
+footer { color: var(--text-muted); font-size: 12px; padding-top: 24px; max-width: 80ch; }

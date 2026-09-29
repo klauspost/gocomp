@@ -1,0 +1,53 @@
+version: "2"
+
+linters:
+  default: standard
+  enable:
+    - durationcheck
+    - forcetypeassert
+    - gocritic
+    - govet
+    - ineffassign
+    - misspell
+    - revive
+    - staticcheck
+    - unconvert
+    - unused
+    - usetesting
+    - whitespace
+  settings:
+    revive:
+      rules:
+        # Every package here is internal/, so a doc comment on every exported
+        # symbol buys nothing; the ones that explain a decision are written.
+        - name: exported
+          disabled: true
+    errcheck:
+      exclude-functions:
+        # Every Fprint* target in this tool is stdout, stderr, a tabwriter or a
+        # strings.Builder. None can fail in a way the caller can act on, and
+        # the CLI already returns the errors that matter.
+        - fmt.Fprint
+        - fmt.Fprintf
+        - fmt.Fprintln
+        - (*text/tabwriter.Writer).Flush
+  exclusions:
+    generated: lax
+    rules:
+      # Close on a source we have finished reading: the read itself already
+      # reported anything that went wrong.
+      - linters: [errcheck]
+        text: '\.Close\b'
+      - linters: [forcetypeassert]
+        path: _test\.go
+
+issues:
+  max-issues-per-linter: 100
+  max-same-issues: 100
+
+formatters:
+  enable:
+    - gofumpt
+    - goimports
+  exclusions:
+    generated: lax

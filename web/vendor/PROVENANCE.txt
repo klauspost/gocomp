@@ -1,0 +1,13 @@
+Vendored, unmodified, from the npm distributions.
+Refresh by re-running the curl commands below and updating the hashes.
+
+chart.js@4.5.1        https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.js                     -> chart.esm.js
+chart.js@4.5.1        https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/helpers.js                   -> chart-helpers.esm.js
+chart.js@4.5.1        https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chunks/helpers.dataset.js   -> chunks/helpers.dataset.js
+@kurkle/color@0.6.4   https://cdn.jsdelivr.net/npm/@kurkle/color@0.6.4/dist/color.esm.js            -> kurkle-color.esm.js
+
+sha256:
+02b5a9c16c26aa026584d64e18bc299805eb2e865b3829dab9144844559a5bb5 *chart.esm.js
+0bf5be655a7e1f4f73b769f97a120c02fdbfa131b359834f33325670587fd95b *chart-helpers.esm.js
+911c846eb98352d7ab30fd01ab2beb02906f6dc0618f9394f4c2bfc64873e6a1 *kurkle-color.esm.js
+6cf27e6006f080b52a571ad1c1f3683f9abc96743f929092dc677ff6a610f55a *chunks/helpers.dataset.js

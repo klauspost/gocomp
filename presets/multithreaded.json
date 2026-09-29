@@ -1,0 +1,76 @@
+{
+  "corpora": [
+    "enwik9",
+    "parking-citations",
+    "reddit",
+    "apache-log",
+    "cockroach-log",
+    "github-ranks",
+    "gob-stream",
+    "nyc-taxi",
+    "10gb-tar",
+    "consensus-db",
+    "github-june",
+    "rawstudio"
+  ],
+  "codecs": {
+    "lz4": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "minlz": [
+      -1,
+      0,
+      1,
+      2,
+      3
+    ],
+    "pgzip": [
+      -2,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+    ],
+    "s2": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "s2s": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "zskp": [
+      1,
+      2,
+      3,
+      4
+    ]
+  },
+  "threads": [
+    16
+  ],
+  "src_threads": 16,
+  "encode": true,
+  "decode": true,
+  "passes": 3,
+  "min_wall": "2s",
+  "max_passes": 25,
+  "max_job": "5m0s",
+  "block": 4194304
+}

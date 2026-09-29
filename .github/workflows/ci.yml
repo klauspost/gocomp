@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Vet and lint
+        run: go tool task lint
+
+      # golangci-lint only analyses the host GOOS, so internal/sysinfo/os_*.go
+      # for the other platforms would never be looked at from here.
+      - name: Vet the other platforms
+        run: |
+          GOOS=windows go vet ./...
+          GOOS=darwin go vet ./...
+
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      # Skips the Conc probe: a two-core shared runner cannot measure whether a
+      # codec parallelises, so it would fail for reasons that are not the code's.
+      - name: Test
+        run: go tool task test:race
+
+      - name: Build
+        run: go tool task build
+
+      - name: Smoke test
+        run: |
+          go run . version
+          go run . list codecs
+          go run . list corpora

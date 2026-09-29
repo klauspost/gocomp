@@ -1,0 +1,34 @@
+version: 2
+
+project_name: compress-site
+
+builds:
+  - main: .
+    binary: compress-site
+    env: [CGO_ENABLED=0]
+    flags: [-trimpath]
+    ldflags: [-s -w]
+    goos: [linux, darwin, windows]
+    goarch: [amd64, arm64]
+    # Released binaries are plain GOAMD64=v1 so they run anywhere. The level is
+    # recorded on every run and is part of the merge gate, so numbers from one
+    # can never be averaged into numbers from a machine-tuned build.
+
+archives:
+  - formats: [tar.gz]
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+    files:
+      - README.md
+
+checksum:
+  name_template: checksums.txt
+
+snapshot:
+  version_template: "{{ incpatch .Version }}-next"
+
+changelog:
+  sort: asc
+  filters:
+    exclude: ["^docs:", "^test:", "^chore:"]

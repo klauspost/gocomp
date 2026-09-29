@@ -1,0 +1,122 @@
+/* Design tokens. Every colour in the site comes from here, including the ones
+   the charts paint on canvas: view/theme.js reads these back out with
+   getComputedStyle, because canvas cannot use custom properties directly.
+
+   The dark values are declared twice on purpose. The media query covers the OS
+   setting; the [data-theme] scope covers the explicit toggle, and the :not()
+   guard lets a light stamp beat OS-dark. */
+
+:root {
+  color-scheme: light;
+
+  /* surface-1 is the chart surface and therefore fixed: --dim-mark and the
+     2px mark ring were validated against it. Separation comes from moving the
+     page plane away from it instead, which is what lets a card read as a card
+     without a border drawn round everything. */
+  --surface-1: #fcfcfb; /* cards, chart surface */
+  --surface-0: #f2f0ec; /* page plane */
+  --surface-2: #ffffff; /* controls sitting on a card */
+  --text-primary: #0b0b0b;
+  --text-secondary: #52514e;
+  --text-muted: #6f6d67;
+  --grid: #e1e0d9;
+  --axis: #c3c2b7;
+  /* De-emphasised series are the page's own ink, 19.2:1 -- context you can
+     still read a value off. They give up weight rather than contrast: the
+     line drops to 1px while an emphasised one keeps 2px plus hue, shape,
+     dash and a direct label. A 2.3:1 grey was below even the non-text
+     contrast minimum, so "the rest" was unreadable rather than recessive. */
+  --dim-mark: #0b0b0b;
+  --border: rgba(11, 11, 11, 0.09);
+  --wash: rgba(11, 11, 11, 0.045);
+  --fill: #14130f;      /* selected chip: neutral, so it cannot read as data */
+  --on-fill: #fcfcfb;
+
+  --shadow-1: 0 1px 2px rgb(24 22 18 / 5%), 0 4px 12px rgb(24 22 18 / 5%);
+  --shadow-2: 0 2px 6px rgb(24 22 18 / 8%), 0 10px 30px rgb(24 22 18 / 14%);
+
+  --series-1: #0289ea;
+  --series-2: #cd384c;
+  --series-3: #00782d;
+  --series-4: #b97f20;
+  --series-5: #6109e2;
+  --series-6: #08a28f;
+  --series-7: #940395;
+  --series-8: #8c63aa;
+
+  --status-warning: #fab219;
+  --status-critical: #d03b3b;
+  --status-good: #0ca30c;
+
+  --link: #1a5fb4;
+
+  --r-sm: 7px;
+  --r-md: 9px;
+  --r-lg: 14px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme='light'])) {
+    color-scheme: dark;
+
+    --surface-1: #1a1a19;
+    --surface-0: #0d0d0d;
+    --surface-2: #232322;
+    --text-primary: #ffffff;
+    --text-secondary: #c3c2b7;
+    --text-muted: #898781;
+    --grid: #2c2c2a;
+    --axis: #383835;
+    --dim-mark: #ffffff; /* the page's ink again, 17.4:1 on the dark surface */
+    --border: rgba(255, 255, 255, 0.09);
+    --wash: rgba(255, 255, 255, 0.06);
+    --fill: #f2f0ec;
+    --on-fill: #14130f;
+
+    --link: #8ab4f8;
+
+    --shadow-1: 0 1px 2px rgb(0 0 0 / 40%);
+    --shadow-2: 0 2px 8px rgb(0 0 0 / 45%), 0 12px 32px rgb(0 0 0 / 55%);
+
+    --series-1: #0c8ced;
+    --series-2: #cd384c;
+    --series-3: #00782d;
+    --series-4: #b97f20;
+    --series-5: #753afe;
+    --series-6: #08a28f;
+    --series-7: #cd4fcc;
+    --series-8: #80579d;
+  }
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --surface-1: #1a1a19;
+  --surface-0: #0d0d0d;
+  --surface-2: #232322;
+  --text-primary: #ffffff;
+  --text-secondary: #c3c2b7;
+  --text-muted: #898781;
+  --grid: #2c2c2a;
+  --axis: #383835;
+  --dim-mark: #ffffff; /* the page's ink again, 17.4:1 on the dark surface */
+  --border: rgba(255, 255, 255, 0.09);
+  --wash: rgba(255, 255, 255, 0.06);
+  --fill: #f2f0ec;
+  --on-fill: #14130f;
+
+  --link: #8ab4f8;
+
+  --shadow-1: 0 1px 2px rgb(0 0 0 / 40%);
+  --shadow-2: 0 2px 8px rgb(0 0 0 / 45%), 0 12px 32px rgb(0 0 0 / 55%);
+
+  --series-1: #0c8ced;
+  --series-2: #cd384c;
+  --series-3: #00782d;
+  --series-4: #b97f20;
+  --series-5: #753afe;
+  --series-6: #08a28f;
+  --series-7: #cd4fcc;
+  --series-8: #80579d;
+}

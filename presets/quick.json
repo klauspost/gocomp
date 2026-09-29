@@ -1,0 +1,21 @@
+{
+  "desc": "Fast sanity sweep: small corpora, fastest and default levels",
+  "corpora": [
+    "stacktrace",
+    "enwik8",
+    "gofiles"
+  ],
+  "codecs": {
+    "gzkp": [-1, 1],
+    "gzstd": [-1, 1],
+    "lz4": [1],
+    "minlz": [1],
+    "s2": [1],
+    "snappy": [0],
+    "zskp": [1, 2]
+  },
+  "encode": true,
+  "decode": true,
+  "passes": 3,
+  "min_wall": "2s"
+}

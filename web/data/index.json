@@ -1,0 +1,3934 @@
+{
+ "schema": 1,
+ "generated": "2026-09-28T02:53:09Z",
+ "formats": [
+  {
+   "id": "brotli",
+   "name": "Brotli"
+  },
+  {
+   "id": "bzip2",
+   "name": "bzip2"
+  },
+  {
+   "id": "deflate",
+   "name": "deflate"
+  },
+  {
+   "id": "gzip",
+   "name": "gzip"
+  },
+  {
+   "id": "lz4",
+   "name": "LZ4"
+  },
+  {
+   "id": "lzma2",
+   "name": "LZMA2"
+  },
+  {
+   "id": "minlz",
+   "name": "MinLZ"
+  },
+  {
+   "id": "minlz-block",
+   "name": "MinLZ block"
+  },
+  {
+   "id": "s2",
+   "name": "S2"
+  },
+  {
+   "id": "s2-block",
+   "name": "S2 block"
+  },
+  {
+   "id": "snappy",
+   "name": "Snappy"
+  },
+  {
+   "id": "snappy-block",
+   "name": "Snappy block"
+  },
+  {
+   "id": "xz",
+   "name": "xz"
+  },
+  {
+   "id": "zstd",
+   "name": "Zstandard"
+  }
+ ],
+ "codecs": [
+  {
+   "id": "br",
+   "name": "Brotli",
+   "impl": "andybalholm/brotli",
+   "format": "brotli",
+   "module": "github.com/andybalholm/brotli",
+   "encode": {
+    "kinds": [
+     "file",
+     "dir"
+    ],
+    "conc": [],
+    "levels": [
+     {
+      "n": 0,
+      "name": "0"
+     },
+     {
+      "n": 1,
+      "name": "1"
+     },
+     {
+      "n": 2,
+      "name": "2"
+     },
+     {
+      "n": 3,
+      "name": "3"
+     },
+     {
+      "n": 4,
+      "name": "4"
+     },
+     {
+      "n": 5,
+      "name": "5"
+     },
+     {
+      "n": 6,
+      "name": "6"
+     },
+     {
+      "n": 7,
+      "name": "7"
+     },
+     {
+      "n": 8,
+      "name": "8"
+     },
+     {
+      "n": 9,
+      "name": "9"
+     },
+     {
+      "n": 10,
+      "name": "10",
+      "slow": true
+     },
+     {
+      "n": 11,
+      "name": "11",
+      "slow": true
+     }
+    ]
+   },
+   "decode": {
+    "kinds": [
+     "file",
+     "dir"
+    ],
+    "conc": []
+   }
+  },
+  {
+   "id": "br2",
+   "name": "Brotli (matchfinder)",
+   "impl": "andybalholm/brotli",
+   "format": "brotli",
+   "module": "github.com/andybalholm/brotli",
+   "encode": {
+    "kinds": [
+     "file",
+     "dir"
+    ],
+    "conc": [],
+    "levels": [
+     {
+      "n": 0,
+      "name": "0"
+     },
+     {
+      "n": 1,
+      "name": "1"
+     },
+     {
+      "n": 2,
+      "name": "2"
+     },
+     {
+      "n": 3,
+      "name": "3"
+     },
+     {
+      "n": 4,
+      "name": "4"
+     },
+     {
+      "n": 5,
+      "name": "5"
+     },
+     {
+      "n": 7,
+      "name": "7"
+     },
+     {
+      "n": 8,
+      "name": "8"
+     },
+     {
+      "n": 9,
+      "name": "9"
+     }
+    ]
+   }
+  },
+  {
+   "id": "bz2",
+   "name": "bzip2",
+   "impl": "dsnet/compress",
+   "format": "bzip2",
+   "module": "github.com/dsnet/compress",
+   "encode": {
+    "kinds": [
+     "file",
+     "dir"
+    ],
+    "conc": [],
+    "levels": [
+     {
+      "n": 1,
+      "name": "1"
+     },
+     {
+      "n": 2,
+      "name": "2"
+     },
+     {
+      "n": 3,
+      "name": "3"
+     },
+     {
+      "n": 4,
+      "name": "4"
+     },
+     {
+      "n": 5,
+      "name": "5"
+     },
+     {
+      "n": 6,
+      "name": "default"
+     },
+     {
+      "n": 7,
+      "name": "7"
+     },
+     {
+      "n": 8,
+      "name": "8"
+     },
+     {
+      "n": 9,
+      "name": "9"
+     }
+    ]
+   },
+   "decode": {
+    "kinds": [
+     "file",
+     "dir"
+    ],
+    "conc": []
+   }
+  },
+  {
+   "id": "bz2std",
+   "name": "bzip2",
+   "impl": "compress/bzip2",
+   "format": "bzip2",
+   "module": "std",
+   "decode": {
+    "kinds": [
+     "file",
+     "dir"
+    ],
+    "conc": []
+   }
+  },
+  {
+   "id": "flkp",
+   "name": "deflate",
+   "impl": "klauspost/compress",
+   "format": "deflate",
+   "module": "github.com/klauspost/compress",
+   "encode": {
+    "kinds": [
+     "file",
+     "dir"
+    ],
+    "conc": [],
+    "levels": [
+     {
+      "n": -3,
+      "name": "stateless"
+     },
+     {
+      "n": -2,
+      "name": "huffman"
+     },
+     {
+      "n": 0,
+      "name": "store"
+     },
+     {
+      "n": 1,
+      "name": "1"
+     },
+     {
+      "n": 2,
+      "name": "2"
+     },
+     {
+      "n": 3,
+      "name": "3"
+     },
+     {
+      "n": 4,
+      "name": "4"
+     },
+     {
+      "n": 5,
+      "name": "default"
+     },
+     {
+      "n": 6,
+      "name": "6"
+     },
+     {
+      "n": 7,
+      "name": "7"
+     },
+     {
+      "n": 8,
+      "name": "8"
+     },
+     {
+      "n": 9,
+      "name": "9"
+     }
+    ]
+   },
+   "decode": {
+    "kinds": [
+     "file",
+     "dir"
+    ],
+    "conc": []
+   }
+  },
+  {
+   "id": "flstd",
+   "name": "deflate",
+   "impl": "compress/flate",
+   "format": "deflate",
+   "module": "std",
+   "encode": {
+    "kinds": [
+     "file",
+     "dir"
+    ],
+    "conc": [],
+    "levels": [
+     {
+      "n": -2,
+      "name": "huffman"
+     },
+     {
+      "n": 0,
+      "name": "store"
+     },
+     {
+      "n": 1,
+      "name": "1"
+     },
+     {
+      "n": 2,
+      "name": "2"
+     },
+     {
+      "n": 3,
+      "name": "3"
+     },
+     {
+      "n": 4,
+      "name": "4"
+     },
+     {
+      "n": 5,
+      "name": "5"
+     },
+     {
+      "n": 6,
+      "name": "default"
+     },
+     {
+      "n": 7,
+      "name": "7"
+     },
+     {
+      "n": 8,
+      "name": "8"
+     },
+     {
+      "n": 9,
+      "name": "9"
+     }
+    ]
+   },
+   "decode": {
+    "kinds": [
+     "file",
+     "dir"
+    ],
+    "conc": []
+   }
+  },
+  {
+   "id": "gzkp",
+   "name": "gzip",
+   "impl": "klauspost/compress",
+   "format": "gzip",
+   "module": "github.com/klauspost/compress",
+   "encode": {
+    "kinds": [
+     "file",
+     "dir"
+    ],
+    "conc": [],
+    "levels": [
+     {
+      "n": -3,
+      "name": "stateless"
+     },
+     {
+      "n": -2,
+      "name": "huffman"
+     },
+     {
+      "n": 0,
+      "name": "store"
+     },
+     {
+      "n": 1,
+      "name": "1"
+     },
+     {
+      "n": 2,
+      "name": "2"
+     },
+     {
+      "n": 3,
+      "name": "3"
+     },
+     {
+      "n": 4,
+      "name": "4"
+     },
+     {
+      "n": 5,
+      "name": "default"
+     },
+     {
+      "n": 6,
+      "name": "6"
+     },
+     {
+      "n": 7,
+      "name": "7"
+     },
+     {
+      "n": 8,
+      "name": "8"
+     },
+     {
+      "n": 9,
+      "name": "9"
+     }
+    ]
+   },
+   "decode": {
+    "kinds": [
+     "file",
+     "dir"
+    ],
+    "conc": []
+   }
+  },
+  {
+   "id": "gzstd",
+   "name": "gzip",
+   "impl": "compress/gzip",
+   "format": "gzip",
+   "module": "std",
+   "encode": {
+    "kinds": [
+     "file",
+     "dir"
+    ],
+    "conc": [],
+    "levels": [
+     {
+      "n": -2,
+      "name": "huffman"
+     },
+     {
+      "n": 0,
+      "name": "store"
+     },
+     {
+      "n": 1,
+      "name": "1"
+     },
+     {
+      "n": 2,
+      "name": "2"
+     },
+     {
+      "n": 3,
+      "name": "3"
+     },
+     {
+      "n": 4,
+      "name": "4"
+     },
+     {
+      "n": 5,
+      "name": "5"
+     },
+     {
+      "n": 6,
+      "name": "default"
+     },
+     {
+      "n": 7,
+      "name": "7"
+     },
+     {
+      "n": 8,
+      "name": "8"
+     },
+     {
+      "n": 9,
+      "name": "9"
+     }
+    ]
+   },
+   "decode": {
+    "kinds": [
+     "file",
+     "dir"
+    ],
+    "conc": []
+   }
+  },
+  {
+   "id": "pgzip",
+   "name": "gzip (parallel)",
+   "impl": "klauspost/pgzip",
+   "format": "gzip",
+   "module": "github.com/klauspost/pgzip",
+   "encode": {
+    "kinds": [
+     "file",
+     "dir"
+    ],
+    "conc": [
+     "file"
+    ],
+    "levels": [
+     {
+      "n": -2,
+      "name": "huffman"
+     },
+     {
+      "n": 0,
+      "name": "store"
+     },
+     {
+      "n": 1,
+      "name": "1"
+     },
+     {
+      "n": 2,
+      "name": "2"
+     },
+     {
+      "n": 3,
+      "name": "3"
+     },
+     {
+      "n": 4,
+      "name": "4"
+     },
+     {
+      "n": 5,
+      "name": "default"
+     },
+     {
+      "n": 6,
+      "name": "6"
+     },
+     {
+      "n": 7,
+      "name": "7"
+     },
+     {
+      "n": 8,
+      "name": "8"
+     },
+     {
+      "n": 9,
+      "name": "9"
+     }
+    ]
+   },
+   "decode": {
+    "kinds": [
+     "file",
+     "dir"
+    ],
+    "conc": []
+   }
+  },
+  {
+   "id": "lz4",
+   "name": "LZ4",
+   "impl": "pierrec/lz4",
+   "format": "lz4",
+   "module": "github.com/pierrec/lz4/v4",
+   "encode": {
+    "kinds": [
+     "file",
+     "dir"
+    ],
+    "conc": [
+     "file"
+    ],
+    "levels": [
+     {
+      "n": 0,
+      "name": "fast"
+     },
+     {
+      "n": 1,
+      "name": "1"
+     },
+     {
+      "n": 2,
+      "name": "2"
+     },
+     {
+      "n": 3,
+      "name": "3"
+     },
+     {
+      "n": 4,
+      "name": "4"
+     },
+     {
+      "n": 5,
+      "name": "5"
+     },
+     {
+      "n": 6,
+      "name": "6"
+     },
+     {
+      "n": 7,
+      "name": "7"
+     },
+     {
+      "n": 8,
+      "name": "8",
+      "slow": true
+     }
+    ]
+   },
+   "decode": {
+    "kinds": [
+     "file",
+     "dir"
+    ],
+    "conc": [
+     "file"
+    ]
+   }
+  },
+  {
+   "id": "lzma2",
+   "name": "LZMA2",
+   "impl": "ulikunitz/xz",
+   "format": "lzma2",
+   "module": "github.com/ulikunitz/xz",
+   "encode": {
+    "kinds": [
+     "file",
+     "dir"
+    ],
+    "conc": [],
+    "slow": true,
+    "levels": [
+     {
+      "n": 0,
+      "name": "default"
+     }
+    ]
+   },
+   "decode": {
+    "kinds": [
+     "file",
+     "dir"
+    ],
+    "conc": [],
+    "slow": true
+   }
+  },
+  {
+   "id": "minlz",
+   "name": "MinLZ",
+   "impl": "minio/minlz",
+   "format": "minlz",
+   "module": "github.com/minio/minlz",
+   "encode": {
+    "kinds": [
+     "file",
+     "dir"
+    ],
+    "conc": [
+     "file"
+    ],
+    "levels": [
+     {
+      "n": -1,
+      "name": "superfast"
+     },
+     {
+      "n": 0,
+      "name": "uncompressed"
+     },
+     {
+      "n": 1,
+      "name": "fastest"
+     },
+     {
+      "n": 2,
+      "name": "balanced"
+     },
+     {
+      "n": 3,
+      "name": "smallest"
+     }
+    ]
+   },
+   "decode": {
+    "kinds": [
+     "file",
+     "dir"
+    ],
+    "conc": [
+     "file"
+    ]
+   }
+  },
+  {
+   "id": "mzblk",
+   "name": "MinLZ block",
+   "impl": "minio/minlz",
+   "format": "minlz-block",
+   "module": "github.com/minio/minlz",
+   "encode": {
+    "kinds": [
+     "dir"
+    ],
+    "conc": [],
+    "levels": [
+     {
+      "n": -1,
+      "name": "superfast"
+     },
+     {
+      "n": 1,
+      "name": "fastest"
+     },
+     {
+      "n": 2,
+      "name": "balanced"
+     },
+     {
+      "n": 3,
+      "name": "smallest"
+     }
+    ]
+   },
+   "decode": {
+    "kinds": [
+     "dir"
+    ],
+    "conc": []
+   }
+  },
+  {
+   "id": "s2",
+   "name": "S2",
+   "impl": "klauspost/compress",
+   "format": "s2",
+   "module": "github.com/klauspost/compress",
+   "encode": {
+    "kinds": [
+     "file",
+     "dir"
+    ],
+    "conc": [
+     "file"
+    ],
+    "levels": [
+     {
+      "n": 0,
+      "name": "uncompressed"
+     },
+     {
+      "n": 1,
+      "name": "default"
+     },
+     {
+      "n": 2,
+      "name": "better"
+     },
+     {
+      "n": 3,
+      "name": "best"
+     }
+    ]
+   },
+   "decode": {
+    "kinds": [
+     "file",
+     "dir"
+    ],
+    "conc": [
+     "file"
+    ]
+   }
+  },
+  {
+   "id": "s2blk",
+   "name": "S2 block",
+   "impl": "klauspost/compress",
+   "format": "s2-block",
+   "module": "github.com/klauspost/compress",
+   "encode": {
+    "kinds": [
+     "dir"
+    ],
+    "conc": [],
+    "levels": [
+     {
+      "n": 1,
+      "name": "default"
+     },
+     {
+      "n": 2,
+      "name": "better"
+     },
+     {
+      "n": 3,
+      "name": "best"
+     }
+    ]
+   },
+   "decode": {
+    "kinds": [
+     "dir"
+    ],
+    "conc": []
+   }
+  },
+  {
+   "id": "s2s",
+   "name": "S2 (snappy frame)",
+   "impl": "klauspost/compress",
+   "format": "snappy",
+   "module": "github.com/klauspost/compress",
+   "encode": {
+    "kinds": [
+     "file",
+     "dir"
+    ],
+    "conc": [
+     "file"
+    ],
+    "levels": [
+     {
+      "n": 0,
+      "name": "uncompressed"
+     },
+     {
+      "n": 1,
+      "name": "default"
+     },
+     {
+      "n": 2,
+      "name": "better"
+     },
+     {
+      "n": 3,
+      "name": "best"
+     }
+    ]
+   }
+  },
+  {
+   "id": "s2sn",
+   "name": "S2 reading snappy",
+   "impl": "klauspost/compress",
+   "format": "snappy",
+   "module": "github.com/klauspost/compress",
+   "decode": {
+    "kinds": [
+     "file",
+     "dir"
+    ],
+    "conc": [
+     "file"
+    ]
+   }
+  },
+  {
+   "id": "snappy",
+   "name": "Snappy",
+   "impl": "golang/snappy",
+   "format": "snappy",
+   "module": "github.com/golang/snappy",
+   "encode": {
+    "kinds": [
+     "file",
+     "dir"
+    ],
+    "conc": [],
+    "levels": [
+     {
+      "n": 0,
+      "name": "default"
+     }
+    ]
+   },
+   "decode": {
+    "kinds": [
+     "file",
+     "dir"
+    ],
+    "conc": []
+   }
+  },
+  {
+   "id": "s2sblk",
+   "name": "S2 reading snappy block",
+   "impl": "klauspost/compress",
+   "format": "snappy-block",
+   "module": "github.com/klauspost/compress",
+   "encode": {
+    "kinds": [
+     "dir"
+    ],
+    "conc": [],
+    "levels": [
+     {
+      "n": 1,
+      "name": "default"
+     },
+     {
+      "n": 2,
+      "name": "better"
+     },
+     {
+      "n": 3,
+      "name": "best"
+     }
+    ]
+   },
+   "decode": {
+    "kinds": [
+     "dir"
+    ],
+    "conc": []
+   }
+  },
+  {
+   "id": "snapblk",
+   "name": "Snappy block",
+   "impl": "golang/snappy",
+   "format": "snappy-block",
+   "module": "github.com/golang/snappy",
+   "encode": {
+    "kinds": [
+     "dir"
+    ],
+    "conc": [],
+    "levels": [
+     {
+      "n": 0,
+      "name": "default"
+     }
+    ]
+   },
+   "decode": {
+    "kinds": [
+     "dir"
+    ],
+    "conc": []
+   }
+  },
+  {
+   "id": "xz",
+   "name": "xz",
+   "impl": "ulikunitz/xz",
+   "format": "xz",
+   "module": "github.com/ulikunitz/xz",
+   "encode": {
+    "kinds": [
+     "file",
+     "dir"
+    ],
+    "conc": [],
+    "slow": true,
+    "levels": [
+     {
+      "n": 0,
+      "name": "default"
+     }
+    ]
+   },
+   "decode": {
+    "kinds": [
+     "file",
+     "dir"
+    ],
+    "conc": [],
+    "slow": true
+   }
+  },
+  {
+   "id": "stdzstd",
+   "name": "Zstandard",
+   "impl": "klauspost/stdgozstd",
+   "format": "zstd",
+   "module": "github.com/klauspost/stdgozstd",
+   "encode": {
+    "kinds": [
+     "file",
+     "dir"
+    ],
+    "conc": [],
+    "levels": [
+     {
+      "n": 0,
+      "name": "store"
+     },
+     {
+      "n": 1,
+      "name": "1"
+     },
+     {
+      "n": 2,
+      "name": "2"
+     },
+     {
+      "n": 3,
+      "name": "default"
+     },
+     {
+      "n": 4,
+      "name": "4"
+     },
+     {
+      "n": 5,
+      "name": "5"
+     },
+     {
+      "n": 6,
+      "name": "6"
+     },
+     {
+      "n": 7,
+      "name": "7"
+     },
+     {
+      "n": 8,
+      "name": "8"
+     },
+     {
+      "n": 9,
+      "name": "9"
+     }
+    ]
+   },
+   "decode": {
+    "kinds": [
+     "file",
+     "dir"
+    ],
+    "conc": []
+   }
+  },
+  {
+   "id": "zskp",
+   "name": "Zstandard",
+   "impl": "klauspost/compress",
+   "format": "zstd",
+   "module": "github.com/klauspost/compress",
+   "encode": {
+    "kinds": [
+     "file",
+     "dir"
+    ],
+    "conc": [
+     "file"
+    ],
+    "levels": [
+     {
+      "n": 1,
+      "name": "fastest"
+     },
+     {
+      "n": 2,
+      "name": "default"
+     },
+     {
+      "n": 3,
+      "name": "better"
+     },
+     {
+      "n": 4,
+      "name": "best"
+     }
+    ]
+   },
+   "decode": {
+    "kinds": [
+     "file",
+     "dir"
+    ],
+    "conc": [
+     "file"
+    ]
+   }
+  }
+ ],
+ "corpora": [
+  {
+   "id": "10gb-tar",
+   "name": "10gb.tar",
+   "desc": "Mixed 10GB file archive, tarred",
+   "kind": "file",
+   "size": 10065157632,
+   "files": 0,
+   "tier": "huge",
+   "tags": [
+    "mixed"
+   ]
+  },
+  {
+   "id": "adresser",
+   "name": "adresser.json",
+   "desc": "Danish address database",
+   "kind": "file",
+   "size": 7983034785,
+   "files": 0,
+   "tier": "huge",
+   "tags": [
+    "json"
+   ]
+  },
+  {
+   "id": "apache-log",
+   "name": "apache.log",
+   "desc": "Apache access log",
+   "kind": "file",
+   "size": 2622574440,
+   "files": 0,
+   "tier": "large",
+   "tags": [
+    "text",
+    "log"
+   ]
+  },
+  {
+   "id": "cockroach-log",
+   "name": "cockroach.node1.log",
+   "desc": "CockroachDB node log",
+   "kind": "file",
+   "size": 1165600000,
+   "files": 0,
+   "tier": "large",
+   "tags": [
+    "text",
+    "log"
+   ]
+  },
+  {
+   "id": "consensus-db",
+   "name": "consensus.db.10gb",
+   "desc": "Consensus database snapshot",
+   "kind": "file",
+   "size": 10737418240,
+   "files": 0,
+   "tier": "huge",
+   "tags": [
+    "binary",
+    "database"
+   ]
+  },
+  {
+   "id": "coronavirus",
+   "name": "coronavirus.unwrapped.fasta",
+   "desc": "SARS-CoV-2 genomes, FASTA. Extremely redundant: 1.8MB download, 1.3GB payload",
+   "kind": "file",
+   "size": 1317937667,
+   "files": 0,
+   "tier": "large",
+   "tags": [
+    "text",
+    "genomic"
+   ]
+  },
+  {
+   "id": "enwik10",
+   "name": "enwik10",
+   "desc": "First 10^10 bytes of English Wikipedia XML",
+   "kind": "file",
+   "size": 10000000000,
+   "files": 0,
+   "tier": "huge",
+   "tags": [
+    "text",
+    "xml"
+   ]
+  },
+  {
+   "id": "enwik8",
+   "name": "enwik8",
+   "desc": "First 10^8 bytes of English Wikipedia XML",
+   "kind": "file",
+   "size": 100000000,
+   "files": 0,
+   "tier": "small",
+   "tags": [
+    "text",
+    "xml"
+   ]
+  },
+  {
+   "id": "enwik9",
+   "name": "enwik9",
+   "desc": "First 10^9 bytes of English Wikipedia XML",
+   "kind": "file",
+   "size": 1000000000,
+   "files": 0,
+   "tier": "medium",
+   "tags": [
+    "text",
+    "xml"
+   ]
+  },
+  {
+   "id": "github-june",
+   "name": "github-june-2days-2019.json",
+   "desc": "Two days of GitHub events",
+   "kind": "file",
+   "size": 6273951764,
+   "files": 0,
+   "tier": "huge",
+   "tags": [
+    "json"
+   ]
+  },
+  {
+   "id": "github-ranks",
+   "name": "github-ranks-backup.bin",
+   "desc": "GitHub ranking database dump",
+   "kind": "file",
+   "size": 1862623243,
+   "files": 0,
+   "tier": "large",
+   "tags": [
+    "binary"
+   ]
+  },
+  {
+   "id": "glove",
+   "name": "glove.6B.300d.txt",
+   "desc": "GloVe word vectors, 300 dimensions",
+   "kind": "file",
+   "size": 1037962819,
+   "files": 0,
+   "tier": "medium",
+   "tags": [
+    "text",
+    "numeric"
+   ]
+  },
+  {
+   "id": "gob-stream",
+   "name": "gob-stream",
+   "desc": "Go gob-encoded object stream",
+   "kind": "file",
+   "size": 1911399616,
+   "files": 0,
+   "tier": "large",
+   "tags": [
+    "binary",
+    "structured"
+   ]
+  },
+  {
+   "id": "gofiles",
+   "name": "gofiles",
+   "desc": "Go source files",
+   "kind": "dir",
+   "size": 65888228,
+   "files": 5186,
+   "tier": "small",
+   "tags": [
+    "text",
+    "source"
+   ]
+  },
+  {
+   "id": "nyc-taxi",
+   "name": "nyc-taxi-data-10M.csv",
+   "desc": "10M New York taxi trips",
+   "kind": "file",
+   "size": 3325605752,
+   "files": 0,
+   "tier": "large",
+   "tags": [
+    "csv",
+    "numeric"
+   ]
+  },
+  {
+   "id": "objectfiles",
+   "name": "objectfiles",
+   "desc": "Compiled Go object files",
+   "kind": "dir",
+   "size": 300491980,
+   "files": 708,
+   "tier": "medium",
+   "tags": [
+    "binary",
+    "source"
+   ]
+  },
+  {
+   "id": "paranoid-passwords",
+   "name": "klauspost-paranoid-passwords",
+   "desc": "Generated password list",
+   "kind": "file",
+   "size": 10616800000,
+   "files": 0,
+   "tier": "huge",
+   "tags": [
+    "text"
+   ]
+  },
+  {
+   "id": "parking-citations",
+   "name": "parking-citations-1M.json",
+   "desc": "1M LA parking citations",
+   "kind": "file",
+   "size": 365489362,
+   "files": 0,
+   "tier": "medium",
+   "tags": [
+    "json"
+   ]
+  },
+  {
+   "id": "rand2gb",
+   "name": "random 2GB",
+   "desc": "Incompressible PCG output, generated locally from seed 0xdeadbeef",
+   "kind": "file",
+   "size": 2147483647,
+   "files": 0,
+   "tier": "large",
+   "tags": [
+    "incompressible",
+    "synthetic"
+   ]
+  },
+  {
+   "id": "rawstudio",
+   "name": "rawstudio-mint14.tar",
+   "desc": "Rawstudio Mint 14 image set, tarred",
+   "kind": "file",
+   "size": 8558382592,
+   "files": 0,
+   "tier": "huge",
+   "tags": [
+    "binary",
+    "images"
+   ]
+  },
+  {
+   "id": "reddit",
+   "name": "RC_2009-01.json",
+   "desc": "Reddit comments, January 2009",
+   "kind": "file",
+   "size": 377200000,
+   "files": 0,
+   "tier": "medium",
+   "tags": [
+    "json"
+   ]
+  },
+  {
+   "id": "silesia",
+   "name": "silesia.tar",
+   "desc": "Silesia compression corpus, tarred",
+   "kind": "file",
+   "size": 211947520,
+   "files": 0,
+   "tier": "medium",
+   "tags": [
+    "mixed"
+   ]
+  },
+  {
+   "id": "sofia-air",
+   "name": "sofia-air-quality-dataset.tar",
+   "desc": "Sofia air quality sensor data, tarred",
+   "kind": "file",
+   "size": 15464463872,
+   "files": 0,
+   "tier": "huge",
+   "tags": [
+    "csv",
+    "numeric"
+   ]
+  },
+  {
+   "id": "stacktrace",
+   "name": "stacktrace.txt",
+   "desc": "Go panic stack traces",
+   "kind": "file",
+   "size": 5308216,
+   "files": 0,
+   "tier": "small",
+   "tags": [
+    "text",
+    "log"
+   ]
+  },
+  {
+   "id": "ts40",
+   "name": "TS40.txt",
+   "desc": "Time series text",
+   "kind": "file",
+   "size": 400000000,
+   "files": 0,
+   "tier": "medium",
+   "tags": [
+    "text",
+    "numeric"
+   ]
+  },
+  {
+   "id": "webdevdata",
+   "name": "webdevdata.org 2015-01-07 subset",
+   "desc": "Crawled web pages, 4GB subset",
+   "kind": "dir",
+   "size": 4016000000,
+   "files": 53926,
+   "tier": "large",
+   "tags": [
+    "html",
+    "web",
+    "small-files"
+   ]
+  },
+  {
+   "id": "zstd-10kfiles",
+   "name": "zstd-10kfiles",
+   "desc": "10,000 small files from the zstd test set",
+   "kind": "dir",
+   "size": 3513600000,
+   "files": 10000,
+   "tier": "large",
+   "tags": [
+    "mixed",
+    "small-files"
+   ]
+  },
+  {
+   "id": "zstd-dict-tests",
+   "name": "zstd-dict-tests",
+   "desc": "Small files from the zstd dictionary test set",
+   "kind": "dir",
+   "size": 72200000,
+   "files": 0,
+   "tier": "small",
+   "tags": [
+    "mixed",
+    "small-files"
+   ]
+  }
+ ],
+ "machines": {
+  "1omrle93": {
+   "id": "1omrle93",
+   "label": "AMD Ryzen 9 9950X",
+   "cpu": {
+    "brand": "AMD Ryzen 9 9950X 16-Core Processor",
+    "vendor": "AuthenticAMD",
+    "family": 26,
+    "model": 68,
+    "stepping": 0,
+    "physical_cores": 16,
+    "logical_cores": 32,
+    "threads_per_core": 2,
+    "base_hz": 0,
+    "boost_hz": 0,
+    "cacheline": 64,
+    "cache": {
+     "l1i": 32768,
+     "l1d": 49152,
+     "l2": 1048576,
+     "l3": 33554432
+    },
+    "x64level": 4,
+    "vm": true,
+    "hypervisor": "Microsoft Hv",
+    "features": [
+     "SSSE3",
+     "SSE4",
+     "SSE42",
+     "POPCNT",
+     "LZCNT",
+     "MOVBE",
+     "AVX",
+     "AVX2",
+     "F16C",
+     "FMA3",
+     "AVX512F",
+     "AVX512BW",
+     "AVX512DQ",
+     "AVX512VL",
+     "AVX512VBMI",
+     "AVX512VBMI2",
+     "AVX512VNNI",
+     "BMI1",
+     "BMI2",
+     "GFNI",
+     "SHA",
+     "VAES",
+     "VPCLMULQDQ"
+    ]
+   },
+   "os": {
+    "name": "Windows",
+    "version": "10.0.26200"
+   },
+   "mem_total": 66156654592
+  }
+ },
+ "runs": [
+  {
+   "id": "1zmox5zrt1rsn",
+   "file": "runs/10gb-tar-1zmox5zrt1rsn.json",
+   "corpus": "10gb-tar",
+   "kind": "file",
+   "machine": "1omrle93",
+   "go": "go1.27.1",
+   "goos": "windows",
+   "goarch": "amd64",
+   "goamd64": "v1",
+   "bench": "1",
+   "threads": [
+    16
+   ],
+   "codecs": [
+    "gzkp",
+    "gzstd",
+    "lz4",
+    "minlz",
+    "pgzip",
+    "s2",
+    "s2s",
+    "s2sn",
+    "snappy",
+    "stdzstd",
+    "zskp"
+   ],
+   "libs": {
+    "github.com/golang/snappy": [
+     "v1.0.0"
+    ],
+    "github.com/klauspost/compress": [
+     "v1.20.0"
+    ],
+    "github.com/klauspost/pgzip": [
+     "v1.2.6"
+    ],
+    "github.com/klauspost/stdgozstd": [
+     "v0.0.0-20260722174150-eb4821197265"
+    ],
+    "github.com/minio/minlz": [
+     "v1.2.0"
+    ],
+    "github.com/pierrec/lz4/v4": [
+     "v4.1.30"
+    ],
+    "std": [
+     "go1.27.1"
+    ]
+   },
+   "variant": {
+    "block_size": "4194304",
+    "cgo": "true",
+    "corpus_hash": "81783e7211385804",
+    "goamd64": "v1",
+    "goarch": "amd64",
+    "gogc": "100",
+    "gomemlimit": "0",
+    "goos": "windows",
+    "numcpu": "32",
+    "src_threads": "16"
+   },
+   "n_encode": 35,
+   "n_decode": 63,
+   "merges": 0,
+   "created": "2026-09-23T18:47:02Z",
+   "updated": "2026-09-23T18:47:02Z"
+  },
+  {
+   "id": "1zmox5zrt1rsn-11axht97cej95",
+   "file": "runs/10gb-tar-1zmox5zrt1rsn-11axht97cej95.json",
+   "corpus": "10gb-tar",
+   "kind": "file",
+   "machine": "1omrle93",
+   "go": "go1.27.1",
+   "goos": "windows",
+   "goarch": "amd64",
+   "goamd64": "v1",
+   "bench": "1",
+   "threads": [
+    1
+   ],
+   "codecs": [
+    "br",
+    "br2",
+    "bz2",
+    "bz2std",
+    "gzkp",
+    "gzstd",
+    "lz4",
+    "minlz",
+    "pgzip",
+    "s2",
+    "s2sn",
+    "snappy",
+    "stdzstd",
+    "zskp"
+   ],
+   "libs": {
+    "github.com/andybalholm/brotli": [
+     "v1.2.4"
+    ],
+    "github.com/dsnet/compress": [
+     "v0.0.1"
+    ],
+    "github.com/golang/snappy": [
+     "v1.0.0"
+    ],
+    "github.com/klauspost/compress": [
+     "v1.20.0",
+     "v1.20.1"
+    ],
+    "github.com/klauspost/pgzip": [
+     "v1.2.6"
+    ],
+    "github.com/klauspost/stdgozstd": [
+     "v0.0.0-20260722174150-eb4821197265"
+    ],
+    "github.com/minio/minlz": [
+     "v1.2.0"
+    ],
+    "github.com/pierrec/lz4/v4": [
+     "v4.1.30"
+    ],
+    "std": [
+     "go1.27.1"
+    ]
+   },
+   "variant": {
+    "block_size": "4194304",
+    "cgo": "true",
+    "corpus_hash": "81783e7211385804",
+    "goamd64": "v1",
+    "goarch": "amd64",
+    "gogc": "100",
+    "gomemlimit": "0",
+    "goos": "windows",
+    "numcpu": "32",
+    "src_threads": "1"
+   },
+   "n_encode": 69,
+   "n_decode": 145,
+   "merges": 1,
+   "created": "2026-09-26T12:50:45Z",
+   "updated": "2026-09-27T22:57:37Z"
+  },
+  {
+   "id": "30qd46mh50cct",
+   "file": "runs/adresser-30qd46mh50cct.json",
+   "corpus": "adresser",
+   "kind": "file",
+   "machine": "1omrle93",
+   "go": "go1.27.1",
+   "goos": "windows",
+   "goarch": "amd64",
+   "goamd64": "v1",
+   "bench": "1",
+   "threads": [
+    16
+   ],
+   "codecs": [
+    "gzkp",
+    "gzstd",
+    "lz4",
+    "minlz",
+    "pgzip",
+    "s2",
+    "s2s",
+    "s2sn",
+    "snappy",
+    "stdzstd",
+    "zskp"
+   ],
+   "libs": {
+    "github.com/golang/snappy": [
+     "v1.0.0"
+    ],
+    "github.com/klauspost/compress": [
+     "v1.20.0"
+    ],
+    "github.com/klauspost/pgzip": [
+     "v1.2.6"
+    ],
+    "github.com/klauspost/stdgozstd": [
+     "v0.0.0-20260722174150-eb4821197265"
+    ],
+    "github.com/minio/minlz": [
+     "v1.2.0"
+    ],
+    "github.com/pierrec/lz4/v4": [
+     "v4.1.30"
+    ],
+    "std": [
+     "go1.27.1"
+    ]
+   },
+   "variant": {
+    "block_size": "4194304",
+    "cgo": "true",
+    "corpus_hash": "2a64a50e9f6b485b",
+    "goamd64": "v1",
+    "goarch": "amd64",
+    "gogc": "100",
+    "gomemlimit": "0",
+    "goos": "windows",
+    "numcpu": "32",
+    "src_threads": "16"
+   },
+   "n_encode": 35,
+   "n_decode": 63,
+   "merges": 0,
+   "created": "2026-09-24T09:05:11Z",
+   "updated": "2026-09-24T09:05:11Z"
+  },
+  {
+   "id": "3d9dl41a83a6j",
+   "file": "runs/apache-log-3d9dl41a83a6j.json",
+   "corpus": "apache-log",
+   "kind": "file",
+   "machine": "1omrle93",
+   "go": "go1.27.1",
+   "goos": "windows",
+   "goarch": "amd64",
+   "goamd64": "v1",
+   "bench": "1",
+   "threads": [
+    1
+   ],
+   "codecs": [
+    "br",
+    "br2",
+    "bz2",
+    "bz2std",
+    "gzkp",
+    "gzstd",
+    "lz4",
+    "minlz",
+    "pgzip",
+    "s2",
+    "s2sn",
+    "snappy",
+    "stdzstd",
+    "zskp"
+   ],
+   "libs": {
+    "github.com/andybalholm/brotli": [
+     "v1.2.4"
+    ],
+    "github.com/dsnet/compress": [
+     "v0.0.1"
+    ],
+    "github.com/golang/snappy": [
+     "v1.0.0"
+    ],
+    "github.com/klauspost/compress": [
+     "v1.20.0",
+     "v1.20.1"
+    ],
+    "github.com/klauspost/pgzip": [
+     "v1.2.6"
+    ],
+    "github.com/klauspost/stdgozstd": [
+     "v0.0.0-20260722174150-eb4821197265"
+    ],
+    "github.com/minio/minlz": [
+     "v1.2.0"
+    ],
+    "github.com/pierrec/lz4/v4": [
+     "v4.1.30"
+    ],
+    "std": [
+     "go1.27.1"
+    ]
+   },
+   "variant": {
+    "block_size": "4194304",
+    "cgo": "true",
+    "corpus_hash": "9fead057bf6c08d1",
+    "goamd64": "v1",
+    "goarch": "amd64",
+    "gogc": "100",
+    "gomemlimit": "0",
+    "goos": "windows",
+    "numcpu": "32",
+    "src_threads": "1"
+   },
+   "n_encode": 79,
+   "n_decode": 145,
+   "merges": 3,
+   "created": "2026-09-23T12:50:53Z",
+   "updated": "2026-09-27T19:09:27Z"
+  },
+  {
+   "id": "3d9dl41a83a6j-2qtx4hgxvhw8z",
+   "file": "runs/apache-log-3d9dl41a83a6j-2qtx4hgxvhw8z.json",
+   "corpus": "apache-log",
+   "kind": "file",
+   "machine": "1omrle93",
+   "go": "go1.27.1",
+   "goos": "windows",
+   "goarch": "amd64",
+   "goamd64": "v1",
+   "bench": "1",
+   "threads": [
+    16
+   ],
+   "codecs": [
+    "gzkp",
+    "gzstd",
+    "lz4",
+    "minlz",
+    "pgzip",
+    "s2",
+    "s2s",
+    "s2sn",
+    "snappy",
+    "stdzstd",
+    "zskp"
+   ],
+   "libs": {
+    "github.com/golang/snappy": [
+     "v1.0.0"
+    ],
+    "github.com/klauspost/compress": [
+     "v1.20.0"
+    ],
+    "github.com/klauspost/pgzip": [
+     "v1.2.6"
+    ],
+    "github.com/klauspost/stdgozstd": [
+     "v0.0.0-20260722174150-eb4821197265"
+    ],
+    "github.com/minio/minlz": [
+     "v1.2.0"
+    ],
+    "github.com/pierrec/lz4/v4": [
+     "v4.1.30"
+    ],
+    "std": [
+     "go1.27.1"
+    ]
+   },
+   "variant": {
+    "block_size": "4194304",
+    "cgo": "true",
+    "corpus_hash": "9fead057bf6c08d1",
+    "goamd64": "v1",
+    "goarch": "amd64",
+    "gogc": "100",
+    "gomemlimit": "0",
+    "goos": "windows",
+    "numcpu": "32",
+    "src_threads": "16"
+   },
+   "n_encode": 35,
+   "n_decode": 63,
+   "merges": 0,
+   "created": "2026-09-23T16:13:56Z",
+   "updated": "2026-09-23T16:13:56Z"
+  },
+  {
+   "id": "11u1m7jbmgnj2",
+   "file": "runs/cockroach-log-11u1m7jbmgnj2.json",
+   "corpus": "cockroach-log",
+   "kind": "file",
+   "machine": "1omrle93",
+   "go": "go1.27.1",
+   "goos": "windows",
+   "goarch": "amd64",
+   "goamd64": "v1",
+   "bench": "1",
+   "threads": [
+    32
+   ],
+   "codecs": [
+    "gzkp",
+    "gzstd",
+    "lz4",
+    "minlz",
+    "pgzip",
+    "s2",
+    "s2s",
+    "s2sn",
+    "snappy",
+    "stdzstd",
+    "zskp"
+   ],
+   "libs": {
+    "github.com/golang/snappy": [
+     "v1.0.0"
+    ],
+    "github.com/klauspost/compress": [
+     "v1.20.0"
+    ],
+    "github.com/klauspost/pgzip": [
+     "v1.2.6"
+    ],
+    "github.com/klauspost/stdgozstd": [
+     "v0.0.0-20260722174150-eb4821197265"
+    ],
+    "github.com/minio/minlz": [
+     "v1.2.0"
+    ],
+    "github.com/pierrec/lz4/v4": [
+     "v4.1.30"
+    ],
+    "std": [
+     "go1.27.1"
+    ]
+   },
+   "n_encode": 38,
+   "n_decode": 76,
+   "merges": 1,
+   "created": "2026-09-23T09:14:25Z",
+   "updated": "2026-09-23T10:43:32Z"
+  },
+  {
+   "id": "11u1m7jbmgnj2-2j6r6qb9bbz51",
+   "file": "runs/cockroach-log-11u1m7jbmgnj2-2j6r6qb9bbz51.json",
+   "corpus": "cockroach-log",
+   "kind": "file",
+   "machine": "1omrle93",
+   "go": "go1.27.1",
+   "goos": "windows",
+   "goarch": "amd64",
+   "goamd64": "v1",
+   "bench": "1",
+   "threads": [
+    1
+   ],
+   "codecs": [
+    "br",
+    "br2",
+    "bz2",
+    "bz2std",
+    "gzkp",
+    "gzstd",
+    "lz4",
+    "minlz",
+    "pgzip",
+    "s2",
+    "s2sn",
+    "snappy",
+    "stdzstd",
+    "zskp"
+   ],
+   "libs": {
+    "github.com/andybalholm/brotli": [
+     "v1.2.4"
+    ],
+    "github.com/dsnet/compress": [
+     "v0.0.1"
+    ],
+    "github.com/golang/snappy": [
+     "v1.0.0"
+    ],
+    "github.com/klauspost/compress": [
+     "v1.20.0",
+     "v1.20.1"
+    ],
+    "github.com/klauspost/pgzip": [
+     "v1.2.6"
+    ],
+    "github.com/klauspost/stdgozstd": [
+     "v0.0.0-20260722174150-eb4821197265"
+    ],
+    "github.com/minio/minlz": [
+     "v1.2.0"
+    ],
+    "github.com/pierrec/lz4/v4": [
+     "v4.1.30"
+    ],
+    "std": [
+     "go1.27.1"
+    ]
+   },
+   "variant": {
+    "block_size": "4194304",
+    "cgo": "true",
+    "corpus_hash": "2c7203e5bfd0c670",
+    "goamd64": "v1",
+    "goarch": "amd64",
+    "gogc": "100",
+    "gomemlimit": "0",
+    "goos": "windows",
+    "numcpu": "32",
+    "src_threads": "1"
+   },
+   "n_encode": 69,
+   "n_decode": 145,
+   "merges": 2,
+   "created": "2026-09-25T20:12:14Z",
+   "updated": "2026-09-27T19:49:24Z"
+  },
+  {
+   "id": "11u1m7jbmgnj2-wamlj5ou4hv6",
+   "file": "runs/cockroach-log-11u1m7jbmgnj2-wamlj5ou4hv6.json",
+   "corpus": "cockroach-log",
+   "kind": "file",
+   "machine": "1omrle93",
+   "go": "go1.27.1",
+   "goos": "windows",
+   "goarch": "amd64",
+   "goamd64": "v1",
+   "bench": "1",
+   "threads": [
+    16
+   ],
+   "codecs": [
+    "gzkp",
+    "gzstd",
+    "lz4",
+    "minlz",
+    "pgzip",
+    "s2",
+    "s2s",
+    "s2sn",
+    "snappy",
+    "stdzstd",
+    "zskp"
+   ],
+   "libs": {
+    "github.com/golang/snappy": [
+     "v1.0.0"
+    ],
+    "github.com/klauspost/compress": [
+     "v1.20.0"
+    ],
+    "github.com/klauspost/pgzip": [
+     "v1.2.6"
+    ],
+    "github.com/klauspost/stdgozstd": [
+     "v0.0.0-20260722174150-eb4821197265"
+    ],
+    "github.com/minio/minlz": [
+     "v1.2.0"
+    ],
+    "github.com/pierrec/lz4/v4": [
+     "v4.1.30"
+    ],
+    "std": [
+     "go1.27.1"
+    ]
+   },
+   "variant": {
+    "block_size": "4194304",
+    "cgo": "true",
+    "corpus_hash": "2c7203e5bfd0c670",
+    "goamd64": "v1",
+    "goarch": "amd64",
+    "gogc": "100",
+    "gomemlimit": "0",
+    "goos": "windows",
+    "numcpu": "32",
+    "src_threads": "16"
+   },
+   "n_encode": 35,
+   "n_decode": 63,
+   "merges": 0,
+   "created": "2026-09-23T16:42:41Z",
+   "updated": "2026-09-23T16:42:41Z"
+  },
+  {
+   "id": "3ceek96i74mqb",
+   "file": "runs/cockroach-log-3ceek96i74mqb.json",
+   "corpus": "cockroach-log",
+   "kind": "file",
+   "machine": "1omrle93",
+   "go": "go1.26.1",
+   "goos": "windows",
+   "goarch": "amd64",
+   "goamd64": "v1",
+   "bench": "1",
+   "threads": [
+    32
+   ],
+   "codecs": [
+    "br",
+    "br2",
+    "flkp",
+    "flstd",
+    "gzkp",
+    "gzstd",
+    "lz4",
+    "minlz",
+    "pgzip",
+    "s2",
+    "s2s",
+    "snappy",
+    "stdzstd",
+    "zskp"
+   ],
+   "libs": {
+    "github.com/andybalholm/brotli": [
+     "v1.2.4"
+    ],
+    "github.com/golang/snappy": [
+     "v1.0.0"
+    ],
+    "github.com/klauspost/compress": [
+     "v1.20.0"
+    ],
+    "github.com/klauspost/pgzip": [
+     "v1.2.6"
+    ],
+    "github.com/klauspost/stdgozstd": [
+     "v0.0.0-20260722174150-eb4821197265"
+    ],
+    "github.com/minio/minlz": [
+     "v1.2.0"
+    ],
+    "github.com/pierrec/lz4/v4": [
+     "v4.1.30"
+    ],
+    "std": [
+     "go1.26.1"
+    ]
+   },
+   "n_encode": 14,
+   "n_decode": 0,
+   "merges": 0,
+   "created": "2026-09-23T08:42:34Z",
+   "updated": "2026-09-23T08:42:34Z"
+  },
+  {
+   "id": "1rxejhkl4h7xx",
+   "file": "runs/consensus-db-1rxejhkl4h7xx.json",
+   "corpus": "consensus-db",
+   "kind": "file",
+   "machine": "1omrle93",
+   "go": "go1.27.1",
+   "goos": "windows",
+   "goarch": "amd64",
+   "goamd64": "v1",
+   "bench": "1",
+   "threads": [
+    16
+   ],
+   "codecs": [
+    "gzkp",
+    "gzstd",
+    "lz4",
+    "minlz",
+    "pgzip",
+    "s2",
+    "s2s",
+    "s2sn",
+    "snappy",
+    "stdzstd",
+    "zskp"
+   ],
+   "libs": {
+    "github.com/golang/snappy": [
+     "v1.0.0"
+    ],
+    "github.com/klauspost/compress": [
+     "v1.20.0"
+    ],
+    "github.com/klauspost/pgzip": [
+     "v1.2.6"
+    ],
+    "github.com/klauspost/stdgozstd": [
+     "v0.0.0-20260722174150-eb4821197265"
+    ],
+    "github.com/minio/minlz": [
+     "v1.2.0"
+    ],
+    "github.com/pierrec/lz4/v4": [
+     "v4.1.30"
+    ],
+    "std": [
+     "go1.27.1"
+    ]
+   },
+   "variant": {
+    "block_size": "4194304",
+    "cgo": "true",
+    "corpus_hash": "bb4b18daafb15521",
+    "goamd64": "v1",
+    "goarch": "amd64",
+    "gogc": "100",
+    "gomemlimit": "0",
+    "goos": "windows",
+    "numcpu": "32",
+    "src_threads": "16"
+   },
+   "n_encode": 35,
+   "n_decode": 63,
+   "merges": 0,
+   "created": "2026-09-23T20:03:09Z",
+   "updated": "2026-09-23T20:03:09Z"
+  },
+  {
+   "id": "1rxejhkl4h7xx-15s5v6ozpe01b",
+   "file": "runs/consensus-db-1rxejhkl4h7xx-15s5v6ozpe01b.json",
+   "corpus": "consensus-db",
+   "kind": "file",
+   "machine": "1omrle93",
+   "go": "go1.27.1",
+   "goos": "windows",
+   "goarch": "amd64",
+   "goamd64": "v1",
+   "bench": "1",
+   "threads": [
+    1
+   ],
+   "codecs": [
+    "br",
+    "br2",
+    "bz2",
+    "bz2std",
+    "gzkp",
+    "gzstd",
+    "lz4",
+    "minlz",
+    "pgzip",
+    "s2",
+    "s2sn",
+    "snappy",
+    "stdzstd",
+    "zskp"
+   ],
+   "libs": {
+    "github.com/andybalholm/brotli": [
+     "v1.2.4"
+    ],
+    "github.com/dsnet/compress": [
+     "v0.0.1"
+    ],
+    "github.com/golang/snappy": [
+     "v1.0.0"
+    ],
+    "github.com/klauspost/compress": [
+     "v1.20.0",
+     "v1.20.1"
+    ],
+    "github.com/klauspost/pgzip": [
+     "v1.2.6"
+    ],
+    "github.com/klauspost/stdgozstd": [
+     "v0.0.0-20260722174150-eb4821197265"
+    ],
+    "github.com/minio/minlz": [
+     "v1.2.0"
+    ],
+    "github.com/pierrec/lz4/v4": [
+     "v4.1.30"
+    ],
+    "std": [
+     "go1.27.1"
+    ]
+   },
+   "variant": {
+    "block_size": "4194304",
+    "cgo": "true",
+    "corpus_hash": "bb4b18daafb15521",
+    "goamd64": "v1",
+    "goarch": "amd64",
+    "gogc": "100",
+    "gomemlimit": "0",
+    "goos": "windows",
+    "numcpu": "32",
+    "src_threads": "1"
+   },
+   "n_encode": 69,
+   "n_decode": 145,
+   "merges": 1,
+   "created": "2026-09-26T21:40:35Z",
+   "updated": "2026-09-28T00:33:56Z"
+  },
+  {
+   "id": "11m75cmxdzk5z",
+   "file": "runs/enwik10-11m75cmxdzk5z.json",
+   "corpus": "enwik10",
+   "kind": "file",
+   "machine": "1omrle93",
+   "go": "go1.27.1",
+   "goos": "windows",
+   "goarch": "amd64",
+   "goamd64": "v1",
+   "bench": "1",
+   "threads": [
+    16
+   ],
+   "codecs": [
+    "gzkp",
+    "gzstd",
+    "lz4",
+    "minlz",
+    "pgzip",
+    "s2",
+    "s2s",
+    "s2sn",
+    "snappy",
+    "stdzstd",
+    "zskp"
+   ],
+   "libs": {
+    "github.com/golang/snappy": [
+     "v1.0.0"
+    ],
+    "github.com/klauspost/compress": [
+     "v1.20.0"
+    ],
+    "github.com/klauspost/pgzip": [
+     "v1.2.6"
+    ],
+    "github.com/klauspost/stdgozstd": [
+     "v0.0.0-20260722174150-eb4821197265"
+    ],
+    "github.com/minio/minlz": [
+     "v1.2.0"
+    ],
+    "github.com/pierrec/lz4/v4": [
+     "v4.1.30"
+    ],
+    "std": [
+     "go1.27.1"
+    ]
+   },
+   "variant": {
+    "block_size": "4194304",
+    "cgo": "true",
+    "corpus_hash": "94db1087eb40b966",
+    "goamd64": "v1",
+    "goarch": "amd64",
+    "gogc": "100",
+    "gomemlimit": "0",
+    "goos": "windows",
+    "numcpu": "32",
+    "src_threads": "16"
+   },
+   "n_encode": 35,
+   "n_decode": 63,
+   "merges": 0,
+   "created": "2026-09-24T10:31:57Z",
+   "updated": "2026-09-24T10:31:57Z"
+  },
+  {
+   "id": "3v89pmmm11wwp",
+   "file": "runs/enwik8-3v89pmmm11wwp.json",
+   "corpus": "enwik8",
+   "kind": "file",
+   "machine": "1omrle93",
+   "go": "go1.26.1",
+   "goos": "windows",
+   "goarch": "amd64",
+   "goamd64": "v4",
+   "bench": "1",
+   "threads": [
+    1,
+    8
+   ],
+   "codecs": [
+    "gzkp",
+    "gzstd",
+    "lz4",
+    "minlz",
+    "pgzip",
+    "s2",
+    "stdzstd",
+    "zskp"
+   ],
+   "libs": {
+    "github.com/klauspost/compress": [
+     "v1.20.0"
+    ],
+    "github.com/klauspost/pgzip": [
+     "v1.2.6"
+    ],
+    "github.com/klauspost/stdgozstd": [
+     "v0.0.0-20260722174150-eb4821197265"
+    ],
+    "github.com/minio/minlz": [
+     "v1.2.0"
+    ],
+    "github.com/pierrec/lz4/v4": [
+     "v4.1.30"
+    ],
+    "std": [
+     "go1.26.1"
+    ]
+   },
+   "n_encode": 68,
+   "n_decode": 128,
+   "merges": 0,
+   "created": "2026-09-22T15:28:40Z",
+   "updated": "2026-09-22T15:28:40Z"
+  },
+  {
+   "id": "27kchhl47tzdx",
+   "file": "runs/enwik9-27kchhl47tzdx.json",
+   "corpus": "enwik9",
+   "kind": "file",
+   "machine": "1omrle93",
+   "go": "go1.27.1",
+   "goos": "windows",
+   "goarch": "amd64",
+   "goamd64": "v1",
+   "bench": "1",
+   "threads": [
+    1
+   ],
+   "codecs": [
+    "br",
+    "br2",
+    "bz2",
+    "bz2std",
+    "gzkp",
+    "gzstd",
+    "lz4",
+    "minlz",
+    "pgzip",
+    "s2",
+    "s2sn",
+    "snappy",
+    "stdzstd",
+    "zskp"
+   ],
+   "libs": {
+    "github.com/andybalholm/brotli": [
+     "v1.2.4"
+    ],
+    "github.com/dsnet/compress": [
+     "v0.0.1"
+    ],
+    "github.com/golang/snappy": [
+     "v1.0.0"
+    ],
+    "github.com/klauspost/compress": [
+     "v1.20.0",
+     "v1.20.1"
+    ],
+    "github.com/klauspost/pgzip": [
+     "v1.2.6"
+    ],
+    "github.com/klauspost/stdgozstd": [
+     "v0.0.0-20260722174150-eb4821197265"
+    ],
+    "github.com/minio/minlz": [
+     "v1.2.0"
+    ],
+    "github.com/pierrec/lz4/v4": [
+     "v4.1.30"
+    ],
+    "std": [
+     "go1.27.1"
+    ]
+   },
+   "variant": {
+    "block_size": "4194304",
+    "cgo": "true",
+    "corpus_hash": "1f0533f6be5d8e95",
+    "goamd64": "v1",
+    "goarch": "amd64",
+    "gogc": "100",
+    "gomemlimit": "0",
+    "goos": "windows",
+    "numcpu": "32",
+    "src_threads": "1"
+   },
+   "n_encode": 85,
+   "n_decode": 145,
+   "merges": 5,
+   "created": "2026-09-23T14:18:57Z",
+   "updated": "2026-09-27T18:50:56Z"
+  },
+  {
+   "id": "27kchhl47tzdx-3i6v9y7epy4ru",
+   "file": "runs/enwik9-27kchhl47tzdx-3i6v9y7epy4ru.json",
+   "corpus": "enwik9",
+   "kind": "file",
+   "machine": "1omrle93",
+   "go": "go1.27.1",
+   "goos": "windows",
+   "goarch": "amd64",
+   "goamd64": "v1",
+   "bench": "1",
+   "threads": [
+    16
+   ],
+   "codecs": [
+    "gzkp",
+    "gzstd",
+    "lz4",
+    "minlz",
+    "pgzip",
+    "s2",
+    "s2s",
+    "s2sn",
+    "snappy",
+    "stdzstd",
+    "zskp"
+   ],
+   "libs": {
+    "github.com/golang/snappy": [
+     "v1.0.0"
+    ],
+    "github.com/klauspost/compress": [
+     "v1.20.0"
+    ],
+    "github.com/klauspost/pgzip": [
+     "v1.2.6"
+    ],
+    "github.com/klauspost/stdgozstd": [
+     "v0.0.0-20260722174150-eb4821197265"
+    ],
+    "github.com/minio/minlz": [
+     "v1.2.0"
+    ],
+    "github.com/pierrec/lz4/v4": [
+     "v4.1.30"
+    ],
+    "std": [
+     "go1.27.1"
+    ]
+   },
+   "variant": {
+    "block_size": "4194304",
+    "cgo": "true",
+    "corpus_hash": "1f0533f6be5d8e95",
+    "goamd64": "v1",
+    "goarch": "amd64",
+    "gogc": "100",
+    "gomemlimit": "0",
+    "goos": "windows",
+    "numcpu": "32",
+    "src_threads": "16"
+   },
+   "n_encode": 35,
+   "n_decode": 63,
+   "merges": 0,
+   "created": "2026-09-23T15:58:30Z",
+   "updated": "2026-09-23T15:58:30Z"
+  },
+  {
+   "id": "gkrn7gt17why",
+   "file": "runs/github-june-gkrn7gt17why.json",
+   "corpus": "github-june",
+   "kind": "file",
+   "machine": "1omrle93",
+   "go": "go1.27.1",
+   "goos": "windows",
+   "goarch": "amd64",
+   "goamd64": "v1",
+   "bench": "1",
+   "threads": [
+    16
+   ],
+   "codecs": [
+    "gzkp",
+    "gzstd",
+    "lz4",
+    "minlz",
+    "pgzip",
+    "s2",
+    "s2s",
+    "s2sn",
+    "snappy",
+    "stdzstd",
+    "zskp"
+   ],
+   "libs": {
+    "github.com/golang/snappy": [
+     "v1.0.0"
+    ],
+    "github.com/klauspost/compress": [
+     "v1.20.0"
+    ],
+    "github.com/klauspost/pgzip": [
+     "v1.2.6"
+    ],
+    "github.com/klauspost/stdgozstd": [
+     "v0.0.0-20260722174150-eb4821197265"
+    ],
+    "github.com/minio/minlz": [
+     "v1.2.0"
+    ],
+    "github.com/pierrec/lz4/v4": [
+     "v4.1.30"
+    ],
+    "std": [
+     "go1.27.1"
+    ]
+   },
+   "variant": {
+    "block_size": "4194304",
+    "cgo": "true",
+    "corpus_hash": "86341acdf6fb5554",
+    "goamd64": "v1",
+    "goarch": "amd64",
+    "gogc": "100",
+    "gomemlimit": "0",
+    "goos": "windows",
+    "numcpu": "32",
+    "src_threads": "16"
+   },
+   "n_encode": 35,
+   "n_decode": 63,
+   "merges": 0,
+   "created": "2026-09-23T20:29:38Z",
+   "updated": "2026-09-23T20:29:38Z"
+  },
+  {
+   "id": "gkrn7gt17why-1vcle6fwog7qi",
+   "file": "runs/github-june-gkrn7gt17why-1vcle6fwog7qi.json",
+   "corpus": "github-june",
+   "kind": "file",
+   "machine": "1omrle93",
+   "go": "go1.27.1",
+   "goos": "windows",
+   "goarch": "amd64",
+   "goamd64": "v1",
+   "bench": "1",
+   "threads": [
+    1
+   ],
+   "codecs": [
+    "br",
+    "br2",
+    "bz2",
+    "bz2std",
+    "gzkp",
+    "gzstd",
+    "lz4",
+    "minlz",
+    "pgzip",
+    "s2",
+    "s2sn",
+    "snappy",
+    "stdzstd",
+    "zskp"
+   ],
+   "libs": {
+    "github.com/andybalholm/brotli": [
+     "v1.2.4"
+    ],
+    "github.com/dsnet/compress": [
+     "v0.0.1"
+    ],
+    "github.com/golang/snappy": [
+     "v1.0.0"
+    ],
+    "github.com/klauspost/compress": [
+     "v1.20.0",
+     "v1.20.1"
+    ],
+    "github.com/klauspost/pgzip": [
+     "v1.2.6"
+    ],
+    "github.com/klauspost/stdgozstd": [
+     "v0.0.0-20260722174150-eb4821197265"
+    ],
+    "github.com/minio/minlz": [
+     "v1.2.0"
+    ],
+    "github.com/pierrec/lz4/v4": [
+     "v4.1.30"
+    ],
+    "std": [
+     "go1.27.1"
+    ]
+   },
+   "variant": {
+    "block_size": "4194304",
+    "cgo": "true",
+    "corpus_hash": "86341acdf6fb5554",
+    "goamd64": "v1",
+    "goarch": "amd64",
+    "gogc": "100",
+    "gomemlimit": "0",
+    "goos": "windows",
+    "numcpu": "32",
+    "src_threads": "1"
+   },
+   "n_encode": 69,
+   "n_decode": 145,
+   "merges": 1,
+   "created": "2026-09-27T09:17:28Z",
+   "updated": "2026-09-28T01:12:37Z"
+  },
+  {
+   "id": "1yc3fcmtobxif",
+   "file": "runs/github-ranks-1yc3fcmtobxif.json",
+   "corpus": "github-ranks",
+   "kind": "file",
+   "machine": "1omrle93",
+   "go": "go1.27.1",
+   "goos": "windows",
+   "goarch": "amd64",
+   "goamd64": "v1",
+   "bench": "1",
+   "threads": [
+    16
+   ],
+   "codecs": [
+    "gzkp",
+    "gzstd",
+    "lz4",
+    "minlz",
+    "pgzip",
+    "s2",
+    "s2s",
+    "s2sn",
+    "snappy",
+    "stdzstd",
+    "zskp"
+   ],
+   "libs": {
+    "github.com/golang/snappy": [
+     "v1.0.0"
+    ],
+    "github.com/klauspost/compress": [
+     "v1.20.0"
+    ],
+    "github.com/klauspost/pgzip": [
+     "v1.2.6"
+    ],
+    "github.com/klauspost/stdgozstd": [
+     "v0.0.0-20260722174150-eb4821197265"
+    ],
+    "github.com/minio/minlz": [
+     "v1.2.0"
+    ],
+    "github.com/pierrec/lz4/v4": [
+     "v4.1.30"
+    ],
+    "std": [
+     "go1.27.1"
+    ]
+   },
+   "variant": {
+    "block_size": "4194304",
+    "cgo": "true",
+    "corpus_hash": "e4de7572725712c3",
+    "goamd64": "v1",
+    "goarch": "amd64",
+    "gogc": "100",
+    "gomemlimit": "0",
+    "goos": "windows",
+    "numcpu": "32",
+    "src_threads": "16"
+   },
+   "n_encode": 35,
+   "n_decode": 63,
+   "merges": 0,
+   "created": "2026-09-23T16:55:20Z",
+   "updated": "2026-09-23T16:55:20Z"
+  },
+  {
+   "id": "1yc3fcmtobxif-2ukm5xkwwcid7",
+   "file": "runs/github-ranks-1yc3fcmtobxif-2ukm5xkwwcid7.json",
+   "corpus": "github-ranks",
+   "kind": "file",
+   "machine": "1omrle93",
+   "go": "go1.27.1",
+   "goos": "windows",
+   "goarch": "amd64",
+   "goamd64": "v1",
+   "bench": "1",
+   "threads": [
+    1
+   ],
+   "codecs": [
+    "br",
+    "br2",
+    "bz2",
+    "bz2std",
+    "gzkp",
+    "gzstd",
+    "lz4",
+    "minlz",
+    "pgzip",
+    "s2",
+    "s2sn",
+    "snappy",
+    "stdzstd",
+    "zskp"
+   ],
+   "libs": {
+    "github.com/andybalholm/brotli": [
+     "v1.2.4"
+    ],
+    "github.com/dsnet/compress": [
+     "v0.0.1"
+    ],
+    "github.com/golang/snappy": [
+     "v1.0.0"
+    ],
+    "github.com/klauspost/compress": [
+     "v1.20.0",
+     "v1.20.1"
+    ],
+    "github.com/klauspost/pgzip": [
+     "v1.2.6"
+    ],
+    "github.com/klauspost/stdgozstd": [
+     "v0.0.0-20260722174150-eb4821197265"
+    ],
+    "github.com/minio/minlz": [
+     "v1.2.0"
+    ],
+    "github.com/pierrec/lz4/v4": [
+     "v4.1.30"
+    ],
+    "std": [
+     "go1.27.1"
+    ]
+   },
+   "variant": {
+    "block_size": "4194304",
+    "cgo": "true",
+    "corpus_hash": "e4de7572725712c3",
+    "goamd64": "v1",
+    "goarch": "amd64",
+    "gogc": "100",
+    "gomemlimit": "0",
+    "goos": "windows",
+    "numcpu": "32",
+    "src_threads": "1"
+   },
+   "n_encode": 69,
+   "n_decode": 145,
+   "merges": 2,
+   "created": "2026-09-25T21:52:48Z",
+   "updated": "2026-09-27T20:08:33Z"
+  },
+  {
+   "id": "kh4sr0y2n0do",
+   "file": "runs/gob-stream-kh4sr0y2n0do.json",
+   "corpus": "gob-stream",
+   "kind": "file",
+   "machine": "1omrle93",
+   "go": "go1.27.1",
+   "goos": "windows",
+   "goarch": "amd64",
+   "goamd64": "v1",
+   "bench": "1",
+   "threads": [
+    16
+   ],
+   "codecs": [
+    "gzkp",
+    "gzstd",
+    "lz4",
+    "minlz",
+    "pgzip",
+    "s2",
+    "s2s",
+    "s2sn",
+    "snappy",
+    "stdzstd",
+    "zskp"
+   ],
+   "libs": {
+    "github.com/golang/snappy": [
+     "v1.0.0"
+    ],
+    "github.com/klauspost/compress": [
+     "v1.20.0"
+    ],
+    "github.com/klauspost/pgzip": [
+     "v1.2.6"
+    ],
+    "github.com/klauspost/stdgozstd": [
+     "v0.0.0-20260722174150-eb4821197265"
+    ],
+    "github.com/minio/minlz": [
+     "v1.2.0"
+    ],
+    "github.com/pierrec/lz4/v4": [
+     "v4.1.30"
+    ],
+    "std": [
+     "go1.27.1"
+    ]
+   },
+   "variant": {
+    "block_size": "4194304",
+    "cgo": "true",
+    "corpus_hash": "b47c93e1f5280cfa",
+    "goamd64": "v1",
+    "goarch": "amd64",
+    "gogc": "100",
+    "gomemlimit": "0",
+    "goos": "windows",
+    "numcpu": "32",
+    "src_threads": "16"
+   },
+   "n_encode": 35,
+   "n_decode": 63,
+   "merges": 0,
+   "created": "2026-09-23T17:04:27Z",
+   "updated": "2026-09-23T17:04:27Z"
+  },
+  {
+   "id": "kh4sr0y2n0do-v8o9v9mn1mvr",
+   "file": "runs/gob-stream-kh4sr0y2n0do-v8o9v9mn1mvr.json",
+   "corpus": "gob-stream",
+   "kind": "file",
+   "machine": "1omrle93",
+   "go": "go1.27.1",
+   "goos": "windows",
+   "goarch": "amd64",
+   "goamd64": "v1",
+   "bench": "1",
+   "threads": [
+    1
+   ],
+   "codecs": [
+    "br",
+    "br2",
+    "bz2",
+    "bz2std",
+    "gzkp",
+    "gzstd",
+    "lz4",
+    "minlz",
+    "pgzip",
+    "s2",
+    "s2sn",
+    "snappy",
+    "stdzstd",
+    "zskp"
+   ],
+   "libs": {
+    "github.com/andybalholm/brotli": [
+     "v1.2.4"
+    ],
+    "github.com/dsnet/compress": [
+     "v0.0.1"
+    ],
+    "github.com/golang/snappy": [
+     "v1.0.0"
+    ],
+    "github.com/klauspost/compress": [
+     "v1.20.0",
+     "v1.20.1"
+    ],
+    "github.com/klauspost/pgzip": [
+     "v1.2.6"
+    ],
+    "github.com/klauspost/stdgozstd": [
+     "v0.0.0-20260722174150-eb4821197265"
+    ],
+    "github.com/minio/minlz": [
+     "v1.2.0"
+    ],
+    "github.com/pierrec/lz4/v4": [
+     "v4.1.30"
+    ],
+    "std": [
+     "go1.27.1"
+    ]
+   },
+   "variant": {
+    "block_size": "4194304",
+    "cgo": "true",
+    "corpus_hash": "b47c93e1f5280cfa",
+    "goamd64": "v1",
+    "goarch": "amd64",
+    "gogc": "100",
+    "gomemlimit": "0",
+    "goos": "windows",
+    "numcpu": "32",
+    "src_threads": "1"
+   },
+   "n_encode": 69,
+   "n_decode": 145,
+   "merges": 1,
+   "created": "2026-09-25T22:56:03Z",
+   "updated": "2026-09-27T20:21:36Z"
+  },
+  {
+   "id": "2jpah2kr7vagr",
+   "file": "runs/gofiles-2jpah2kr7vagr.json",
+   "corpus": "gofiles",
+   "kind": "dir",
+   "machine": "1omrle93",
+   "go": "go1.26.1",
+   "goos": "windows",
+   "goarch": "amd64",
+   "goamd64": "v4",
+   "bench": "1",
+   "threads": [
+    1,
+    4
+   ],
+   "codecs": [
+    "gzkp",
+    "gzstd",
+    "mzblk",
+    "pgzip",
+    "s2",
+    "s2blk",
+    "s2sblk",
+    "snapblk",
+    "stdzstd",
+    "zskp"
+   ],
+   "libs": {
+    "github.com/golang/snappy": [
+     "v1.0.0"
+    ],
+    "github.com/klauspost/compress": [
+     "v1.20.0"
+    ],
+    "github.com/klauspost/pgzip": [
+     "v1.2.6"
+    ],
+    "github.com/klauspost/stdgozstd": [
+     "v0.0.0-20260722174150-eb4821197265"
+    ],
+    "github.com/minio/minlz": [
+     "v1.2.0"
+    ],
+    "std": [
+     "go1.26.1"
+    ]
+   },
+   "n_encode": 58,
+   "n_decode": 120,
+   "merges": 0,
+   "created": "2026-09-22T15:34:13Z",
+   "updated": "2026-09-22T15:34:13Z"
+  },
+  {
+   "id": "dh7rry8o87zf",
+   "file": "runs/nyc-taxi-dh7rry8o87zf.json",
+   "corpus": "nyc-taxi",
+   "kind": "file",
+   "machine": "1omrle93",
+   "go": "go1.27.1",
+   "goos": "windows",
+   "goarch": "amd64",
+   "goamd64": "v1",
+   "bench": "1",
+   "threads": [
+    16
+   ],
+   "codecs": [
+    "gzkp",
+    "gzstd",
+    "lz4",
+    "minlz",
+    "pgzip",
+    "s2",
+    "s2s",
+    "s2sn",
+    "snappy",
+    "stdzstd",
+    "zskp"
+   ],
+   "libs": {
+    "github.com/golang/snappy": [
+     "v1.0.0"
+    ],
+    "github.com/klauspost/compress": [
+     "v1.20.0"
+    ],
+    "github.com/klauspost/pgzip": [
+     "v1.2.6"
+    ],
+    "github.com/klauspost/stdgozstd": [
+     "v0.0.0-20260722174150-eb4821197265"
+    ],
+    "github.com/minio/minlz": [
+     "v1.2.0"
+    ],
+    "github.com/pierrec/lz4/v4": [
+     "v4.1.30"
+    ],
+    "std": [
+     "go1.27.1"
+    ]
+   },
+   "variant": {
+    "block_size": "4194304",
+    "cgo": "true",
+    "corpus_hash": "a5d856f28baf4bd8",
+    "goamd64": "v1",
+    "goarch": "amd64",
+    "gogc": "100",
+    "gomemlimit": "0",
+    "goos": "windows",
+    "numcpu": "32",
+    "src_threads": "16"
+   },
+   "n_encode": 35,
+   "n_decode": 63,
+   "merges": 0,
+   "created": "2026-09-23T17:26:21Z",
+   "updated": "2026-09-23T17:26:21Z"
+  },
+  {
+   "id": "dh7rry8o87zf-10v40u4ejnii1",
+   "file": "runs/nyc-taxi-dh7rry8o87zf-10v40u4ejnii1.json",
+   "corpus": "nyc-taxi",
+   "kind": "file",
+   "machine": "1omrle93",
+   "go": "go1.27.1",
+   "goos": "windows",
+   "goarch": "amd64",
+   "goamd64": "v1",
+   "bench": "1",
+   "threads": [
+    1
+   ],
+   "codecs": [
+    "br",
+    "br2",
+    "bz2",
+    "bz2std",
+    "gzkp",
+    "gzstd",
+    "lz4",
+    "minlz",
+    "pgzip",
+    "s2",
+    "s2sn",
+    "snappy",
+    "stdzstd",
+    "zskp"
+   ],
+   "libs": {
+    "github.com/andybalholm/brotli": [
+     "v1.2.4"
+    ],
+    "github.com/dsnet/compress": [
+     "v0.0.1"
+    ],
+    "github.com/golang/snappy": [
+     "v1.0.0"
+    ],
+    "github.com/klauspost/compress": [
+     "v1.20.0",
+     "v1.20.1"
+    ],
+    "github.com/klauspost/pgzip": [
+     "v1.2.6"
+    ],
+    "github.com/klauspost/stdgozstd": [
+     "v0.0.0-20260722174150-eb4821197265"
+    ],
+    "github.com/minio/minlz": [
+     "v1.2.0"
+    ],
+    "github.com/pierrec/lz4/v4": [
+     "v4.1.30"
+    ],
+    "std": [
+     "go1.27.1"
+    ]
+   },
+   "variant": {
+    "block_size": "4194304",
+    "cgo": "true",
+    "corpus_hash": "a5d856f28baf4bd8",
+    "goamd64": "v1",
+    "goarch": "amd64",
+    "gogc": "100",
+    "gomemlimit": "0",
+    "goos": "windows",
+    "numcpu": "32",
+    "src_threads": "1"
+   },
+   "n_encode": 69,
+   "n_decode": 145,
+   "merges": 1,
+   "created": "2026-09-26T01:55:45Z",
+   "updated": "2026-09-27T20:58:20Z"
+  },
+  {
+   "id": "wv3vmbf24szl",
+   "file": "runs/parking-citations-wv3vmbf24szl.json",
+   "corpus": "parking-citations",
+   "kind": "file",
+   "machine": "1omrle93",
+   "go": "go1.27.1",
+   "goos": "windows",
+   "goarch": "amd64",
+   "goamd64": "v1",
+   "bench": "1",
+   "threads": [
+    1
+   ],
+   "codecs": [
+    "br",
+    "br2",
+    "bz2",
+    "bz2std",
+    "gzkp",
+    "gzstd",
+    "lz4",
+    "minlz",
+    "pgzip",
+    "s2",
+    "s2sn",
+    "snappy",
+    "stdzstd",
+    "zskp"
+   ],
+   "libs": {
+    "github.com/andybalholm/brotli": [
+     "v1.2.4"
+    ],
+    "github.com/dsnet/compress": [
+     "v0.0.1"
+    ],
+    "github.com/golang/snappy": [
+     "v1.0.0"
+    ],
+    "github.com/klauspost/compress": [
+     "v1.20.0",
+     "v1.20.1"
+    ],
+    "github.com/klauspost/pgzip": [
+     "v1.2.6"
+    ],
+    "github.com/klauspost/stdgozstd": [
+     "v0.0.0-20260722174150-eb4821197265"
+    ],
+    "github.com/minio/minlz": [
+     "v1.2.0"
+    ],
+    "github.com/pierrec/lz4/v4": [
+     "v4.1.30"
+    ],
+    "std": [
+     "go1.27.1"
+    ]
+   },
+   "variant": {
+    "block_size": "4194304",
+    "cgo": "true",
+    "corpus_hash": "99bc1680ebf993d",
+    "goamd64": "v1",
+    "goarch": "amd64",
+    "gogc": "100",
+    "gomemlimit": "0",
+    "goos": "windows",
+    "numcpu": "32",
+    "src_threads": "1"
+   },
+   "n_encode": 79,
+   "n_decode": 145,
+   "merges": 3,
+   "created": "2026-09-23T14:24:21Z",
+   "updated": "2026-09-27T18:53:26Z"
+  },
+  {
+   "id": "wv3vmbf24szl-2gizs0bgvo1xc",
+   "file": "runs/parking-citations-wv3vmbf24szl-2gizs0bgvo1xc.json",
+   "corpus": "parking-citations",
+   "kind": "file",
+   "machine": "1omrle93",
+   "go": "go1.27.1",
+   "goos": "windows",
+   "goarch": "amd64",
+   "goamd64": "v1",
+   "bench": "1",
+   "threads": [
+    16
+   ],
+   "codecs": [
+    "gzkp",
+    "gzstd",
+    "lz4",
+    "minlz",
+    "pgzip",
+    "s2",
+    "s2s",
+    "s2sn",
+    "snappy",
+    "stdzstd",
+    "zskp"
+   ],
+   "libs": {
+    "github.com/golang/snappy": [
+     "v1.0.0"
+    ],
+    "github.com/klauspost/compress": [
+     "v1.20.0"
+    ],
+    "github.com/klauspost/pgzip": [
+     "v1.2.6"
+    ],
+    "github.com/klauspost/stdgozstd": [
+     "v0.0.0-20260722174150-eb4821197265"
+    ],
+    "github.com/minio/minlz": [
+     "v1.2.0"
+    ],
+    "github.com/pierrec/lz4/v4": [
+     "v4.1.30"
+    ],
+    "std": [
+     "go1.27.1"
+    ]
+   },
+   "variant": {
+    "block_size": "4194304",
+    "cgo": "true",
+    "corpus_hash": "99bc1680ebf993d",
+    "goamd64": "v1",
+    "goarch": "amd64",
+    "gogc": "100",
+    "gomemlimit": "0",
+    "goos": "windows",
+    "numcpu": "32",
+    "src_threads": "16"
+   },
+   "n_encode": 35,
+   "n_decode": 63,
+   "merges": 0,
+   "created": "2026-09-23T16:01:18Z",
+   "updated": "2026-09-23T16:01:18Z"
+  },
+  {
+   "id": "2vrmjqwnll1kv",
+   "file": "runs/rand2gb-2vrmjqwnll1kv.json",
+   "corpus": "rand2gb",
+   "kind": "file",
+   "machine": "1omrle93",
+   "go": "go1.27.1",
+   "goos": "windows",
+   "goarch": "amd64",
+   "goamd64": "v1",
+   "bench": "1",
+   "threads": [
+    16
+   ],
+   "codecs": [
+    "gzkp",
+    "gzstd",
+    "lz4",
+    "minlz",
+    "pgzip",
+    "s2",
+    "s2s",
+    "s2sn",
+    "snappy",
+    "stdzstd",
+    "zskp"
+   ],
+   "libs": {
+    "github.com/golang/snappy": [
+     "v1.0.0"
+    ],
+    "github.com/klauspost/compress": [
+     "v1.20.0"
+    ],
+    "github.com/klauspost/pgzip": [
+     "v1.2.6"
+    ],
+    "github.com/klauspost/stdgozstd": [
+     "v0.0.0-20260722174150-eb4821197265"
+    ],
+    "github.com/minio/minlz": [
+     "v1.2.0"
+    ],
+    "github.com/pierrec/lz4/v4": [
+     "v4.1.30"
+    ],
+    "std": [
+     "go1.27.1"
+    ]
+   },
+   "variant": {
+    "block_size": "4194304",
+    "cgo": "true",
+    "corpus_hash": "3c19fac2e9108f85",
+    "goamd64": "v1",
+    "goarch": "amd64",
+    "gogc": "100",
+    "gomemlimit": "0",
+    "goos": "windows",
+    "numcpu": "32",
+    "src_threads": "16"
+   },
+   "n_encode": 35,
+   "n_decode": 63,
+   "merges": 0,
+   "created": "2026-09-24T07:29:59Z",
+   "updated": "2026-09-24T07:29:59Z"
+  },
+  {
+   "id": "2vrmjqwnll1kv-21w5e7bnak50i",
+   "file": "runs/rand2gb-2vrmjqwnll1kv-21w5e7bnak50i.json",
+   "corpus": "rand2gb",
+   "kind": "file",
+   "machine": "1omrle93",
+   "go": "go1.27.1",
+   "goos": "windows",
+   "goarch": "amd64",
+   "goamd64": "v1",
+   "bench": "1",
+   "threads": [
+    1
+   ],
+   "codecs": [
+    "br",
+    "br2",
+    "bz2",
+    "bz2std",
+    "gzkp",
+    "gzstd",
+    "lz4",
+    "minlz",
+    "pgzip",
+    "s2",
+    "s2sn",
+    "snappy",
+    "stdzstd",
+    "zskp"
+   ],
+   "libs": {
+    "github.com/andybalholm/brotli": [
+     "v1.2.4"
+    ],
+    "github.com/dsnet/compress": [
+     "v0.0.1"
+    ],
+    "github.com/golang/snappy": [
+     "v1.0.0"
+    ],
+    "github.com/klauspost/compress": [
+     "v1.20.0",
+     "v1.20.1"
+    ],
+    "github.com/klauspost/pgzip": [
+     "v1.2.6"
+    ],
+    "github.com/klauspost/stdgozstd": [
+     "v0.0.0-20260722174150-eb4821197265"
+    ],
+    "github.com/minio/minlz": [
+     "v1.2.0"
+    ],
+    "github.com/pierrec/lz4/v4": [
+     "v4.1.30"
+    ],
+    "std": [
+     "go1.27.1"
+    ]
+   },
+   "variant": {
+    "block_size": "4194304",
+    "cgo": "true",
+    "corpus_hash": "3c19fac2e9108f85",
+    "goamd64": "v1",
+    "goarch": "amd64",
+    "gogc": "100",
+    "gomemlimit": "0",
+    "goos": "windows",
+    "numcpu": "32",
+    "src_threads": "1"
+   },
+   "n_encode": 69,
+   "n_decode": 145,
+   "merges": 1,
+   "created": "2026-09-26T03:19:01Z",
+   "updated": "2026-09-27T21:02:31Z"
+  },
+  {
+   "id": "1qhqu6kb3f2f5",
+   "file": "runs/rawstudio-1qhqu6kb3f2f5.json",
+   "corpus": "rawstudio",
+   "kind": "file",
+   "machine": "1omrle93",
+   "go": "go1.27.1",
+   "goos": "windows",
+   "goarch": "amd64",
+   "goamd64": "v1",
+   "bench": "1",
+   "threads": [
+    16
+   ],
+   "codecs": [
+    "gzkp",
+    "gzstd",
+    "lz4",
+    "minlz",
+    "pgzip",
+    "s2",
+    "s2s",
+    "s2sn",
+    "snappy",
+    "stdzstd",
+    "zskp"
+   ],
+   "libs": {
+    "github.com/golang/snappy": [
+     "v1.0.0"
+    ],
+    "github.com/klauspost/compress": [
+     "v1.20.0"
+    ],
+    "github.com/klauspost/pgzip": [
+     "v1.2.6"
+    ],
+    "github.com/klauspost/stdgozstd": [
+     "v0.0.0-20260722174150-eb4821197265"
+    ],
+    "github.com/minio/minlz": [
+     "v1.2.0"
+    ],
+    "github.com/pierrec/lz4/v4": [
+     "v4.1.30"
+    ],
+    "std": [
+     "go1.27.1"
+    ]
+   },
+   "variant": {
+    "block_size": "4194304",
+    "cgo": "true",
+    "corpus_hash": "8d8f6ec144067f08",
+    "goamd64": "v1",
+    "goarch": "amd64",
+    "gogc": "100",
+    "gomemlimit": "0",
+    "goos": "windows",
+    "numcpu": "32",
+    "src_threads": "16"
+   },
+   "n_encode": 35,
+   "n_decode": 63,
+   "merges": 0,
+   "created": "2026-09-24T08:41:15Z",
+   "updated": "2026-09-24T08:41:15Z"
+  },
+  {
+   "id": "1qhqu6kb3f2f5-2wwj3uxq78v63",
+   "file": "runs/rawstudio-1qhqu6kb3f2f5-2wwj3uxq78v63.json",
+   "corpus": "rawstudio",
+   "kind": "file",
+   "machine": "1omrle93",
+   "go": "go1.27.1",
+   "goos": "windows",
+   "goarch": "amd64",
+   "goamd64": "v1",
+   "bench": "1",
+   "threads": [
+    1
+   ],
+   "codecs": [
+    "br",
+    "br2",
+    "bz2",
+    "bz2std",
+    "gzkp",
+    "gzstd",
+    "lz4",
+    "minlz",
+    "pgzip",
+    "s2",
+    "s2sn",
+    "snappy",
+    "stdzstd",
+    "zskp"
+   ],
+   "libs": {
+    "github.com/andybalholm/brotli": [
+     "v1.2.4"
+    ],
+    "github.com/dsnet/compress": [
+     "v0.0.1"
+    ],
+    "github.com/golang/snappy": [
+     "v1.0.0"
+    ],
+    "github.com/klauspost/compress": [
+     "v1.20.0",
+     "v1.20.1"
+    ],
+    "github.com/klauspost/pgzip": [
+     "v1.2.6"
+    ],
+    "github.com/klauspost/stdgozstd": [
+     "v0.0.0-20260722174150-eb4821197265"
+    ],
+    "github.com/minio/minlz": [
+     "v1.2.0"
+    ],
+    "github.com/pierrec/lz4/v4": [
+     "v4.1.30"
+    ],
+    "std": [
+     "go1.27.1"
+    ]
+   },
+   "variant": {
+    "block_size": "4194304",
+    "cgo": "true",
+    "corpus_hash": "8d8f6ec144067f08",
+    "goamd64": "v1",
+    "goarch": "amd64",
+    "gogc": "100",
+    "gomemlimit": "0",
+    "goos": "windows",
+    "numcpu": "32",
+    "src_threads": "1"
+   },
+   "n_encode": 69,
+   "n_decode": 145,
+   "merges": 1,
+   "created": "2026-09-27T16:38:44Z",
+   "updated": "2026-09-28T02:53:09Z"
+  },
+  {
+   "id": "pmfhpd6gt3ov",
+   "file": "runs/reddit-pmfhpd6gt3ov.json",
+   "corpus": "reddit",
+   "kind": "file",
+   "machine": "1omrle93",
+   "go": "go1.27.1",
+   "goos": "windows",
+   "goarch": "amd64",
+   "goamd64": "v1",
+   "bench": "1",
+   "threads": [
+    1
+   ],
+   "codecs": [
+    "br",
+    "br2",
+    "bz2",
+    "bz2std",
+    "gzkp",
+    "gzstd",
+    "lz4",
+    "minlz",
+    "pgzip",
+    "s2",
+    "s2sn",
+    "snappy",
+    "stdzstd",
+    "zskp"
+   ],
+   "libs": {
+    "github.com/andybalholm/brotli": [
+     "v1.2.4"
+    ],
+    "github.com/dsnet/compress": [
+     "v0.0.1"
+    ],
+    "github.com/golang/snappy": [
+     "v1.0.0"
+    ],
+    "github.com/klauspost/compress": [
+     "v1.20.0",
+     "v1.20.1"
+    ],
+    "github.com/klauspost/pgzip": [
+     "v1.2.6"
+    ],
+    "github.com/klauspost/stdgozstd": [
+     "v0.0.0-20260722174150-eb4821197265"
+    ],
+    "github.com/minio/minlz": [
+     "v1.2.0"
+    ],
+    "github.com/pierrec/lz4/v4": [
+     "v4.1.30"
+    ],
+    "std": [
+     "go1.27.1"
+    ]
+   },
+   "variant": {
+    "block_size": "4194304",
+    "cgo": "true",
+    "corpus_hash": "a18d5c4b04075c98",
+    "goamd64": "v1",
+    "goarch": "amd64",
+    "gogc": "100",
+    "gomemlimit": "0",
+    "goos": "windows",
+    "numcpu": "32",
+    "src_threads": "1"
+   },
+   "n_encode": 79,
+   "n_decode": 145,
+   "merges": 3,
+   "created": "2026-09-23T14:42:37Z",
+   "updated": "2026-09-27T18:59:43Z"
+  },
+  {
+   "id": "pmfhpd6gt3ov-3ty9cwuw0rgva",
+   "file": "runs/reddit-pmfhpd6gt3ov-3ty9cwuw0rgva.json",
+   "corpus": "reddit",
+   "kind": "file",
+   "machine": "1omrle93",
+   "go": "go1.27.1",
+   "goos": "windows",
+   "goarch": "amd64",
+   "goamd64": "v1",
+   "bench": "1",
+   "threads": [
+    16
+   ],
+   "codecs": [
+    "gzkp",
+    "gzstd",
+    "lz4",
+    "minlz",
+    "pgzip",
+    "s2",
+    "s2s",
+    "s2sn",
+    "snappy",
+    "stdzstd",
+    "zskp"
+   ],
+   "libs": {
+    "github.com/golang/snappy": [
+     "v1.0.0"
+    ],
+    "github.com/klauspost/compress": [
+     "v1.20.0"
+    ],
+    "github.com/klauspost/pgzip": [
+     "v1.2.6"
+    ],
+    "github.com/klauspost/stdgozstd": [
+     "v0.0.0-20260722174150-eb4821197265"
+    ],
+    "github.com/minio/minlz": [
+     "v1.2.0"
+    ],
+    "github.com/pierrec/lz4/v4": [
+     "v4.1.30"
+    ],
+    "std": [
+     "go1.27.1"
+    ]
+   },
+   "variant": {
+    "block_size": "4194304",
+    "cgo": "true",
+    "corpus_hash": "a18d5c4b04075c98",
+    "goamd64": "v1",
+    "goarch": "amd64",
+    "gogc": "100",
+    "gomemlimit": "0",
+    "goos": "windows",
+    "numcpu": "32",
+    "src_threads": "16"
+   },
+   "n_encode": 35,
+   "n_decode": 63,
+   "merges": 0,
+   "created": "2026-09-23T16:06:16Z",
+   "updated": "2026-09-23T16:06:16Z"
+  },
+  {
+   "id": "2knsx6y0c5dgn",
+   "file": "runs/sofia-air-2knsx6y0c5dgn.json",
+   "corpus": "sofia-air",
+   "kind": "file",
+   "machine": "1omrle93",
+   "go": "go1.27.1",
+   "goos": "windows",
+   "goarch": "amd64",
+   "goamd64": "v1",
+   "bench": "1",
+   "threads": [
+    16
+   ],
+   "codecs": [
+    "gzkp",
+    "gzstd",
+    "lz4",
+    "minlz",
+    "pgzip",
+    "s2",
+    "s2s",
+    "s2sn",
+    "snappy",
+    "stdzstd",
+    "zskp"
+   ],
+   "libs": {
+    "github.com/golang/snappy": [
+     "v1.0.0"
+    ],
+    "github.com/klauspost/compress": [
+     "v1.20.0"
+    ],
+    "github.com/klauspost/pgzip": [
+     "v1.2.6"
+    ],
+    "github.com/klauspost/stdgozstd": [
+     "v0.0.0-20260722174150-eb4821197265"
+    ],
+    "github.com/minio/minlz": [
+     "v1.2.0"
+    ],
+    "github.com/pierrec/lz4/v4": [
+     "v4.1.30"
+    ],
+    "std": [
+     "go1.27.1"
+    ]
+   },
+   "variant": {
+    "block_size": "4194304",
+    "cgo": "true",
+    "corpus_hash": "70ca62df9462f8d2",
+    "goamd64": "v1",
+    "goarch": "amd64",
+    "gogc": "100",
+    "gomemlimit": "0",
+    "goos": "windows",
+    "numcpu": "32",
+    "src_threads": "16"
+   },
+   "n_encode": 35,
+   "n_decode": 63,
+   "merges": 0,
+   "created": "2026-09-24T12:18:45Z",
+   "updated": "2026-09-24T12:18:45Z"
+  },
+  {
+   "id": "1p8j9eynjji8r",
+   "file": "runs/stacktrace-1p8j9eynjji8r.json",
+   "corpus": "stacktrace",
+   "kind": "file",
+   "machine": "1omrle93",
+   "go": "go1.26.1",
+   "goos": "windows",
+   "goarch": "amd64",
+   "goamd64": "v4",
+   "bench": "1",
+   "threads": [
+    1,
+    4,
+    16
+   ],
+   "codecs": [
+    "br",
+    "gzkp",
+    "gzstd",
+    "lz4",
+    "minlz",
+    "pgzip",
+    "s2",
+    "s2sn",
+    "snappy",
+    "stdzstd",
+    "zskp"
+   ],
+   "libs": {
+    "github.com/andybalholm/brotli": [
+     "v1.2.4"
+    ],
+    "github.com/golang/snappy": [
+     "v1.0.0"
+    ],
+    "github.com/klauspost/compress": [
+     "v1.20.0"
+    ],
+    "github.com/klauspost/pgzip": [
+     "v1.2.6"
+    ],
+    "github.com/klauspost/stdgozstd": [
+     "v0.0.0-20260722174150-eb4821197265"
+    ],
+    "github.com/minio/minlz": [
+     "v1.2.0"
+    ],
+    "github.com/pierrec/lz4/v4": [
+     "v4.1.30"
+    ],
+    "std": [
+     "go1.26.1"
+    ]
+   },
+   "n_encode": 171,
+   "n_decode": 336,
+   "merges": 1,
+   "created": "2026-09-22T15:21:57Z",
+   "updated": "2026-09-22T16:08:39Z"
+  }
+ ]
+}

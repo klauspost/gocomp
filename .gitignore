@@ -1,0 +1,19 @@
+# Corpus cache: tens of gigabytes of downloaded test data.
+/testdata/
+
+# Built binaries.
+/compress-site
+/compress-site.exe
+/cs.exe
+*.exe~
+
+# Task's fingerprint store and goreleaser output.
+/.task/
+/dist/
+
+# Editors.
+/.idea/
+/.vscode/
+
+# Working notes, deliberately kept out of the repo.
+/_IMPLEMENTATION.md

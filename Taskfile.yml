@@ -1,0 +1,90 @@
+version: "3"
+
+# Everything is driven through the module's own tool directives, so a checkout
+# plus "go tool task" is the complete setup: no separate install step, and the
+# linter version is pinned in go.mod like any other dependency.
+
+vars:
+  BIN: compress-site{{if eq OS "windows"}}.exe{{end}}
+
+tasks:
+  default:
+    cmds:
+      - task --list-all
+
+  build:
+    desc: Build the compress-site binary
+    cmds:
+      - go build -o {{.BIN}} .
+
+  test:
+    desc: Run all tests, including the Conc declaration probe
+    cmds:
+      - go test ./... -count=1 -parallel 4
+
+  test:race:
+    desc: Run all tests under the race detector
+    cmds:
+      # The Conc probe compares wall times, which the race detector makes
+      # meaningless. -parallel 4 keeps the sanitizer's shadow memory in bounds
+      # while brotli-11 and xz subtests run side by side.
+      - go test ./... -count=1 -race -parallel 4 -skip TestConcurrencyDeclarations
+
+  lint:
+    desc: Vet and lint without changing anything
+    cmds:
+      - go vet ./...
+      - go tool golangci-lint run
+
+  lint:fix:
+    desc: Lint and apply the fixes it can make
+    cmds:
+      - go vet ./...
+      - go tool golangci-lint run --fix
+
+  fmt:
+    desc: Format the tree with gofumpt
+    cmds:
+      - go tool gofumpt -l -w .
+
+  tui:
+    desc: Interactive selection (needs a terminal)
+    deps: [build]
+    interactive: true
+    cmds:
+      - ./{{.BIN}} {{.CLI_ARGS}}
+
+  bench:
+    desc: 'Run benchmarks into web/data; pass flags after --, e.g. task bench -- -corpus=enwik8'
+    deps: [build]
+    cmds:
+      - ./{{.BIN}} run {{.CLI_ARGS}}
+
+  validate:
+    desc: Round-trip integrity check with xxh3; writes nothing
+    deps: [build]
+    cmds:
+      - ./{{.BIN}} validate {{.CLI_ARGS}}
+
+  serve:
+    desc: Serve web/ so the site loads as ES modules
+    deps: [build]
+    cmds:
+      - ./{{.BIN}} serve {{.CLI_ARGS}}
+
+  check:
+    desc: What CI runs
+    cmds:
+      - task: lint
+      - task: test:race
+      - task: build
+
+  snapshot:
+    desc: Build the release archives locally (needs goreleaser >= v2.6 on PATH)
+    cmds:
+      - goreleaser release --snapshot --clean --skip=publish
+
+  clean:
+    desc: Remove build artifacts
+    cmds:
+      - rm -rf compress-site compress-site.exe cs.exe dist/
