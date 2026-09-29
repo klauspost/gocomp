@@ -39,6 +39,7 @@ type Engine struct {
 	results []Result
 	done    int
 	total   int
+	decoded []bool // by variant index: decode already ran off the encode output
 }
 
 func (e *Engine) emit(ev Event) {
@@ -58,6 +59,7 @@ func (e *Engine) emit(ev Event) {
 func (e *Engine) Run(ctx context.Context) ([]Result, error) {
 	enc, dec := Plan(e.Cfg, e.Data.Kind, e.Variants)
 	e.total = enc + dec
+	e.decoded = make([]bool, len(e.Variants))
 
 	prev := runtime.GOMAXPROCS(0)
 	defer runtime.GOMAXPROCS(prev)
@@ -85,9 +87,28 @@ func keep(dst *[]byte, out []byte) {
 }
 
 type encJob struct {
-	v   Variant
-	enc codec.Encoder
-	out int64
+	v      Variant
+	vi     int // index into Engine.Variants
+	enc    codec.Encoder
+	out    int64
+	last   []byte // the latest pass's output
+	source bool   // its output is this variant's decode input
+}
+
+// sourceGroup is the encode thread count whose output is exactly what
+// compressFor would produce for v: the one at SrcThreads, or -- for a codec that
+// declares no concurrency, and so encodes the same bytes at any thread count --
+// the last group it runs in, when SrcThreads is not among them.
+func (e *Engine) sourceGroup(v Variant) (int, bool) {
+	conc := v.Enc.Concurrent(e.Data.Kind)
+	ts := e.Cfg.ThreadsFor(conc)
+	switch {
+	case containsInt(ts, e.Cfg.SrcThreads):
+		return e.Cfg.SrcThreads, true
+	case !conc && len(ts) > 0:
+		return ts[len(ts)-1], true
+	}
+	return 0, false
 }
 
 func (e *Engine) runEncode(ctx context.Context) error {
@@ -96,7 +117,7 @@ func (e *Engine) runEncode(ctx context.Context) error {
 
 	for _, t := range e.Cfg.Threads {
 		var jobs []*encJob
-		for _, v := range e.Variants {
+		for vi, v := range e.Variants {
 			if !containsInt(e.Cfg.ThreadsFor(v.Enc.Concurrent(kind)), t) {
 				continue
 			}
@@ -106,7 +127,12 @@ func (e *Engine) runEncode(ctx context.Context) error {
 				e.total-- // Plan counted it; it will never run, so 100% must not require it
 				continue
 			}
-			jobs = append(jobs, &encJob{v: v, enc: enc})
+			// A directory's output is overwritten file by file, so the whole
+			// compressed corpus never exists during an encode pass.
+			g, ok := e.sourceGroup(v)
+			src := e.Cfg.Decode && kind == corpus.KindFile && ok && g == t &&
+				len(e.Cfg.DecodersOf(v, kind, e.Variants)) > 0
+			jobs = append(jobs, &encJob{v: v, vi: vi, enc: enc, source: src})
 		}
 		if len(jobs) == 0 {
 			continue
@@ -126,12 +152,30 @@ func (e *Engine) runEncode(ctx context.Context) error {
 		st, err := e.roundRobin(ctx, len(jobs), func(i int) (time.Duration, error) {
 			j := jobs[i]
 			e.emit(Event{Kind: "job", Phase: "encode", Label: j.v.Label(), Msg: threadLabel(t)})
-			d, n, err := e.encodeOnce(j.enc, &dst)
-			j.out = n
+			d, out, n, err := e.encodeOnce(j.enc, &dst)
+			j.out, j.last = n, out
 			return d, err
 		}, func(i int, a agg) {
 			r := e.encResult(jobs[i], t, a)
 			e.emit(Event{Kind: "pass", Result: &r})
+		}, func(i int) {
+			// Its last pass has just landed, and the next job's pass would
+			// overwrite it: decoding it now, straight out of the encode buffer,
+			// is what saves encoding it again for the decode phase.
+			j := jobs[i]
+			if !j.source {
+				return
+			}
+			j.enc.Release()
+			j.enc = nil
+			e.decoded[j.vi] = true
+			comp := &compressed{file: j.last, total: int64(len(j.last)), verified: -1}
+			e.emit(Event{Kind: "phase", Phase: "decode"})
+			_ = e.decodeSource(ctx, j.v, comp) // cancellation surfaces at the next pass
+			comp.release()
+			j.last = nil
+			runtime.GOMAXPROCS(t) // each decode job set its own
+			e.emit(Event{Kind: "phase", Phase: "encode"})
 		})
 		for i, j := range jobs {
 			switch a := st[i]; {
@@ -140,7 +184,10 @@ func (e *Engine) runEncode(ctx context.Context) error {
 			case a.n > 0:
 				e.record(e.encResult(j, t, a))
 			}
-			j.enc.Release()
+			if j.enc != nil {
+				j.enc.Release()
+			}
+			j.last = nil
 		}
 		dst = nil
 		runtime.GC()
@@ -152,8 +199,9 @@ func (e *Engine) runEncode(ctx context.Context) error {
 }
 
 // encodeOnce is the timed region. GC runs immediately before the clock starts
-// and never inside it.
-func (e *Engine) encodeOnce(enc codec.Encoder, dst *[]byte) (time.Duration, int64, error) {
+// and never inside it. For a single file it also returns the output, which
+// stays valid until the next pass writes into the same buffer.
+func (e *Engine) encodeOnce(enc codec.Encoder, dst *[]byte) (time.Duration, []byte, int64, error) {
 	d := e.Data
 	if d.Kind == corpus.KindFile {
 		runtime.GC()
@@ -161,10 +209,10 @@ func (e *Engine) encodeOnce(enc codec.Encoder, dst *[]byte) (time.Duration, int6
 		out, err := enc.Encode(*dst, d.File)
 		el := time.Since(start)
 		if err != nil {
-			return 0, 0, err
+			return 0, nil, 0, err
 		}
 		keep(dst, out)
-		return el, int64(len(out)), nil
+		return el, out, int64(len(out)), nil
 	}
 	var n int64
 	runtime.GC()
@@ -172,12 +220,12 @@ func (e *Engine) encodeOnce(enc codec.Encoder, dst *[]byte) (time.Duration, int6
 	for i := range d.Files {
 		out, err := enc.Encode(*dst, d.Files[i].Data)
 		if err != nil {
-			return 0, 0, fmt.Errorf("%s: %w", d.Files[i].Name, err)
+			return 0, nil, 0, fmt.Errorf("%s: %w", d.Files[i].Name, err)
 		}
 		n += int64(len(out))
 		keep(dst, out)
 	}
-	return time.Since(start), n, nil
+	return time.Since(start), nil, n, nil
 }
 
 type decJob struct {
@@ -187,21 +235,24 @@ type decJob struct {
 	out  int64
 }
 
-// runDecode walks one source variant at a time: the compressed bytes are
-// produced once, every decoder is timed against them, then they are released
-// before the next variant. Holding every variant's output at once would be tens
-// of gigabytes on a large corpus.
+// runDecode walks the source variants encoding did not already decode, one at
+// a time: the compressed bytes are produced once, every decoder is timed
+// against them, then they are released before the next variant. Holding every
+// variant's output at once would be tens of gigabytes on a large corpus.
 func (e *Engine) runDecode(ctx context.Context) error {
-	e.emit(Event{Kind: "phase", Phase: "decode"})
 	kind := e.Data.Kind
-
-	for _, v := range e.Variants {
-		decs := codec.DecodersFor(v.Enc.Format, kind)
-		if len(decs) == 0 {
+	phased := false
+	for vi, v := range e.Variants {
+		decs := e.Cfg.DecodersOf(v, kind, e.Variants)
+		if len(decs) == 0 || e.decoded[vi] {
 			continue
 		}
 		if err := ctx.Err(); err != nil {
 			return err
+		}
+		if !phased {
+			e.emit(Event{Kind: "phase", Phase: "decode"})
+			phased = true
 		}
 
 		e.emit(Event{Kind: "job", Phase: "decode", Label: v.Label(), Msg: "preparing input"})
@@ -215,59 +266,67 @@ func (e *Engine) runDecode(ctx context.Context) error {
 			}
 			continue
 		}
-		if e.Cfg.Validate {
-			// Recorded as a result, not just an event: the CLI has no event
-			// channel, and a silent integrity failure defeats the whole mode.
-			if err := e.validate(v, comp, decs); err != nil {
-				e.fail(OpDecode, "", v.ID(), v.Level.N, v.Window, e.Cfg.SrcThreads, v.Enc.Module, err)
-			}
-		}
-
-		var jobs []*decJob
-		for _, d := range decs {
-			for _, t := range e.Cfg.ThreadsFor(d.Concurrent(kind)) {
-				inst, err := d.New(e.opts(t, 0))
-				if err != nil {
-					e.fail(OpDecode, d.ID, v.ID(), v.Level.N, v.Window, t, d.Module, err)
-					e.total--
-					continue
-				}
-				jobs = append(jobs, &decJob{dec: d, inst: inst, t: t})
-			}
-		}
-
-		// The headroom matters: appender.ReadFrom grows when fewer than 64KB
-		// remain, which on an exactly-sized buffer means a realloc and a full
-		// memcpy inside the timed region.
-		dst := make([]byte, 0, e.Data.Max+64<<10)
-		st, err := e.roundRobin(ctx, len(jobs), func(i int) (time.Duration, error) {
-			j := jobs[i]
-			runtime.GOMAXPROCS(j.t)
-			e.emit(Event{Kind: "job", Phase: "decode", Label: j.dec.ID + " <- " + v.Label(), Msg: threadLabel(j.t)})
-			d, n, err := e.decodeOnce(j.inst, comp, &dst)
-			j.out = n
-			return d, err
-		}, func(i int, a agg) {
-			r := decResult(jobs[i], v, comp, a)
-			e.emit(Event{Kind: "pass", Result: &r})
-		})
-		for i, j := range jobs {
-			switch a := st[i]; {
-			case a.err != nil:
-				e.fail(OpDecode, j.dec.ID, v.ID(), v.Level.N, v.Window, j.t, j.dec.Module, a.err)
-			case a.n > 0:
-				e.record(decResult(j, v, comp, a))
-			}
-			j.inst.Release()
-		}
+		err = e.decodeSource(ctx, v, comp)
 		comp.release()
-		dst = nil
 		runtime.GC()
 		if err != nil {
 			return err
 		}
 	}
 	return nil
+}
+
+// decodeSource times v's decoders against comp, which the caller owns and
+// releases.
+func (e *Engine) decodeSource(ctx context.Context, v Variant, comp *compressed) error {
+	kind := e.Data.Kind
+	decs := e.Cfg.DecodersOf(v, kind, e.Variants)
+	if e.Cfg.Validate {
+		// Recorded as a result, not just an event: the CLI has no event
+		// channel, and a silent integrity failure defeats the whole mode.
+		if err := e.validate(v, comp, decs); err != nil {
+			e.fail(OpDecode, "", v.ID(), v.Level.N, v.Window, e.Cfg.SrcThreads, v.Enc.Module, err)
+		}
+	}
+
+	var jobs []*decJob
+	for _, d := range decs {
+		for _, t := range e.Cfg.ThreadsFor(d.Concurrent(kind)) {
+			inst, err := d.New(e.opts(t, 0))
+			if err != nil {
+				e.fail(OpDecode, d.ID, v.ID(), v.Level.N, v.Window, t, d.Module, err)
+				e.total--
+				continue
+			}
+			jobs = append(jobs, &decJob{dec: d, inst: inst, t: t})
+		}
+	}
+
+	// The headroom matters: appender.ReadFrom grows when fewer than 64KB
+	// remain, which on an exactly-sized buffer means a realloc and a full
+	// memcpy inside the timed region.
+	dst := make([]byte, 0, e.Data.Max+64<<10)
+	st, err := e.roundRobin(ctx, len(jobs), func(i int) (time.Duration, error) {
+		j := jobs[i]
+		runtime.GOMAXPROCS(j.t)
+		e.emit(Event{Kind: "job", Phase: "decode", Label: j.dec.ID + " <- " + v.Label(), Msg: threadLabel(j.t)})
+		d, n, err := e.decodeOnce(j.inst, comp, &dst)
+		j.out = n
+		return d, err
+	}, func(i int, a agg) {
+		r := decResult(jobs[i], v, comp, a)
+		e.emit(Event{Kind: "pass", Result: &r})
+	}, nil)
+	for i, j := range jobs {
+		switch a := st[i]; {
+		case a.err != nil:
+			e.fail(OpDecode, j.dec.ID, v.ID(), v.Level.N, v.Window, j.t, j.dec.Module, a.err)
+		case a.n > 0:
+			e.record(decResult(j, v, comp, a))
+		}
+		j.inst.Release()
+	}
+	return err
 }
 
 func (e *Engine) decodeOnce(dec codec.Decoder, c *compressed, dst *[]byte) (time.Duration, int64, error) {
@@ -308,9 +367,26 @@ func (e *Engine) decodeOnce(dec codec.Decoder, c *compressed, dst *[]byte) (time
 // stretch, because round-robin finishes a whole group at once. Part-finished
 // measurements therefore earn partial credit, scaled back to whole
 // measurements so done and total stay comparable across groups.
-func (e *Engine) roundRobin(ctx context.Context, n int, run func(int) (time.Duration, error), onPass func(int, agg)) ([]agg, error) {
+//
+// onDone, when set, is called once for each job the moment it reaches its
+// target, before any other job runs again. It may run a whole group of its own;
+// the progress that group makes is carried in shift, so this group neither
+// counts it as its own nor takes it back at its boundary.
+func (e *Engine) roundRobin(ctx context.Context, n int, run func(int) (time.Duration, error),
+	onPass func(int, agg), onDone func(int),
+) ([]agg, error) {
 	st := make([]agg, n)
 	base := e.done
+	shift := 0
+
+	finished := func(i int) {
+		if onDone == nil || st[i].n < st[i].target {
+			return
+		}
+		before := e.done
+		onDone(i)
+		shift += e.done - before
+	}
 
 	report := func() {
 		var have, want float64
@@ -329,7 +405,7 @@ func (e *Engine) roundRobin(ctx context.Context, n int, run func(int) (time.Dura
 		if want > 0 {
 			// Never backwards: a first pass can raise a target well above the
 			// assumed minimum, which would otherwise shrink the fraction.
-			e.done = max(e.done, base+int(float64(n)*have/want))
+			e.done = max(e.done, base+shift+int(float64(n)*have/want))
 		}
 	}
 
@@ -347,6 +423,7 @@ func (e *Engine) roundRobin(ctx context.Context, n int, run func(int) (time.Dura
 		st[i].target = passesFor(d, e.Cfg)
 		report()
 		onPass(i, st[i])
+		finished(i)
 	}
 	for {
 		more := false
@@ -366,10 +443,11 @@ func (e *Engine) roundRobin(ctx context.Context, n int, run func(int) (time.Dura
 			st[i].add(d)
 			report()
 			onPass(i, st[i])
+			finished(i)
 			more = true
 		}
 		if !more {
-			e.done = base + n // exact at the boundary, whatever the estimate did
+			e.done = base + shift + n // exact at the boundary, whatever the estimate did
 			return st, nil
 		}
 	}

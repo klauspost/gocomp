@@ -316,8 +316,12 @@ func (m *Model) codecView() string {
 		}
 		lines = append(lines, text)
 	}
-	head := dimStyle.Render(fmt.Sprintf("  decoders are derived: every selected encoder is decoded by every implementation of its format%s",
-		map[bool]string{true: " · slow shown", false: ""}[m.slow]))
+	decs := "its own implementation and every other selected codec of its format"
+	if m.cfg.AllDecoders {
+		decs = "every implementation of its format"
+	}
+	head := dimStyle.Render(fmt.Sprintf("  decoders follow the selection: each encoder is decoded by %s%s",
+		decs, map[bool]string{true: " · slow shown", false: ""}[m.slow]))
 	return head + "\n" + strings.Join(window(lines, m.eCur, m.bodyHeight()-1), "\n")
 }
 
@@ -332,14 +336,15 @@ type field struct {
 	buf    string
 }
 
-func (m *Model) buildFields() {
-	ints := func(v []int) string {
-		var s []string
-		for _, n := range v {
-			s = append(s, strconv.Itoa(n))
-		}
-		return strings.Join(s, ",")
+func ints(v []int) string {
+	var s []string
+	for _, n := range v {
+		s = append(s, strconv.Itoa(n))
 	}
+	return strings.Join(s, ",")
+}
+
+func (m *Model) buildFields() {
 	m.fields = []*field{
 		{
 			label: "threads (-cpu)", kind: "text",
@@ -409,6 +414,11 @@ func (m *Model) buildFields() {
 			label: "collapse non-concurrent codecs to one thread count", kind: "bool",
 			get:    func() string { return check(m.cfg.Collapse) },
 			toggle: func() { m.cfg.Collapse = !m.cfg.Collapse },
+		},
+		{
+			label: "decode with every decoder of the format", kind: "bool",
+			get:    func() string { return check(m.cfg.AllDecoders) },
+			toggle: func() { m.cfg.AllDecoders = !m.cfg.AllDecoders },
 		},
 	}
 }

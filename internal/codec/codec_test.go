@@ -172,6 +172,15 @@ func TestIDsAndLevels(t *testing.T) {
 		if d.Module == "" || d.Format == "" || d.Kinds == 0 {
 			t.Errorf("decoder %s: incomplete registration", d.ID)
 		}
+		// A run brings a decoder in through the encoders it selects, so one
+		// no encoder can name would be unreachable outside -decoders=all.
+		_, own := LookupEnc(d.ID)
+		switch w, ok := LookupEnc(d.With); {
+		case own && d.With != "":
+			t.Errorf("decoder %s: With is only for decoders no encoder shares an ID with", d.ID)
+		case !own && (!ok || w.Format != d.Format):
+			t.Errorf("decoder %s: shares no encoder's ID, so With must name an encoder of format %s", d.ID, d.Format)
+		}
 	}
 }
 

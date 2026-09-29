@@ -58,8 +58,11 @@ type Config struct {
 	Windows    []int         // the window sweep; 0 is each codec's default
 	Validate   bool
 	Collapse   bool // run codecs that declare no concurrency at one thread value
-	Encode     bool
-	Decode     bool
+	// AllDecoders times every decoder of a format against every selected
+	// encoder's output, instead of only the decoders the selection names.
+	AllDecoders bool
+	Encode      bool
+	Decode      bool
 }
 
 // DefaultConfig is the starting point for both the CLI and the TUI.
@@ -175,10 +178,35 @@ func Plan(cfg Config, kind corpus.Kind, variants []Variant) (encode, decode int)
 			encode += len(cfg.ThreadsFor(v.Enc.Concurrent(kind)))
 		}
 		if cfg.Decode {
-			for _, d := range codec.DecodersFor(v.Enc.Format, kind) {
+			for _, d := range cfg.DecodersOf(v, kind, variants) {
 				decode += len(cfg.ThreadsFor(d.Concurrent(kind)))
 			}
 		}
 	}
 	return encode, decode
+}
+
+// DecodersOf lists the decoders timed against v's output, vs being the whole
+// selection. Every decoder of the format with AllDecoders; otherwise the ones
+// the selection names: v's own implementation always reads it -- br2's output
+// is read by br -- and so does every decoder whose codec is selected too, or
+// the codec it declares With when it has no encoder of its own. Selecting a
+// codec is saying it is being compared, so it is compared as a decoder too.
+func (c Config) DecodersOf(v Variant, kind corpus.Kind, vs []Variant) []codec.Dec {
+	var out []codec.Dec
+	for _, d := range codec.DecodersFor(v.Enc.Format, kind) {
+		if c.AllDecoders || d.Impl == v.Enc.Impl || selected(vs, d.ID) || (d.With != "" && selected(vs, d.With)) {
+			out = append(out, d)
+		}
+	}
+	return out
+}
+
+func selected(vs []Variant, id string) bool {
+	for _, v := range vs {
+		if v.Enc.ID == id {
+			return true
+		}
+	}
+	return false
 }

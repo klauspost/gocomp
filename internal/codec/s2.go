@@ -93,7 +93,7 @@ func init() {
 	})
 	RegisterDec(Dec{
 		ID: "s2sn", Name: "S2 reading snappy", Impl: "klauspost/compress", Format: FmtSnappy,
-		Module: kpCompress, Kinds: bothKinds, Conc: corpus.KindFile,
+		Module: kpCompress, Kinds: bothKinds, Conc: corpus.KindFile, With: "s2s",
 		New: func(o Opts) (Decoder, error) {
 			r := s2.NewReader(nil)
 			return &streamDec{rst: nopReset(r.Reset), fn: s2Decode(r, o)}, nil

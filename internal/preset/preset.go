@@ -51,22 +51,23 @@ func (d *Dur) UnmarshalJSON(b []byte) error {
 // the corresponding default or command-line flag alone, so a three-line preset
 // that names two corpora is valid and useful.
 type Preset struct {
-	Name       string           `json:"-"` // the file name, without .json
-	Desc       string           `json:"desc,omitempty"`
-	Corpora    []string         `json:"corpora,omitempty"`
-	Codecs     map[string][]int `json:"codecs,omitempty"`
-	Threads    []int            `json:"threads,omitempty"`
-	SrcThreads int              `json:"src_threads,omitempty"`
-	Encode     bool             `json:"encode"`
-	Decode     bool             `json:"decode"`
-	Passes     int              `json:"passes,omitempty"`
-	MinWall    Dur              `json:"min_wall,omitempty"`
-	MaxPasses  int              `json:"max_passes,omitempty"`
-	MaxJob     Dur              `json:"max_job,omitempty"`
-	Windows    []string         `json:"windows,omitempty"` // -window items: "default", "64K"
-	Validate   bool             `json:"validate,omitempty"`
-	Collapse   bool             `json:"collapse,omitempty"`
-	Slow       bool             `json:"slow,omitempty"`
+	Name        string           `json:"-"` // the file name, without .json
+	Desc        string           `json:"desc,omitempty"`
+	Corpora     []string         `json:"corpora,omitempty"`
+	Codecs      map[string][]int `json:"codecs,omitempty"`
+	Threads     []int            `json:"threads,omitempty"`
+	SrcThreads  int              `json:"src_threads,omitempty"`
+	Encode      bool             `json:"encode"`
+	Decode      bool             `json:"decode"`
+	Passes      int              `json:"passes,omitempty"`
+	MinWall     Dur              `json:"min_wall,omitempty"`
+	MaxPasses   int              `json:"max_passes,omitempty"`
+	MaxJob      Dur              `json:"max_job,omitempty"`
+	Windows     []string         `json:"windows,omitempty"` // -window items: "default", "64K"
+	Validate    bool             `json:"validate,omitempty"`
+	Collapse    bool             `json:"collapse,omitempty"`
+	Slow        bool             `json:"slow,omitempty"`
+	AllDecoders bool             `json:"all_decoders,omitempty"` // -decoders=all
 }
 
 // CheckName rejects anything that would write outside the preset directory.
@@ -243,6 +244,9 @@ func (p Preset) Summary() string {
 	}
 	if p.Slow {
 		parts = append(parts, "slow")
+	}
+	if p.AllDecoders {
+		parts = append(parts, "all decoders")
 	}
 	return strings.Join(parts, " · ")
 }

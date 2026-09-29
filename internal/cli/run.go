@@ -33,6 +33,7 @@ type runOpts struct {
 	maxPass  int
 	maxJob   time.Duration
 	windows  string
+	decoders string
 	slow     bool
 	collapse bool
 	validate bool
@@ -54,6 +55,7 @@ func (o *runOpts) bind(fs *flag.FlagSet) {
 	fs.StringVar(&o.cpu, "cpu", "", "thread sweep, Go benchmark style: \"1,2,4,8\" or \"sweep\" (default NumCPU)")
 	fs.IntVar(&o.srcCPU, "src-threads", 0, "threads used to produce decode inputs (default NumCPU)")
 	fs.StringVar(&o.ops, "op", "encode,decode", "encode, decode or both")
+	fs.StringVar(&o.decoders, "decoders", "selected", "selected: each output is decoded by its own implementation and the other selected codecs; all: by every decoder of its format")
 	fs.IntVar(&o.passes, "passes", 3, "minimum passes per measurement")
 	fs.DurationVar(&o.minWall, "min", 2*time.Second, "adaptive target wall time per measurement")
 	fs.IntVar(&o.maxPass, "max-passes", 25, "cap on adaptive passes")
@@ -118,6 +120,9 @@ func (o *runOpts) loadPreset(fs *flag.FlagSet) error {
 	}
 	if s := p.WindowSpec(); s != "" {
 		o.windows = s
+	}
+	if p.AllDecoders {
+		o.decoders = "all"
 	}
 	o.validate, o.collapse, o.slow = p.Validate, p.Collapse, p.Slow
 
@@ -291,6 +296,13 @@ func (o runOpts) config() (bench.Config, error) {
 	cfg.Passes, cfg.MinWall, cfg.MaxPasses = o.passes, o.minWall, o.maxPass
 	cfg.MaxJob = o.maxJob
 	cfg.Validate, cfg.Collapse = o.validate, o.collapse
+	switch o.decoders {
+	case "selected":
+	case "all":
+		cfg.AllDecoders = true
+	default:
+		return cfg, fmt.Errorf("-decoders: want selected or all, not %q", o.decoders)
+	}
 	w, err := bench.ParseWindows(o.windows)
 	if err != nil {
 		return cfg, err

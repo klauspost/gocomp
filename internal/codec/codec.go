@@ -152,7 +152,11 @@ type Dec struct {
 	Kinds  corpus.Kind
 	Conc   corpus.Kind
 	Slow   bool
-	New    func(o Opts) (Decoder, error)
+	// With names the encoder whose selection brings this decoder into a run,
+	// for a decoder whose ID no encoder shares. Every other decoder is brought
+	// in by its own ID.
+	With string
+	New  func(o Opts) (Decoder, error)
 }
 
 // Concurrent reports whether threads matter for this encoder on kind.

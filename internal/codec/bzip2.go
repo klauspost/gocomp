@@ -61,7 +61,7 @@ func init() {
 	// which is the honest cost of the API rather than a flaw in the adapter.
 	RegisterDec(Dec{
 		ID: "bz2std", Name: "bzip2", Impl: "compress/bzip2", Format: FmtBzip2,
-		Module: "std", Kinds: bothKinds,
+		Module: "std", Kinds: bothKinds, With: "bz2",
 		New: func(o Opts) (Decoder, error) {
 			return blockFn{fn: func(dst, src []byte) ([]byte, error) {
 				a := appender{b: dst[:0]}

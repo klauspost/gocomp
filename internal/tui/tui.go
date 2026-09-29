@@ -108,7 +108,8 @@ type Model struct {
 	fCur    int
 	editing bool
 
-	pane *pane // the preset browser, nil unless open
+	pane *pane   // the preset browser, nil unless open
+	dbp  *dbPane // the database cleanup, nil unless open
 	run  *runState
 }
 
@@ -200,6 +201,13 @@ func (m *Model) key(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		}
 		return m, m.paneKey(msg)
 	}
+	if m.dbp != nil {
+		if s := msg.String(); s == "ctrl+c" || s == "q" {
+			m.save()
+			return m, tea.Quit
+		}
+		return m, m.dbKey(msg)
+	}
 	switch msg.String() {
 	case "ctrl+c", "q":
 		m.save()
@@ -209,6 +217,9 @@ func (m *Model) key(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			m.openPane()
 			return m, nil
 		}
+	case "D":
+		m.openDB()
+		return m, nil
 	case "tab", "right", "l":
 		if m.scr < scrOptions {
 			m.scr++
@@ -248,8 +259,12 @@ func (m *Model) View() string {
 	var b strings.Builder
 	b.WriteString(m.header())
 	b.WriteString("\n")
-	if m.pane != nil {
-		b.WriteString(m.paneView())
+	if m.pane != nil || m.dbp != nil {
+		if m.pane != nil {
+			b.WriteString(m.paneView())
+		} else {
+			b.WriteString(m.dbView())
+		}
 		b.WriteString("\n")
 		b.WriteString(m.footer())
 		return b.String()
@@ -327,15 +342,18 @@ func (m *Model) footer() string {
 		line += " · over budget"
 	}
 	help := map[screen]string{
-		scrCorpus:  "space select · t tier · a all · d download · p presets · tab next",
-		scrCodecs:  "space codec · enter levels · 1-4 quick picks · S slow · p presets · tab next",
-		scrOptions: "up/down field · enter edit · space toggle · p presets · R run",
+		scrCorpus:  "space select · t tier · a all · d download · p presets · D database · tab next",
+		scrCodecs:  "space codec · enter levels · 1-4 quick picks · S slow · p presets · D database · tab next",
+		scrOptions: "up/down field · enter edit · space toggle · p presets · D database · R run",
 		scrRun:     "ctrl+c cancel",
-		scrDone:    "r run the same selection again · e edit it · p presets · q quit",
+		scrDone:    "r run the same selection again · e edit it · p presets · D database · q quit",
 	}[m.scr]
-	if m.pane != nil {
+	switch {
+	case m.pane != nil:
 		help = m.paneHelp()
-	} else if m.note != "" {
+	case m.dbp != nil:
+		help = m.dbHelp()
+	case m.note != "":
 		help = m.note
 	}
 	return st.Render(line) + "\n" + dimStyle.Render(help)

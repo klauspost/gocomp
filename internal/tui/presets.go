@@ -213,6 +213,7 @@ func (m *Model) currentPreset() preset.Preset {
 		MinWall: preset.Dur(m.cfg.MinWall), MaxPasses: m.cfg.MaxPasses,
 		MaxJob:   preset.Dur(m.cfg.MaxJob),
 		Validate: m.cfg.Validate, Collapse: m.cfg.Collapse, Slow: m.slow,
+		AllDecoders: m.cfg.AllDecoders,
 	}
 	// Default alone is what an absent field means, so it is not spelled out.
 	if s := bench.WindowSpec(m.cfg.Windows); s != "" && s != "default" {
@@ -282,6 +283,7 @@ func (m *Model) applySaved(s preset.Preset) {
 		m.cfg.Encode, m.cfg.Decode = true, true
 	}
 	m.cfg.Validate, m.cfg.Collapse, m.slow = s.Validate, s.Collapse, s.Slow
+	m.cfg.AllDecoders = s.AllDecoders
 }
 
 func containsInt(s []int, v int) bool {

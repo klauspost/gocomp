@@ -129,6 +129,14 @@ numeric, so `zskp:1-4,s2,gzkp:1,5,9` is unambiguous. In a level list a leading
 `-` is a sign and any other `-` is a range, so `-2` is one level and `-3--1` is
 three.
 
+Decoders follow the codec selection. Each selected encoder's output is decoded
+by its own implementation (`br2`'s by `br`) and by every other selected codec
+of the same format, so `-codec=zskp` times one decoder and
+`-codec=zskp,stdzstd` has each decode both. The two readers with no encoder of
+their own come with the codec they belong to: the standard library's bzip2
+reader with `bz2`, S2's snappy-frame reader with `s2s`. `-decoders=all` decodes
+every output with every decoder of its format.
+
 Progress goes to stderr; one TSV row per measurement goes to stdout.
 
 ### Window sizes
@@ -233,6 +241,26 @@ next run with the same settings merges into that file rather than making a new
 one. The site lists them under **Settings** and plots them as separate lines,
 so two `-src-threads` values never average together. `-new-run` still forces a
 separate entry even when the run would have merged cleanly.
+
+### Cleaning up
+
+In the TUI, `D` opens the database from any selection screen. Tick runs with
+`space` (`a` ticks all), then choose what to delete from them:
+
+- a **codec**, by `space`: its own rows, meaning its encode rows and the decode
+  rows it decoded;
+- a codec **as source**, by `s`: the decode rows of its output, whichever
+  decoder read it;
+- a **library version**: every row measured with it, including decodes of
+  output it produced.
+
+`d` deletes the ticked rows from the ticked runs, and `X` deletes the ticked
+runs outright. Both show what they will remove and wait for `y`. A run left
+with no rows is removed, and so is a machine no run is left on. Beside each
+codec and library is the number of runs holding it: of the ticked runs, or of
+all runs while none is ticked. Runs are listed newest first.
+Each run is re-read from disk before it is written, so a merge
+made while the pane was open is kept. `web/data` is in git, which is the undo.
 
 ## The site
 
@@ -341,7 +369,9 @@ codec parallelises — so run it locally before trusting a new registration.
   measurement, and each library's own concurrency option is set to match.
 - Decode inputs are produced **once** at a fixed thread count (`-src-threads`),
   so the decode sweep measures decoder scaling rather than a changing block
-  layout.
+  layout. For a single-file corpus that input is the timed encode's own
+  output: a variant's decoders run against it the moment its last encode pass
+  at that thread count lands, so it is never encoded a second time.
 - Single-file and many-file corpora are separate: the first uses streaming APIs,
   the second block APIs with instance reuse, and they are never mixed in a chart.
 
