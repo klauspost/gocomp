@@ -46,7 +46,7 @@ func TestProgressReachesFullOnlyAtTheEnd(t *testing.T) {
 		Cfg: Config{
 			Threads: []int{1}, SrcThreads: 1, Passes: 3, MaxPasses: 8,
 			MinWall: 50 * time.Millisecond, MaxJob: time.Minute,
-			BlockSize: 64 << 10, Encode: true, Decode: true,
+			Encode: true, Decode: true,
 		},
 		Data: testData(t), Variants: testVariants(t), Events: events,
 	}
@@ -119,7 +119,7 @@ func TestTotalDropsMeasurementsThatCannotRun(t *testing.T) {
 		Cfg: Config{
 			Threads: []int{1}, SrcThreads: 1, Passes: 1, MaxPasses: 1,
 			MinWall: time.Millisecond, MaxJob: time.Minute,
-			BlockSize: 64 << 10, Encode: true, Decode: true,
+			Encode: true, Decode: true,
 		},
 		Data:     testData(t),
 		Variants: append(testVariants(t), Variant{Enc: broken, Level: broken.Levels[0]}),

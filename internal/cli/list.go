@@ -212,7 +212,16 @@ func cmdServe(args []string) error {
 		go openBrowser(url)
 	}
 	// ES modules will not load over file://, which is why this exists.
-	return http.Serve(ln, http.FileServer(http.Dir(*root)))
+	//
+	// no-cache makes the browser revalidate every file, a 304 when nothing
+	// changed. Without it, modules are cached heuristically and one at a time,
+	// so after an edit the page can load a new module against an old one that
+	// lacks the export it imports, and fail to start at all.
+	files := http.FileServer(http.Dir(*root))
+	return http.Serve(ln, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Cache-Control", "no-cache")
+		files.ServeHTTP(w, r)
+	}))
 }
 
 // browseURL builds an address a browser can actually use. It reads the bound

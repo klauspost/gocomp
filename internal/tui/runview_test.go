@@ -33,6 +33,29 @@ func TestRunViewNamesTheCorpus(t *testing.T) {
 	}
 }
 
+// A run over many corpora says how far through them it is, without the corpus
+// count leaking into the measurement progress bar.
+func TestRunViewCountsCorpora(t *testing.T) {
+	m := newTestModel(t)
+	m.scr = scrRun
+	m.run = &runState{events: make(chan bench.Event, 8), phase: "encode", done: 7, total: 40}
+
+	m.onEvent(bench.Event{Kind: "corpus", Corpus: "enwik9", Done: 2, Total: 12})
+	got := m.runView()
+	if !strings.Contains(got, "enwik9 (2/12) · encode") {
+		t.Errorf("run view does not count corpora:\n%s", got)
+	}
+	if m.run.done != 7 || m.run.total != 40 {
+		t.Errorf("corpus event moved the measurement progress to %d/%d", m.run.done, m.run.total)
+	}
+
+	// One corpus has nothing to count.
+	m.onEvent(bench.Event{Kind: "corpus", Corpus: "enwik9", Done: 1, Total: 1})
+	if got := m.runView(); strings.Contains(got, "(1/1)") {
+		t.Errorf("a single-corpus run shows a count:\n%s", got)
+	}
+}
+
 // Fetch progress arrives before there is an Engine, so it fills Corpus itself.
 func TestFetchProgressNamesTheCorpusOnce(t *testing.T) {
 	ch := make(chan bench.Event, 4)

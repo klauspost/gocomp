@@ -11,6 +11,16 @@ export function bytes(n) {
   return `${i === 0 ? v : v.toFixed(1)} ${u[i]}`;
 }
 
+// windowName spells a window the way the -window flag does. Binary, unlike
+// bytes(): every window is a power of two, and "65.5 kB" would hide that.
+export function windowName(n) {
+  if (!n) return 'default';
+  for (const [shift, unit] of [[30, 'G'], [20, 'M'], [10, 'K']]) {
+    if (n >= 2 ** shift && n % 2 ** shift === 0) return `${n / 2 ** shift}${unit}`;
+  }
+  return String(n);
+}
+
 export function ms(ns) {
   return (ns / 1e6).toFixed(3);
 }

@@ -8,11 +8,11 @@ import (
 )
 
 var minlzLevels = []Level{
-	{minlz.LevelSuperFast, "superfast", false},
-	{minlz.LevelUncompressed, "uncompressed", false},
-	{minlz.LevelFastest, "fastest", false},
-	{minlz.LevelBalanced, "balanced", false},
-	{minlz.LevelSmallest, "smallest", false},
+	{N: minlz.LevelSuperFast, Name: "superfast"},
+	{N: minlz.LevelUncompressed, Name: "uncompressed", Class: Uncompressed},
+	{N: minlz.LevelFastest, Name: "fastest"},
+	{N: minlz.LevelBalanced, Name: "balanced"},
+	{N: minlz.LevelSmallest, Name: "smallest"},
 }
 
 // mzBlkLevels drops only LevelUncompressed; the block API supports superfast.
@@ -22,7 +22,7 @@ func init() {
 	RegisterEnc(Enc{
 		ID: "minlz", Name: "MinLZ", Impl: "minio/minlz", Format: FmtMinLZ,
 		Module: "github.com/minio/minlz", Kinds: bothKinds, Conc: corpus.KindFile,
-		Levels: minlzLevels,
+		Levels: minlzLevels, Windows: pow2s(4<<10, minlz.MaxBlockSize),
 		New: func(lvl int, o Opts) (Encoder, error) {
 			opts := []minlz.WriterOption{minlz.WriterConcurrency(o.LibThreads(corpus.KindFile))}
 			if lvl == minlz.LevelUncompressed {
@@ -30,8 +30,8 @@ func init() {
 			} else {
 				opts = append(opts, minlz.WriterLevel(lvl))
 			}
-			if o.BlockSize > 0 {
-				opts = append(opts, minlz.WriterBlockSize(min(o.BlockSize, minlz.MaxBlockSize)))
+			if o.Window > 0 {
+				opts = append(opts, minlz.WriterBlockSize(o.Window))
 			}
 			w := minlz.NewWriter(nil, opts...)
 			return &streamEnc{rst: w.Reset, w: w, fast: w.EncodeBuffer, fin: w.Close}, nil

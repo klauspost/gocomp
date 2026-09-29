@@ -1,6 +1,6 @@
 {
- "schema": 1,
- "generated": "2026-09-28T02:53:09Z",
+ "schema": 2,
+ "generated": "2026-09-29T09:45:43Z",
  "formats": [
   {
    "id": "brotli",
@@ -273,15 +273,18 @@
     "levels": [
      {
       "n": -3,
-      "name": "stateless"
+      "name": "stateless",
+      "class": "special"
      },
      {
       "n": -2,
-      "name": "huffman"
+      "name": "huffman",
+      "class": "special"
      },
      {
       "n": 0,
-      "name": "store"
+      "name": "store",
+      "class": "uncompressed"
      },
      {
       "n": 1,
@@ -344,11 +347,13 @@
     "levels": [
      {
       "n": -2,
-      "name": "huffman"
+      "name": "huffman",
+      "class": "special"
      },
      {
       "n": 0,
-      "name": "store"
+      "name": "store",
+      "class": "uncompressed"
      },
      {
       "n": 1,
@@ -411,15 +416,18 @@
     "levels": [
      {
       "n": -3,
-      "name": "stateless"
+      "name": "stateless",
+      "class": "special"
      },
      {
       "n": -2,
-      "name": "huffman"
+      "name": "huffman",
+      "class": "special"
      },
      {
       "n": 0,
-      "name": "store"
+      "name": "store",
+      "class": "uncompressed"
      },
      {
       "n": 1,
@@ -482,11 +490,13 @@
     "levels": [
      {
       "n": -2,
-      "name": "huffman"
+      "name": "huffman",
+      "class": "special"
      },
      {
       "n": 0,
-      "name": "store"
+      "name": "store",
+      "class": "uncompressed"
      },
      {
       "n": 1,
@@ -551,11 +561,13 @@
     "levels": [
      {
       "n": -2,
-      "name": "huffman"
+      "name": "huffman",
+      "class": "special"
      },
      {
       "n": 0,
-      "name": "store"
+      "name": "store",
+      "class": "uncompressed"
      },
      {
       "n": 1,
@@ -717,7 +729,8 @@
      },
      {
       "n": 0,
-      "name": "uncompressed"
+      "name": "uncompressed",
+      "class": "uncompressed"
      },
      {
       "n": 1,
@@ -797,7 +810,8 @@
     "levels": [
      {
       "n": 0,
-      "name": "uncompressed"
+      "name": "uncompressed",
+      "class": "uncompressed"
      },
      {
       "n": 1,
@@ -873,7 +887,8 @@
     "levels": [
      {
       "n": 0,
-      "name": "uncompressed"
+      "name": "uncompressed",
+      "class": "uncompressed"
      },
      {
       "n": 1,
@@ -1035,7 +1050,8 @@
     "levels": [
      {
       "n": 0,
-      "name": "store"
+      "name": "store",
+      "class": "uncompressed"
      },
      {
       "n": 1,
@@ -1559,6 +1575,10 @@
    "threads": [
     16
    ],
+   "windows": [
+    0,
+    4194304
+   ],
    "codecs": [
     "gzkp",
     "gzstd",
@@ -1596,7 +1616,6 @@
     ]
    },
    "variant": {
-    "block_size": "4194304",
     "cgo": "true",
     "corpus_hash": "81783e7211385804",
     "goamd64": "v1",
@@ -1614,8 +1633,8 @@
    "updated": "2026-09-23T18:47:02Z"
   },
   {
-   "id": "1zmox5zrt1rsn-11axht97cej95",
-   "file": "runs/10gb-tar-1zmox5zrt1rsn-11axht97cej95.json",
+   "id": "1zmox5zrt1rsn-20kamtrkrbpwm",
+   "file": "runs/10gb-tar-1zmox5zrt1rsn-20kamtrkrbpwm.json",
    "corpus": "10gb-tar",
    "kind": "file",
    "machine": "1omrle93",
@@ -1626,6 +1645,10 @@
    "bench": "1",
    "threads": [
     1
+   ],
+   "windows": [
+    0,
+    4194304
    ],
    "codecs": [
     "br",
@@ -1674,7 +1697,6 @@
     ]
    },
    "variant": {
-    "block_size": "4194304",
     "cgo": "true",
     "corpus_hash": "81783e7211385804",
     "goamd64": "v1",
@@ -1705,6 +1727,10 @@
    "threads": [
     16
    ],
+   "windows": [
+    0,
+    4194304
+   ],
    "codecs": [
     "gzkp",
     "gzstd",
@@ -1742,7 +1768,6 @@
     ]
    },
    "variant": {
-    "block_size": "4194304",
     "cgo": "true",
     "corpus_hash": "2a64a50e9f6b485b",
     "goamd64": "v1",
@@ -1773,6 +1798,10 @@
    "threads": [
     1
    ],
+   "windows": [
+    0,
+    4194304
+   ],
    "codecs": [
     "br",
     "br2",
@@ -1820,7 +1849,6 @@
     ]
    },
    "variant": {
-    "block_size": "4194304",
     "cgo": "true",
     "corpus_hash": "9fead057bf6c08d1",
     "goamd64": "v1",
@@ -1838,8 +1866,8 @@
    "updated": "2026-09-27T19:09:27Z"
   },
   {
-   "id": "3d9dl41a83a6j-2qtx4hgxvhw8z",
-   "file": "runs/apache-log-3d9dl41a83a6j-2qtx4hgxvhw8z.json",
+   "id": "3d9dl41a83a6j-ytwyjs0j3glc",
+   "file": "runs/apache-log-3d9dl41a83a6j-ytwyjs0j3glc.json",
    "corpus": "apache-log",
    "kind": "file",
    "machine": "1omrle93",
@@ -1850,6 +1878,10 @@
    "bench": "1",
    "threads": [
     16
+   ],
+   "windows": [
+    0,
+    4194304
    ],
    "codecs": [
     "gzkp",
@@ -1888,7 +1920,6 @@
     ]
    },
    "variant": {
-    "block_size": "4194304",
     "cgo": "true",
     "corpus_hash": "9fead057bf6c08d1",
     "goamd64": "v1",
@@ -1919,6 +1950,10 @@
    "threads": [
     32
    ],
+   "windows": [
+    0,
+    4194304
+   ],
    "codecs": [
     "gzkp",
     "gzstd",
@@ -1955,6 +1990,17 @@
      "go1.27.1"
     ]
    },
+   "variant": {
+    "cgo": "true",
+    "corpus_hash": "2c7203e5bfd0c670",
+    "goamd64": "v1",
+    "goarch": "amd64",
+    "gogc": "100",
+    "gomemlimit": "0",
+    "goos": "windows",
+    "numcpu": "32",
+    "src_threads": "32"
+   },
    "n_encode": 38,
    "n_decode": 76,
    "merges": 1,
@@ -1962,8 +2008,8 @@
    "updated": "2026-09-23T10:43:32Z"
   },
   {
-   "id": "11u1m7jbmgnj2-2j6r6qb9bbz51",
-   "file": "runs/cockroach-log-11u1m7jbmgnj2-2j6r6qb9bbz51.json",
+   "id": "11u1m7jbmgnj2-3gimwbhaxfld7",
+   "file": "runs/cockroach-log-11u1m7jbmgnj2-3gimwbhaxfld7.json",
    "corpus": "cockroach-log",
    "kind": "file",
    "machine": "1omrle93",
@@ -1974,6 +2020,10 @@
    "bench": "1",
    "threads": [
     1
+   ],
+   "windows": [
+    0,
+    4194304
    ],
    "codecs": [
     "br",
@@ -2022,7 +2072,6 @@
     ]
    },
    "variant": {
-    "block_size": "4194304",
     "cgo": "true",
     "corpus_hash": "2c7203e5bfd0c670",
     "goamd64": "v1",
@@ -2040,8 +2089,8 @@
    "updated": "2026-09-27T19:49:24Z"
   },
   {
-   "id": "11u1m7jbmgnj2-wamlj5ou4hv6",
-   "file": "runs/cockroach-log-11u1m7jbmgnj2-wamlj5ou4hv6.json",
+   "id": "11u1m7jbmgnj2-4ofsgrjje8qm",
+   "file": "runs/cockroach-log-11u1m7jbmgnj2-4ofsgrjje8qm.json",
    "corpus": "cockroach-log",
    "kind": "file",
    "machine": "1omrle93",
@@ -2052,6 +2101,10 @@
    "bench": "1",
    "threads": [
     16
+   ],
+   "windows": [
+    0,
+    4194304
    ],
    "codecs": [
     "gzkp",
@@ -2090,7 +2143,6 @@
     ]
    },
    "variant": {
-    "block_size": "4194304",
     "cgo": "true",
     "corpus_hash": "2c7203e5bfd0c670",
     "goamd64": "v1",
@@ -2120,6 +2172,10 @@
    "bench": "1",
    "threads": [
     32
+   ],
+   "windows": [
+    0,
+    4194304
    ],
    "codecs": [
     "br",
@@ -2163,6 +2219,17 @@
      "go1.26.1"
     ]
    },
+   "variant": {
+    "cgo": "true",
+    "corpus_hash": "2c7203e5bfd0c670",
+    "goamd64": "v1",
+    "goarch": "amd64",
+    "gogc": "100",
+    "gomemlimit": "0",
+    "goos": "windows",
+    "numcpu": "32",
+    "src_threads": "32"
+   },
    "n_encode": 14,
    "n_decode": 0,
    "merges": 0,
@@ -2182,6 +2249,10 @@
    "bench": "1",
    "threads": [
     16
+   ],
+   "windows": [
+    0,
+    4194304
    ],
    "codecs": [
     "gzkp",
@@ -2220,7 +2291,6 @@
     ]
    },
    "variant": {
-    "block_size": "4194304",
     "cgo": "true",
     "corpus_hash": "bb4b18daafb15521",
     "goamd64": "v1",
@@ -2238,8 +2308,8 @@
    "updated": "2026-09-23T20:03:09Z"
   },
   {
-   "id": "1rxejhkl4h7xx-15s5v6ozpe01b",
-   "file": "runs/consensus-db-1rxejhkl4h7xx-15s5v6ozpe01b.json",
+   "id": "1rxejhkl4h7xx-1mzmj1sxvwnjw",
+   "file": "runs/consensus-db-1rxejhkl4h7xx-1mzmj1sxvwnjw.json",
    "corpus": "consensus-db",
    "kind": "file",
    "machine": "1omrle93",
@@ -2250,6 +2320,10 @@
    "bench": "1",
    "threads": [
     1
+   ],
+   "windows": [
+    0,
+    4194304
    ],
    "codecs": [
     "br",
@@ -2298,7 +2372,6 @@
     ]
    },
    "variant": {
-    "block_size": "4194304",
     "cgo": "true",
     "corpus_hash": "bb4b18daafb15521",
     "goamd64": "v1",
@@ -2328,6 +2401,10 @@
    "bench": "1",
    "threads": [
     16
+   ],
+   "windows": [
+    0,
+    4194304
    ],
    "codecs": [
     "gzkp",
@@ -2366,7 +2443,6 @@
     ]
    },
    "variant": {
-    "block_size": "4194304",
     "cgo": "true",
     "corpus_hash": "94db1087eb40b966",
     "goamd64": "v1",
@@ -2398,6 +2474,10 @@
     1,
     8
    ],
+   "windows": [
+    0,
+    4194304
+   ],
    "codecs": [
     "gzkp",
     "gzstd",
@@ -2428,6 +2508,17 @@
      "go1.26.1"
     ]
    },
+   "variant": {
+    "cgo": "true",
+    "corpus_hash": "e5cbe56bb1579db8",
+    "goamd64": "v4",
+    "goarch": "amd64",
+    "gogc": "100",
+    "gomemlimit": "0",
+    "goos": "windows",
+    "numcpu": "32",
+    "src_threads": "32"
+   },
    "n_encode": 68,
    "n_decode": 128,
    "merges": 0,
@@ -2447,6 +2538,10 @@
    "bench": "1",
    "threads": [
     1
+   ],
+   "windows": [
+    0,
+    4194304
    ],
    "codecs": [
     "br",
@@ -2495,7 +2590,6 @@
     ]
    },
    "variant": {
-    "block_size": "4194304",
     "cgo": "true",
     "corpus_hash": "1f0533f6be5d8e95",
     "goamd64": "v1",
@@ -2513,8 +2607,8 @@
    "updated": "2026-09-27T18:50:56Z"
   },
   {
-   "id": "27kchhl47tzdx-3i6v9y7epy4ru",
-   "file": "runs/enwik9-27kchhl47tzdx-3i6v9y7epy4ru.json",
+   "id": "27kchhl47tzdx-1kn44qar68z7q",
+   "file": "runs/enwik9-27kchhl47tzdx-1kn44qar68z7q.json",
    "corpus": "enwik9",
    "kind": "file",
    "machine": "1omrle93",
@@ -2525,6 +2619,10 @@
    "bench": "1",
    "threads": [
     16
+   ],
+   "windows": [
+    0,
+    4194304
    ],
    "codecs": [
     "gzkp",
@@ -2563,7 +2661,6 @@
     ]
    },
    "variant": {
-    "block_size": "4194304",
     "cgo": "true",
     "corpus_hash": "1f0533f6be5d8e95",
     "goamd64": "v1",
@@ -2594,6 +2691,10 @@
    "threads": [
     16
    ],
+   "windows": [
+    0,
+    4194304
+   ],
    "codecs": [
     "gzkp",
     "gzstd",
@@ -2631,7 +2732,6 @@
     ]
    },
    "variant": {
-    "block_size": "4194304",
     "cgo": "true",
     "corpus_hash": "86341acdf6fb5554",
     "goamd64": "v1",
@@ -2649,8 +2749,8 @@
    "updated": "2026-09-23T20:29:38Z"
   },
   {
-   "id": "gkrn7gt17why-1vcle6fwog7qi",
-   "file": "runs/github-june-gkrn7gt17why-1vcle6fwog7qi.json",
+   "id": "gkrn7gt17why-zdccsrhcesqs",
+   "file": "runs/github-june-gkrn7gt17why-zdccsrhcesqs.json",
    "corpus": "github-june",
    "kind": "file",
    "machine": "1omrle93",
@@ -2661,6 +2761,10 @@
    "bench": "1",
    "threads": [
     1
+   ],
+   "windows": [
+    0,
+    4194304
    ],
    "codecs": [
     "br",
@@ -2709,7 +2813,6 @@
     ]
    },
    "variant": {
-    "block_size": "4194304",
     "cgo": "true",
     "corpus_hash": "86341acdf6fb5554",
     "goamd64": "v1",
@@ -2740,6 +2843,10 @@
    "threads": [
     16
    ],
+   "windows": [
+    0,
+    4194304
+   ],
    "codecs": [
     "gzkp",
     "gzstd",
@@ -2777,7 +2884,6 @@
     ]
    },
    "variant": {
-    "block_size": "4194304",
     "cgo": "true",
     "corpus_hash": "e4de7572725712c3",
     "goamd64": "v1",
@@ -2795,8 +2901,8 @@
    "updated": "2026-09-23T16:55:20Z"
   },
   {
-   "id": "1yc3fcmtobxif-2ukm5xkwwcid7",
-   "file": "runs/github-ranks-1yc3fcmtobxif-2ukm5xkwwcid7.json",
+   "id": "1yc3fcmtobxif-25ztetif2gesr",
+   "file": "runs/github-ranks-1yc3fcmtobxif-25ztetif2gesr.json",
    "corpus": "github-ranks",
    "kind": "file",
    "machine": "1omrle93",
@@ -2807,6 +2913,10 @@
    "bench": "1",
    "threads": [
     1
+   ],
+   "windows": [
+    0,
+    4194304
    ],
    "codecs": [
     "br",
@@ -2855,7 +2965,6 @@
     ]
    },
    "variant": {
-    "block_size": "4194304",
     "cgo": "true",
     "corpus_hash": "e4de7572725712c3",
     "goamd64": "v1",
@@ -2886,6 +2995,10 @@
    "threads": [
     16
    ],
+   "windows": [
+    0,
+    4194304
+   ],
    "codecs": [
     "gzkp",
     "gzstd",
@@ -2923,7 +3036,6 @@
     ]
    },
    "variant": {
-    "block_size": "4194304",
     "cgo": "true",
     "corpus_hash": "b47c93e1f5280cfa",
     "goamd64": "v1",
@@ -2941,8 +3053,8 @@
    "updated": "2026-09-23T17:04:27Z"
   },
   {
-   "id": "kh4sr0y2n0do-v8o9v9mn1mvr",
-   "file": "runs/gob-stream-kh4sr0y2n0do-v8o9v9mn1mvr.json",
+   "id": "kh4sr0y2n0do-ry3rb0yoayw8",
+   "file": "runs/gob-stream-kh4sr0y2n0do-ry3rb0yoayw8.json",
    "corpus": "gob-stream",
    "kind": "file",
    "machine": "1omrle93",
@@ -2953,6 +3065,10 @@
    "bench": "1",
    "threads": [
     1
+   ],
+   "windows": [
+    0,
+    4194304
    ],
    "codecs": [
     "br",
@@ -3001,7 +3117,6 @@
     ]
    },
    "variant": {
-    "block_size": "4194304",
     "cgo": "true",
     "corpus_hash": "b47c93e1f5280cfa",
     "goamd64": "v1",
@@ -3032,6 +3147,10 @@
    "threads": [
     1,
     4
+   ],
+   "windows": [
+    0,
+    4194304
    ],
    "codecs": [
     "gzkp",
@@ -3065,6 +3184,17 @@
      "go1.26.1"
     ]
    },
+   "variant": {
+    "cgo": "true",
+    "corpus_hash": "5cf0da49dbe9e282",
+    "goamd64": "v4",
+    "goarch": "amd64",
+    "gogc": "100",
+    "gomemlimit": "0",
+    "goos": "windows",
+    "numcpu": "32",
+    "src_threads": "32"
+   },
    "n_encode": 58,
    "n_decode": 120,
    "merges": 0,
@@ -3084,6 +3214,10 @@
    "bench": "1",
    "threads": [
     16
+   ],
+   "windows": [
+    0,
+    4194304
    ],
    "codecs": [
     "gzkp",
@@ -3122,7 +3256,6 @@
     ]
    },
    "variant": {
-    "block_size": "4194304",
     "cgo": "true",
     "corpus_hash": "a5d856f28baf4bd8",
     "goamd64": "v1",
@@ -3140,8 +3273,8 @@
    "updated": "2026-09-23T17:26:21Z"
   },
   {
-   "id": "dh7rry8o87zf-10v40u4ejnii1",
-   "file": "runs/nyc-taxi-dh7rry8o87zf-10v40u4ejnii1.json",
+   "id": "dh7rry8o87zf-3b2674nvla1it",
+   "file": "runs/nyc-taxi-dh7rry8o87zf-3b2674nvla1it.json",
    "corpus": "nyc-taxi",
    "kind": "file",
    "machine": "1omrle93",
@@ -3152,6 +3285,10 @@
    "bench": "1",
    "threads": [
     1
+   ],
+   "windows": [
+    0,
+    4194304
    ],
    "codecs": [
     "br",
@@ -3200,7 +3337,6 @@
     ]
    },
    "variant": {
-    "block_size": "4194304",
     "cgo": "true",
     "corpus_hash": "a5d856f28baf4bd8",
     "goamd64": "v1",
@@ -3231,6 +3367,10 @@
    "threads": [
     1
    ],
+   "windows": [
+    0,
+    4194304
+   ],
    "codecs": [
     "br",
     "br2",
@@ -3278,7 +3418,6 @@
     ]
    },
    "variant": {
-    "block_size": "4194304",
     "cgo": "true",
     "corpus_hash": "99bc1680ebf993d",
     "goamd64": "v1",
@@ -3296,8 +3435,8 @@
    "updated": "2026-09-27T18:53:26Z"
   },
   {
-   "id": "wv3vmbf24szl-2gizs0bgvo1xc",
-   "file": "runs/parking-citations-wv3vmbf24szl-2gizs0bgvo1xc.json",
+   "id": "wv3vmbf24szl-1qm7ms1yfeqs3",
+   "file": "runs/parking-citations-wv3vmbf24szl-1qm7ms1yfeqs3.json",
    "corpus": "parking-citations",
    "kind": "file",
    "machine": "1omrle93",
@@ -3308,6 +3447,10 @@
    "bench": "1",
    "threads": [
     16
+   ],
+   "windows": [
+    0,
+    4194304
    ],
    "codecs": [
     "gzkp",
@@ -3346,7 +3489,6 @@
     ]
    },
    "variant": {
-    "block_size": "4194304",
     "cgo": "true",
     "corpus_hash": "99bc1680ebf993d",
     "goamd64": "v1",
@@ -3377,6 +3519,10 @@
    "threads": [
     16
    ],
+   "windows": [
+    0,
+    4194304
+   ],
    "codecs": [
     "gzkp",
     "gzstd",
@@ -3414,7 +3560,6 @@
     ]
    },
    "variant": {
-    "block_size": "4194304",
     "cgo": "true",
     "corpus_hash": "3c19fac2e9108f85",
     "goamd64": "v1",
@@ -3432,8 +3577,8 @@
    "updated": "2026-09-24T07:29:59Z"
   },
   {
-   "id": "2vrmjqwnll1kv-21w5e7bnak50i",
-   "file": "runs/rand2gb-2vrmjqwnll1kv-21w5e7bnak50i.json",
+   "id": "2vrmjqwnll1kv-2whiahejlokt2",
+   "file": "runs/rand2gb-2vrmjqwnll1kv-2whiahejlokt2.json",
    "corpus": "rand2gb",
    "kind": "file",
    "machine": "1omrle93",
@@ -3444,6 +3589,10 @@
    "bench": "1",
    "threads": [
     1
+   ],
+   "windows": [
+    0,
+    4194304
    ],
    "codecs": [
     "br",
@@ -3492,7 +3641,6 @@
     ]
    },
    "variant": {
-    "block_size": "4194304",
     "cgo": "true",
     "corpus_hash": "3c19fac2e9108f85",
     "goamd64": "v1",
@@ -3523,6 +3671,10 @@
    "threads": [
     16
    ],
+   "windows": [
+    0,
+    4194304
+   ],
    "codecs": [
     "gzkp",
     "gzstd",
@@ -3560,7 +3712,6 @@
     ]
    },
    "variant": {
-    "block_size": "4194304",
     "cgo": "true",
     "corpus_hash": "8d8f6ec144067f08",
     "goamd64": "v1",
@@ -3578,8 +3729,8 @@
    "updated": "2026-09-24T08:41:15Z"
   },
   {
-   "id": "1qhqu6kb3f2f5-2wwj3uxq78v63",
-   "file": "runs/rawstudio-1qhqu6kb3f2f5-2wwj3uxq78v63.json",
+   "id": "1qhqu6kb3f2f5-1gzl3gfuj9d7r",
+   "file": "runs/rawstudio-1qhqu6kb3f2f5-1gzl3gfuj9d7r.json",
    "corpus": "rawstudio",
    "kind": "file",
    "machine": "1omrle93",
@@ -3590,6 +3741,10 @@
    "bench": "1",
    "threads": [
     1
+   ],
+   "windows": [
+    0,
+    4194304
    ],
    "codecs": [
     "br",
@@ -3638,7 +3793,6 @@
     ]
    },
    "variant": {
-    "block_size": "4194304",
     "cgo": "true",
     "corpus_hash": "8d8f6ec144067f08",
     "goamd64": "v1",
@@ -3669,6 +3823,10 @@
    "threads": [
     1
    ],
+   "windows": [
+    0,
+    4194304
+   ],
    "codecs": [
     "br",
     "br2",
@@ -3716,7 +3874,6 @@
     ]
    },
    "variant": {
-    "block_size": "4194304",
     "cgo": "true",
     "corpus_hash": "a18d5c4b04075c98",
     "goamd64": "v1",
@@ -3734,8 +3891,8 @@
    "updated": "2026-09-27T18:59:43Z"
   },
   {
-   "id": "pmfhpd6gt3ov-3ty9cwuw0rgva",
-   "file": "runs/reddit-pmfhpd6gt3ov-3ty9cwuw0rgva.json",
+   "id": "pmfhpd6gt3ov-22o2rsvdjxv92",
+   "file": "runs/reddit-pmfhpd6gt3ov-22o2rsvdjxv92.json",
    "corpus": "reddit",
    "kind": "file",
    "machine": "1omrle93",
@@ -3746,6 +3903,10 @@
    "bench": "1",
    "threads": [
     16
+   ],
+   "windows": [
+    0,
+    4194304
    ],
    "codecs": [
     "gzkp",
@@ -3784,7 +3945,6 @@
     ]
    },
    "variant": {
-    "block_size": "4194304",
     "cgo": "true",
     "corpus_hash": "a18d5c4b04075c98",
     "goamd64": "v1",
@@ -3815,6 +3975,10 @@
    "threads": [
     16
    ],
+   "windows": [
+    0,
+    4194304
+   ],
    "codecs": [
     "gzkp",
     "gzstd",
@@ -3852,7 +4016,6 @@
     ]
    },
    "variant": {
-    "block_size": "4194304",
     "cgo": "true",
     "corpus_hash": "70ca62df9462f8d2",
     "goamd64": "v1",
@@ -3884,6 +4047,10 @@
     1,
     4,
     16
+   ],
+   "windows": [
+    0,
+    4194304
    ],
    "codecs": [
     "br",
@@ -3923,6 +4090,17 @@
     "std": [
      "go1.26.1"
     ]
+   },
+   "variant": {
+    "cgo": "true",
+    "corpus_hash": "a3ab9dc67d1664a3",
+    "goamd64": "v4",
+    "goarch": "amd64",
+    "gogc": "100",
+    "gomemlimit": "0",
+    "goos": "windows",
+    "numcpu": "32",
+    "src_threads": "32"
    },
    "n_encode": 171,
    "n_decode": 336,

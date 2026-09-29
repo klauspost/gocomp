@@ -3,6 +3,8 @@ package corpus
 
 import (
 	"fmt"
+	"path/filepath"
+	"strings"
 
 	"github.com/pbnjay/memory"
 )
@@ -109,6 +111,22 @@ func (c Corpus) Bytes() int64 {
 }
 
 func (c Corpus) Tier() Tier { return tierFor(c.Bytes()) }
+
+// direct reports whether c is read straight from its download instead of an
+// extracted copy. A single file in a zstd frame decodes into memory about as
+// fast as a plain copy reads off disk, so extracting it would only double the
+// disk it takes -- 86GB of copies beside 16GB of downloads, before this. xz and
+// the archive formats are slow enough to decode that one extraction still pays.
+func (c Corpus) direct() bool {
+	if c.Kind != KindFile || c.Remote == "" {
+		return false
+	}
+	switch strings.ToLower(filepath.Ext(c.Remote)) {
+	case ".xz", ".zip", ".7z":
+		return false
+	}
+	return true // .zst, or already a plain payload such as stacktrace.txt
+}
 
 // URL is the download location, "" when the corpus is synthetic or manual.
 func (c Corpus) URL() string {

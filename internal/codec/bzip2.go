@@ -25,7 +25,7 @@ func init() {
 		if i == bzip2.DefaultCompression {
 			name = "default"
 		}
-		lv = append(lv, Level{i, name, false})
+		lv = append(lv, Level{N: i, Name: name})
 	}
 
 	RegisterEnc(Enc{

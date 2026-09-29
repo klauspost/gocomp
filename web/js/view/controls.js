@@ -2,6 +2,7 @@
 // the same slice, so the numbers always agree.
 
 import { variantLabel } from '../data/db.js';
+import { windowName } from '../format.js';
 import { el } from './chart.js';
 
 // A control with one option filters nothing, so it is not shown. That is the
@@ -48,12 +49,15 @@ export function createControls(host, db, onChange) {
       add(some(d.threads) && chips('Threads', d.threads, state.threads,
         (v) => onChange({ threads: v }), (n) => String(n)));
 
-      // A store level is a measurement of the memcpy ceiling, not of a codec,
-      // so it is out of the picture unless asked for.
-      add(d.hasStore && segment('Uncompressed', [
-        { v: false, label: 'Hide' },
-        { v: true, label: 'Show' },
-      ], state.uncompressed, (v) => onChange({ uncompressed: v })));
+      add(some(d.windows) && chips('Window', d.windows, state.windows,
+        (v) => onChange({ windows: v }), windowName));
+
+      // Only the classes the scope actually has a level of: a Special button
+      // with no special level behind it would do nothing.
+      add(some(d.levelClasses) && toggles('Levels', d.levelClasses, state.levelClasses,
+        (v) => onChange({ levelClasses: v }), (c) => ({
+          regular: 'Regular', uncompressed: 'Uncompressed', special: 'Special',
+        }[c])));
 
       add(some(d.ops) && segment('Operation', [
         { v: 'both', label: 'Both' },
@@ -61,10 +65,15 @@ export function createControls(host, db, onChange) {
         { v: 'd', label: 'Decompress' },
       ], state.op, (v) => onChange({ op: v })));
 
-      add(single('Compare by', ['codec', 'go', 'corpus', 'machine', 'threads', 'lib'],
-        state.compareBy, (v) => onChange({ compareBy: v }), (v) => ({
+      // Comparing windows under the default-only filter would draw one series,
+      // so choosing it opens the filter to every window at the same time.
+      const onlyDefault = state.windows.length === 1 && state.windows[0] === 0;
+      add(single('Compare by', ['codec', 'go', 'corpus', 'machine', 'threads', 'lib', 'window'],
+        state.compareBy, (v) => onChange({
+          compareBy: v, ...(v === 'window' && onlyDefault ? { windows: [] } : {}),
+        }), (v) => ({
           codec: 'Codec', go: 'Go version', corpus: 'Corpus',
-          machine: 'CPU', threads: 'Threads', lib: 'Library version',
+          machine: 'CPU', threads: 'Threads', lib: 'Library version', window: 'Window size',
         }[v])));
 
       const measures = ['cspeed', 'dspeed', 'ratio', 'pct']
@@ -153,6 +162,28 @@ function segment(label, options, value, onPick) {
     seg.append(b);
   }
   wrap.append(seg);
+  return wrap;
+}
+
+// toggles is a row of independent on/off buttons. Unlike chips, nothing on
+// means nothing shown rather than no filter, so there is no "all" and no clear.
+function toggles(label, values, selected, onPick, fmt) {
+  const wrap = field(label, false);
+  const box = el('div', 'segment');
+  box.setAttribute('role', 'group');
+  box.setAttribute('aria-labelledby', wrap.__lab.id);
+  for (const v of values) {
+    const b = el('button');
+    b.type = 'button';
+    b.textContent = fmt(v);
+    const on = selected.includes(v);
+    b.setAttribute('aria-pressed', String(on));
+    b.addEventListener('click', () => onPick(on
+      ? selected.filter((x) => x !== v)
+      : values.filter((x) => x === v || selected.includes(x))));
+    box.append(b);
+  }
+  wrap.append(box);
   return wrap;
 }
 

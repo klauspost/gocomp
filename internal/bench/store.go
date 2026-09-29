@@ -42,7 +42,6 @@ func ToRun(meta CorpusMeta, results []Result, cfg Config, env sysinfo.Env, libs 
 		CorpusHash:  meta.Hash,
 		Bench:       Version,
 		SrcThreads:  cfg.SrcThreads,
-		BlockSize:   cfg.BlockSize,
 		MinPasses:   cfg.Passes,
 		Tool:        sysinfo.ToolInfo(),
 		Env:         env,
@@ -50,7 +49,7 @@ func ToRun(meta CorpusMeta, results []Result, cfg Config, env sysinfo.Env, libs 
 	for _, r := range results {
 		if r.Err != "" {
 			run.Errors = append(run.Errors, db.RunError{
-				Op: r.Op.String(), Codec: r.Codec, Level: r.Level, Threads: r.Threads, Msg: r.Err,
+				Op: r.Op.String(), Codec: r.Codec, Level: r.Level, Window: r.Window, Threads: r.Threads, Msg: r.Err,
 			})
 			continue
 		}
@@ -58,13 +57,13 @@ func ToRun(meta CorpusMeta, results []Result, cfg Config, env sysinfo.Env, libs 
 		switch r.Op {
 		case OpEncode:
 			run.Encode = append(run.Encode, db.EncRow{
-				Codec: r.Codec, Level: r.Level, Threads: r.Threads, Lib: lib,
+				Codec: r.Codec, Level: r.Level, Window: r.Window, Threads: r.Threads, Lib: lib,
 				In: r.In, Out: r.Out, NS: int64(r.Best), Passes: r.Passes,
 				SD: r.SD, Verified: r.Verified,
 			})
 		case OpDecode:
 			run.Decode = append(run.Decode, db.DecRow{
-				Codec: r.Codec, Src: r.Src, Threads: r.Threads, Lib: lib,
+				Codec: r.Codec, Src: r.Src, Window: r.Window, Threads: r.Threads, Lib: lib,
 				SrcLib: run.LibIndex(r.SrcModule, libs[r.SrcModule]),
 				In:     r.In, Out: r.Out, NS: int64(r.Best), Passes: r.Passes,
 				SD: r.SD, Verified: r.Verified,

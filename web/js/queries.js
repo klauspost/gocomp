@@ -10,6 +10,7 @@ const COMPARE_DIM = {
   machine: 'machine',
   threads: 'threads',
   lib: 'lib',
+  window: 'window',
 };
 
 function base(state) {
@@ -20,11 +21,12 @@ function base(state) {
     gos: state.gos,
     bench: state.bench,
     threads: state.threads,
+    windows: state.windows,
     codecs: state.codecs,
     levels: state.levels,
     libs: state.libs,
     variants: state.variants,
-    uncompressed: state.uncompressed,
+    levelClasses: state.levelClasses,
     srcPolicy: state.srcPolicy,
   };
 }

@@ -2,6 +2,7 @@
 // shareable. Theme is deliberately absent: a shared link must not force the
 // recipient's colour scheme.
 
+import { LEVEL_CLASSES } from './data/db.js';
 import { SLOTS } from './view/theme.js';
 
 // fitSlots pads or trims to the current cap. Links shared before the cap grew
@@ -18,15 +19,20 @@ export const DEFAULTS = {
   gos: [],
   bench: null,   // null means "newest"
   threads: [],
+  // The default window alone, unlike every other list here where empty means
+  // all: a window sweep is a deliberate experiment, and mixing its sizes into
+  // the headline charts would put one codec on screen several times.
+  windows: [0],
   op: 'both',
   compareBy: 'codec',
   codecs: [],
   levels: [],
   libs: [],
   variants: [], // build/measurement settings that kept two runs in separate files
-  // Store levels are off by default: one of them tops the log throughput axis
-  // and wins the ranking outright, which buries every codec that compresses.
-  uncompressed: false,
+  // Regular levels only by default. An uncompressed level tops the throughput
+  // axis and wins the ranking outright, which buries every codec that
+  // compresses; a special one is off the dial the chart draws a codec along.
+  levelClasses: ['regular'],
   // A log speed axis makes the slow codecs legible but flatters them; off
   // unless asked for, so nobody reads one without knowing it is on.
   logSpeed: false,
@@ -78,17 +84,17 @@ export function emphasise(emphasis, id) {
 
 const KEYS = {
   kind: 'k', corpora: 'c', machines: 'm', gos: 'g', bench: 'b', threads: 't',
-  op: 'op', compareBy: 'by', codecs: 'cd', levels: 'lv', libs: 'lb',
-  variants: 'va', uncompressed: 'uc', logSpeed: 'lg',
+  windows: 'w', op: 'op', compareBy: 'by', codecs: 'cd', levels: 'lv', libs: 'lb',
+  variants: 'va', levelClasses: 'lc', logSpeed: 'lg',
   metric: 'me', srcPolicy: 'sp', frontier: 'f', emphasis: 'em',
   tables: 'tb', sorts: 'so',
 };
 
 const LISTS = new Set([
-  'corpora', 'machines', 'gos', 'threads', 'codecs', 'levels', 'libs',
-  'variants', 'emphasis', 'tables', 'sorts',
+  'corpora', 'machines', 'gos', 'threads', 'windows', 'codecs', 'levels', 'libs',
+  'variants', 'levelClasses', 'emphasis', 'tables', 'sorts',
 ]);
-const NUMS = new Set(['threads', 'levels']);
+const NUMS = new Set(['threads', 'windows', 'levels']);
 
 // sortOf/withSort keep the per-card sort in the URL as "card:column:dir".
 export function sortOf(state, card, fallback) {
@@ -137,11 +143,14 @@ export function reconcile(state, d) {
   if (!d.kinds.includes(out.kind)) out.kind = d.kinds[0] || 'file';
   for (const [field, valid] of [
     ['corpora', d.corpora], ['machines', d.machines], ['gos', d.gos],
-    ['threads', d.threads], ['codecs', d.codecs], ['libs', d.libs],
+    ['threads', d.threads], ['windows', d.windows], ['codecs', d.codecs], ['libs', d.libs],
     ['variants', d.variants],
   ]) {
     out[field] = (out[field] || []).filter((v) => valid.includes(v));
   }
+  // Checked against the fixed set, not the scope: a class the scope lacks
+  // selects nothing, and dropping it would lose the choice on the way back.
+  out.levelClasses = (out.levelClasses || []).filter((c) => LEVEL_CLASSES.includes(c));
   if (out.bench && !d.benches.includes(out.bench)) out.bench = null;
   // 'both' stays legal as long as anything was measured; a single operation
   // that is not in the data falls back to it rather than to an empty view.

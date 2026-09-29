@@ -41,7 +41,7 @@ hypervisor.
 | state | meaning |
 |---|---|
 | `adopted` | an existing plain file or directory in the cache root is used as-is |
-| `cached` | downloaded and extracted by this tool |
+| `cached` | downloaded by this tool, and extracted where the format needs it |
 | `generated` | synthesised locally, never downloaded (`rand2gb`) |
 | `missing` | run `compress-site corpus fetch <id>` |
 | `manual` | not hosted; place the file in the cache root yourself — no corpus needs this any more |
@@ -58,8 +58,15 @@ already holds `enwik9`, `silesia.tar`, `gofiles/` and the rest is adopted in
 place with nothing downloaded and nothing copied.
 
 Otherwise `corpus fetch` downloads from <https://klauspost.com/files/compress/>
-and unpacks in-process: `.zst`, `.zip`, `.7z` and `.xz` are all handled in pure
-Go, so there is no manual repackaging step. Downloads resume if interrupted.
+into `dl/`, and everything is handled in pure Go, so there is no manual
+repackaging step. Downloads resume if interrupted.
+
+**A single-file corpus in a `.zst` is never extracted.** Loading decompresses
+the download straight into the memory the benchmark uses anyway, which costs
+about what reading the plain file off disk would, so the cache holds downloads
+only — 16 GB for every hosted corpus rather than another 86 GB of copies beside
+them. Directory corpora (`.7z`, `.zip`) and the one `.xz` are slow enough to
+decode that they are unpacked into `ex/` once, as before.
 
 Exactly one compression container is unwrapped, so `10gb.tar.zst` yields
 `10gb.tar` — the tar *is* the corpus and is never unpacked further.
@@ -106,6 +113,9 @@ compress-site run -corpus=enwik9 -codec=zskp,s2 -cpu=1,16
 # Level sweeps with an explicit list per codec.
 compress-site run -codec="zskp:1-4,s2,gzkp:1,5,9"
 
+# Window and block sizes, next to each codec's default.
+compress-site run -codec=zskp,s2,minlz -window=default,64K,1M,8M
+
 # Check that everything round-trips, write nothing.
 compress-site validate -corpus=gofiles -codec=all
 
@@ -120,6 +130,41 @@ numeric, so `zskp:1-4,s2,gzkp:1,5,9` is unambiguous. In a level list a leading
 three.
 
 Progress goes to stderr; one TSV row per measurement goes to stdout.
+
+### Window sizes
+
+`-window` sweeps the window — or, for the codecs that split their input into
+independent blocks, the block size — like `-cpu` sweeps threads. Sizes are
+powers of two written `8K`, `64KB`, `1M`; `default` is each codec's own choice
+and is what runs when the flag is absent. `-window=64K,1M` measures only those
+two; `-window=default,64K,1M` measures them beside the default.
+
+Each codec lists the sizes it takes, and a requested size it does not take is
+**skipped, never clamped**, so one list can drive every codec without measuring
+a clamped setting twice under two names. A codec with a fixed window runs at
+`default` only, and not at all if `default` is not in the list. Once the corpus
+is loaded, windows that cannot differ are dropped too: of the sizes at or above
+the largest single input (the file, or a directory's largest member), only the
+smallest runs.
+
+| codec | setting | sizes | `default`, as the library sets it |
+|---|---|---|---|
+| `zskp` | window | 1K–512M | 4M at fastest, 8M above |
+| `stdzstd` | window | 128K–512M | 2M–8M by level |
+| `s2` | block | 4K–4M | 1M |
+| `s2s` | block | 4K–64K | 64K−8 (snappy's limit) |
+| `minlz` | block | 4K–8M | 2M |
+| `lz4` | block | 64K, 256K, 1M, 4M | 4M |
+| `pgzip` | block | 32K–64M | 1M |
+| `br` | window | 1K–16M | 4M |
+| `xz`, `lzma2` | dictionary | 64K–2G | 8M |
+
+gzip and deflate (fixed 32K), snappy, bzip2 (its level *is* the block size),
+`br2` (no window option) and the block-API codecs have no window to vary.
+`compress-site run -dry-run` lists the sizes per codec.
+
+Large windows cost memory the RAM guard does not count: `zskp` with concurrent
+blocks keeps a window per worker, so 512M at 32 threads is 16 GB.
 
 **Use `run`, not the TUI, for numbers you intend to publish.** A terminal
 redrawing during a measurement is noise the batch path does not have.
@@ -171,10 +216,11 @@ separately instead.
 
 Library version is part of each measurement's identity, so rebuilding against a
 new `klauspost/compress` adds rows beside the old ones rather than overwriting
-them — that is what makes "compare library versions" work on the site.
+them — that is what makes "compare library versions" work on the site. Window
+size is part of it the same way.
 
 Runs do not merge when `GOOS`, `GOARCH`, `GOAMD64`, `GOARM64`, build tags,
-`GOEXPERIMENT`, cgo, block size, source thread count, core count, `GOGC`,
+`GOEXPERIMENT`, cgo, source thread count, core count, `GOGC`,
 `GOMEMLIMIT` or the corpus hash differ. Those are excluded from the run id on
 purpose, and the gate is what stops a `GOAMD64=v1` run silently averaging into
 a `v4` one — or a `taskset`-limited run, which has the same CPU brand and only
@@ -227,13 +273,28 @@ log** — throughput spans two orders of magnitude, so log is often the readable
 choice, but it flatters the slow end and nobody should read one without having
 chosen it.
 
-**Uncompressed levels are hidden by default.** Nine codecs declare a level that
-stores rather than compresses, and one of those measurements sets the top of the
-throughput axis and wins the ranking chart outright, which buries every
-codec doing actual work. `Uncompressed → Show` brings them back when the
-memcpy ceiling is the thing you want. The filter goes by the level's declared
-name, not its number: `lz4` level 0 is `fast` and `snappy` has only one level,
-so those stay put, while `gzkp -2` at 1.48:1 is compressing and stays too.
+**Only regular levels are shown by default.** Every level is declared in the
+codec registry as one of three classes, and `Levels` has an on/off button for
+each:
+
+- **Regular** — a point on the codec's speed/size dial.
+- **Uncompressed** — stores rather than compresses. Nine codecs have one, and a
+  single such measurement sets the top of the throughput axis and wins the
+  ranking outright, which buries every codec doing actual work. Turn it on when
+  the memcpy ceiling is what you want.
+- **Special** — compresses, but by a different method than the dial:
+  deflate's `huffman` (-2, all five deflate-family codecs) and `stateless` (-3,
+  `gzkp` and `flkp`).
+
+A decode measurement takes its source's class, so decoding a stored frame is
+Uncompressed whatever the decoder. The class is declared, never inferred from
+the level number: `lz4` level 0 is `fast` and compresses, so it is Regular.
+
+**Only the default window is shown by default.** A window sweep is an
+experiment, and mixing its sizes into the headline charts would put one codec on
+screen several times. The `Window` chips appear once a run holds more than one
+size; `Compare by → Window size` draws one series per window, best read with a
+single codec selected.
 
 The filter row describes what the data holds, not what the schema allows. A
 control with one option is not shown, and the options cascade: narrowing to one
@@ -245,7 +306,7 @@ are collapsed checkbox groups with a `clear` beside the label; nothing ticked
 means no filter, which is why the summary reads `all`.
 
 The whole filter state lives in the URL hash, so copying the address bar shares
-the exact view — corpus, CPU, Go version, threads, operation, codecs, levels,
+the exact view — corpus, CPU, Go version, threads, windows, operation, codecs, levels,
 library versions, which codecs are highlighted, which tables are open and how
 they are sorted. Theme is deliberately excluded: a shared link should not force
 the recipient's colour scheme.

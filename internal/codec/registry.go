@@ -22,6 +22,11 @@ func RegisterEnc(e Enc) {
 	if e.Conc&^e.Kinds != 0 {
 		panic("codec: " + e.ID + " declares Conc for a kind not in Kinds")
 	}
+	for i, w := range e.Windows {
+		if w <= 0 || w&(w-1) != 0 || (i > 0 && w <= e.Windows[i-1]) {
+			panic("codec: " + e.ID + " windows must be ascending powers of two")
+		}
+	}
 	if len(e.Levels) == 0 {
 		e.Levels = []Level{{N: 0, Name: "default"}}
 	}

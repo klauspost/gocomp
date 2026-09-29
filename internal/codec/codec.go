@@ -5,6 +5,7 @@
 package codec
 
 import (
+	"slices"
 	"strconv"
 	"strings"
 
@@ -41,9 +42,18 @@ var FormatName = map[Format]string{
 
 // Opts are fixed for the duration of one measurement.
 type Opts struct {
-	Kind      corpus.Kind
-	Threads   int // also the process GOMAXPROCS for this measurement
-	BlockSize int // stream block size; 0 means the library default
+	Kind    corpus.Kind
+	Threads int // also the process GOMAXPROCS for this measurement
+	Window  int // window or block size, one of Enc.Windows; 0 leaves the library's own default
+}
+
+// pow2s lists the powers of two from lo to hi inclusive.
+func pow2s(lo, hi int) []int {
+	var out []int
+	for n := lo; n <= hi; n *= 2 {
+		out = append(out, n)
+	}
+	return out
 }
 
 // LibThreads is the concurrency to hand the library. It collapses to 1 for
@@ -59,9 +69,34 @@ func (o Opts) LibThreads(conc corpus.Kind) int {
 
 // Level is one compression setting of an encoder.
 type Level struct {
-	N    int
-	Name string
-	Slow bool // skipped unless -slow
+	N     int
+	Name  string
+	Slow  bool // skipped unless -slow
+	Class LevelClass
+}
+
+// LevelClass says whether a level is a point on the codec's speed/size dial.
+// The site shows Regular levels only unless asked: the others answer a
+// different question, and one of them on a chart sets its scale.
+type LevelClass uint8
+
+const (
+	Regular LevelClass = iota
+	// Uncompressed stores rather than compresses: the memcpy ceiling.
+	Uncompressed
+	// Special compresses, but by another method than the dial the regular
+	// levels sit on -- deflate's huffman-only and stateless modes.
+	Special
+)
+
+func (c LevelClass) String() string {
+	switch c {
+	case Uncompressed:
+		return "uncompressed"
+	case Special:
+		return "special"
+	}
+	return "regular"
 }
 
 // Encoder produces one self-contained frame or block per call. Instances are
@@ -96,6 +131,11 @@ type Enc struct {
 	Levels []Level
 	Slow   bool // whole encoder is opt-in
 
+	// Windows are the sizes Opts.Window may take, ascending; nil when the
+	// window is fixed. A requested size not listed is skipped, never clamped:
+	// clamping would measure the same setting twice under two names.
+	Windows []int
+
 	// MaxSize bounds the compressed size of n input bytes. Defaults to a
 	// generous bound that also covers incompressible input.
 	MaxSize func(n int) int
@@ -120,6 +160,9 @@ func (e Enc) Concurrent(k corpus.Kind) bool { return e.Conc&k != 0 }
 
 // Concurrent reports whether threads matter for this decoder on kind.
 func (d Dec) Concurrent(k corpus.Kind) bool { return d.Conc&k != 0 }
+
+// AcceptsWindow reports whether the encoder can run at window w.
+func (e Enc) AcceptsWindow(w int) bool { return w == 0 || slices.Contains(e.Windows, w) }
 
 // Level returns the named level.
 func (e Enc) Level(n int) (Level, bool) {

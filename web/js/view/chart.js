@@ -59,7 +59,7 @@ const endpointLabels = {
       const pts = chart.getDatasetMeta(i).data;
       if (!pts.length) continue;
       const p = pts[pts.length - 1];
-      const label = ds.__label;
+      const label = ds.__endLabel ?? ds.__label;
       const w = ctx.measureText(label).width;
       let x = p.x + 9;
       if (x + w > chart.chartArea.right) x = p.x - 9 - w;

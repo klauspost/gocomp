@@ -103,6 +103,11 @@ func (c *Cache) Resolve(cp Corpus) (path string, adopted bool, ok bool) {
 			return p, true, true
 		}
 	}
+	if cp.direct() {
+		if p := c.dlPath(cp.Remote); want(p) {
+			return p, false, true
+		}
+	}
 	if p := c.exPath(cp.ID); want(p) {
 		return p, false, true
 	}

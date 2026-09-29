@@ -133,7 +133,7 @@ var catalog = []Corpus{
 	{
 		ID: "enwik10", Name: "enwik10", Desc: "First 10^10 bytes of English Wikipedia XML",
 		Kind: KindFile, Tags: []string{"text", "xml"},
-		Remote: "enwik10.7z", DL: 1_872_400_000, Size: 10_000_000_000,
+		Remote: "enwik10.zst", DL: 2_242_738_799, Size: 10_000_000_000,
 		Local: []string{"enwik10"},
 	},
 	{

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/klauspost/compress-site/internal/bench"
 	"github.com/klauspost/compress-site/internal/preset"
 )
 
@@ -210,8 +211,12 @@ func (m *Model) currentPreset() preset.Preset {
 		Codecs: map[string][]int{}, Threads: m.cfg.Threads, SrcThreads: m.cfg.SrcThreads,
 		Encode: m.cfg.Encode, Decode: m.cfg.Decode, Passes: m.cfg.Passes,
 		MinWall: preset.Dur(m.cfg.MinWall), MaxPasses: m.cfg.MaxPasses,
-		MaxJob: preset.Dur(m.cfg.MaxJob), Block: m.cfg.BlockSize,
+		MaxJob:   preset.Dur(m.cfg.MaxJob),
 		Validate: m.cfg.Validate, Collapse: m.cfg.Collapse, Slow: m.slow,
+	}
+	// Default alone is what an absent field means, so it is not spelled out.
+	if s := bench.WindowSpec(m.cfg.Windows); s != "" && s != "default" {
+		p.Windows = strings.Split(s, ",")
 	}
 	for _, it := range m.corpora {
 		if it.sel {
@@ -269,8 +274,8 @@ func (m *Model) applySaved(s preset.Preset) {
 	if s.MaxJob > 0 {
 		m.cfg.MaxJob = time.Duration(s.MaxJob)
 	}
-	if s.Block > 0 {
-		m.cfg.BlockSize = s.Block
+	if w, err := bench.ParseWindows(s.WindowSpec()); err == nil {
+		m.cfg.Windows = w
 	}
 	m.cfg.Encode, m.cfg.Decode = s.Encode, s.Decode
 	if !m.cfg.Encode && !m.cfg.Decode {

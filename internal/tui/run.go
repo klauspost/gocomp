@@ -43,6 +43,8 @@ type runState struct {
 	started  time.Time
 	elapsed  time.Duration
 	corpus   string
+	corpusAt int // position of corpus in the run, from 1
+	corpusOf int
 	label    string
 	phase    string
 	done     int
@@ -148,6 +150,11 @@ func (m *Model) onEvent(ev bench.Event) tea.Cmd {
 		r.corpus = ev.Corpus
 	}
 	switch ev.Kind {
+	case "corpus":
+		// Done and Total count corpora here, so they must not reach the
+		// measurement progress below.
+		r.corpusAt, r.corpusOf = ev.Done, ev.Total
+		return waitFor(r.events)
 	case "phase":
 		r.phase = ev.Phase
 	case "job":
@@ -199,8 +206,12 @@ func formatResult(r bench.Result) string {
 	if src == "" {
 		src = "-"
 	}
-	return fmt.Sprintf("%s %-9s %3d %-12s t%-3d %8.2f MB/s  %.3f:1  n=%d",
-		r.Op, r.Codec, r.Level, src, r.Threads, r.MBps(), r.Ratio(), r.Passes)
+	win := ""
+	if r.Window > 0 {
+		win = " w" + bench.WindowName(r.Window)
+	}
+	return fmt.Sprintf("%s %-9s %3d %-12s t%-3d %8.2f MB/s  %.3f:1  n=%d%s",
+		r.Op, r.Codec, r.Level, src, r.Threads, r.MBps(), r.Ratio(), r.Passes, win)
 }
 
 // execute runs the benchmark and merges each corpus as it completes, so a
@@ -211,14 +222,26 @@ func execute(ctx context.Context, j job) {
 	var firstErr error
 	prog := progressTo(j.st.events)
 
+	// A corpus none of whose codecs take any requested window is skipped before
+	// counting, so the heading's 2/5 counts what will actually run -- and so no
+	// corpus is loaded to measure nothing, which is minutes on a large one.
+	var todo []corpus.Corpus
 	for _, cp := range j.corpora {
+		if len(j.cfg.Expand(j.variants[cp.Kind], 0)) > 0 {
+			todo = append(todo, cp)
+		}
+	}
+	for i, cp := range todo {
 		if ctx.Err() != nil {
 			break
 		}
-		variants := j.variants[cp.Kind]
-		if len(variants) == 0 {
-			continue
+		// Not the usual non-blocking send: this is the heading for the whole
+		// corpus, hours on a large one, and a dropped event leaves it wrong.
+		select {
+		case j.st.events <- bench.Event{Kind: "corpus", Corpus: cp.ID, Done: i + 1, Total: len(todo)}:
+		case <-ctx.Done():
 		}
+		variants := j.variants[cp.Kind]
 		if err := corpus.Fetch(ctx, j.cache, cp, prog); err != nil {
 			firstErr = err
 			break
@@ -230,7 +253,9 @@ func execute(ctx context.Context, j job) {
 		}
 		_ = j.cache.Save()
 
-		eng := &bench.Engine{Cfg: j.cfg, Data: data, Variants: variants, Events: j.st.events}
+		// Windows past the largest input are trimmed here, the first point at
+		// which that size is known.
+		eng := &bench.Engine{Cfg: j.cfg, Data: data, Variants: j.cfg.Expand(variants, data.Max), Events: j.st.events}
 		results, runErr := eng.Run(ctx)
 		// meta is the last use of data, so the corpus is unreachable from here
 		// on and this GC hands its memory back before the next one is loaded.
@@ -391,7 +416,11 @@ func (m *Model) runView() string {
 		r.since().Round(time.Second))
 	head := r.phase
 	if r.corpus != "" {
-		head = r.corpus + " · " + r.phase
+		c := r.corpus
+		if r.corpusOf > 1 {
+			c += fmt.Sprintf(" (%d/%d)", r.corpusAt, r.corpusOf)
+		}
+		head = c + " · " + r.phase
 	}
 	fmt.Fprintf(&b, "  %s: %s\n", head, r.label)
 

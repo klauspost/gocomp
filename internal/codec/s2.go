@@ -8,7 +8,12 @@ import (
 )
 
 var (
-	s2Levels    = []Level{{0, "uncompressed", false}, {1, "default", false}, {2, "better", false}, {3, "best", false}}
+	s2Levels = []Level{
+		{N: 0, Name: "uncompressed", Class: Uncompressed},
+		{N: 1, Name: "default"},
+		{N: 2, Name: "better"},
+		{N: 3, Name: "best"},
+	}
 	s2BlkLevels = s2Levels[1:]
 )
 
@@ -50,10 +55,12 @@ func s2Decode(r *s2.Reader, o Opts) func(io.Writer) (int64, error) {
 }
 
 // newS2Writer builds the stream encoder shared by the s2 and snappy-compat frames.
+// The block size goes before extra so that WriterSnappyCompat still clamps the
+// library's 1MB default down to the 64KB snappy frames allow.
 func newS2Writer(lvl int, o Opts, extra ...s2.WriterOption) Encoder {
 	opts := append(s2Opts(lvl), s2.WriterConcurrency(o.LibThreads(corpus.KindFile)))
-	if o.BlockSize > 0 {
-		opts = append(opts, s2.WriterBlockSize(o.BlockSize))
+	if o.Window > 0 {
+		opts = append(opts, s2.WriterBlockSize(o.Window))
 	}
 	w := s2.NewWriter(nil, append(opts, extra...)...)
 	// EncodeBuffer is the concurrent path; a plain Write is sequential.
@@ -64,7 +71,8 @@ func init() {
 	RegisterEnc(Enc{
 		ID: "s2", Name: "S2", Impl: "klauspost/compress", Format: FmtS2,
 		Module: kpCompress, Kinds: bothKinds, Conc: corpus.KindFile, Levels: s2Levels,
-		New: func(lvl int, o Opts) (Encoder, error) { return newS2Writer(lvl, o), nil },
+		Windows: pow2s(4<<10, 4<<20),
+		New:     func(lvl int, o Opts) (Encoder, error) { return newS2Writer(lvl, o), nil },
 	})
 	RegisterDec(Dec{
 		ID: "s2", Name: "S2", Impl: "klauspost/compress", Format: FmtS2,
@@ -78,6 +86,7 @@ func init() {
 	RegisterEnc(Enc{
 		ID: "s2s", Name: "S2 (snappy frame)", Impl: "klauspost/compress", Format: FmtSnappy,
 		Module: kpCompress, Kinds: bothKinds, Conc: corpus.KindFile, Levels: s2Levels,
+		Windows: pow2s(4<<10, 64<<10), // snappy frames cap blocks at 64KB
 		New: func(lvl int, o Opts) (Encoder, error) {
 			return newS2Writer(lvl, o, s2.WriterSnappyCompat()), nil
 		},

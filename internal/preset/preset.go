@@ -63,7 +63,7 @@ type Preset struct {
 	MinWall    Dur              `json:"min_wall,omitempty"`
 	MaxPasses  int              `json:"max_passes,omitempty"`
 	MaxJob     Dur              `json:"max_job,omitempty"`
-	Block      int              `json:"block,omitempty"`
+	Windows    []string         `json:"windows,omitempty"` // -window items: "default", "64K"
 	Validate   bool             `json:"validate,omitempty"`
 	Collapse   bool             `json:"collapse,omitempty"`
 	Slow       bool             `json:"slow,omitempty"`
@@ -177,7 +177,7 @@ func Delete(dir, name string) error {
 	return os.Remove(path(dir, name))
 }
 
-// CorpusSpec, CodecSpec, ThreadSpec and OpSpec render the selection back into
+// CorpusSpec, CodecSpec, ThreadSpec, WindowSpec and OpSpec render the selection back into
 // the syntax the run flags already accept, so a preset reaches the engine
 // through exactly the same parsing as a command line and cannot diverge from it.
 func (p Preset) CorpusSpec() string { return strings.Join(p.Corpora, ",") }
@@ -212,6 +212,8 @@ func (p Preset) ThreadSpec() string {
 	return strings.Join(parts, ",")
 }
 
+func (p Preset) WindowSpec() string { return strings.Join(p.Windows, ",") }
+
 // OpSpec falls back to both: a preset that names neither operation would
 // otherwise measure nothing, which is never what was meant.
 func (p Preset) OpSpec() string {
@@ -231,6 +233,9 @@ func (p Preset) Summary() string {
 	parts = append(parts, plural(len(p.Codecs), "codec", "codecs"))
 	if len(p.Threads) > 0 {
 		parts = append(parts, "t"+p.ThreadSpec())
+	}
+	if s := p.WindowSpec(); s != "" && s != "default" {
+		parts = append(parts, "w"+s)
 	}
 	parts = append(parts, p.OpSpec())
 	if p.Validate {

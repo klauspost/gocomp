@@ -9,10 +9,10 @@ import (
 )
 
 var zstdLevels = []Level{
-	{int(zstd.SpeedFastest), "fastest", false},
-	{int(zstd.SpeedDefault), "default", false},
-	{int(zstd.SpeedBetterCompression), "better", false},
-	{int(zstd.SpeedBestCompression), "best", false},
+	{N: int(zstd.SpeedFastest), Name: "fastest"},
+	{N: int(zstd.SpeedDefault), Name: "default"},
+	{N: int(zstd.SpeedBetterCompression), Name: "better"},
+	{N: int(zstd.SpeedBestCompression), Name: "best"},
 }
 
 func init() {
@@ -22,13 +22,19 @@ func init() {
 		// EncodeAll, used for the per-file path, is single-goroutine; only the
 		// stream path with concurrent blocks parallelises.
 		Conc: corpus.KindFile, Levels: zstdLevels,
+		Windows: pow2s(zstd.MinWindowSize, zstd.MaxWindowSize),
 		New: func(lvl int, o Opts) (Encoder, error) {
 			// WithConcurrentBlocks cannot be changed on Reset, so it is fixed here.
 			concurrent := o.Kind == corpus.KindFile && o.Threads > 1
-			e, err := zstd.NewWriter(nil,
+			opts := []zstd.EOption{
 				zstd.WithEncoderLevel(zstd.EncoderLevel(lvl)),
 				zstd.WithEncoderConcurrency(o.LibThreads(corpus.KindFile)),
-				zstd.WithConcurrentBlocks(concurrent))
+				zstd.WithConcurrentBlocks(concurrent),
+			}
+			if o.Window > 0 {
+				opts = append(opts, zstd.WithWindowSize(o.Window))
+			}
+			e, err := zstd.NewWriter(nil, opts...)
 			if err != nil {
 				return nil, err
 			}
@@ -61,24 +67,31 @@ func init() {
 
 	// stdgozstd is the candidate standard-library implementation. Level -1 is
 	// omitted: it is an alias for 3 and would duplicate that row.
-	var stdLevels []Level
-	for i := 0; i <= 9; i++ {
+	stdLevels := []Level{{N: 0, Name: "store", Class: Uncompressed}}
+	for i := 1; i <= 9; i++ {
 		name := strconv.Itoa(i)
-		switch i {
-		case 0:
-			name = "store"
-		case 3:
+		if i == 3 {
 			name = "default"
 		}
-		stdLevels = append(stdLevels, Level{i, name, false})
+		stdLevels = append(stdLevels, Level{N: i, Name: name})
 	}
 	RegisterEnc(Enc{
 		ID: "stdzstd", Name: "Zstandard", Impl: "klauspost/stdgozstd", Format: FmtZstd,
 		Module: "github.com/klauspost/stdgozstd", Kinds: bothKinds, Levels: stdLevels,
+		// Not from MinWindowSize: SetWindowSize leaves the block size at 128KB,
+		// and a block larger than the window is invalid, so below 128KB both
+		// decoders reject the frame ("window size exceeded").
+		Windows: pow2s(128<<10, stdzstd.MaxWindowSize),
 		New: func(lvl int, o Opts) (Encoder, error) {
 			w := stdzstd.NewWriter(nil)
 			if err := w.SetLevel(lvl); err != nil {
 				return nil, err
+			}
+			// After SetLevel, which resets the window to the level's own.
+			if o.Window > 0 {
+				if err := w.SetWindowSize(o.Window); err != nil {
+					return nil, err
+				}
 			}
 			if o.Kind == corpus.KindDir {
 				return blockFn{fn: func(dst, src []byte) ([]byte, error) {
@@ -93,6 +106,11 @@ func init() {
 		Module: "github.com/klauspost/stdgozstd", Kinds: bothKinds,
 		New: func(o Opts) (Decoder, error) {
 			r := stdzstd.NewReader(nil)
+			// The default cap is 128MB, below the largest window either zstd
+			// encoder can be asked for. It is a limit, not a tuning knob.
+			if err := r.SetMaxWindowSize(stdzstd.MaxWindowSize); err != nil {
+				return nil, err
+			}
 			if o.Kind == corpus.KindDir {
 				return blockFn{fn: func(dst, src []byte) ([]byte, error) {
 					return r.AppendDecompress(dst[:0], src)

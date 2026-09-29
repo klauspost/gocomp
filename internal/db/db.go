@@ -15,7 +15,7 @@ import (
 )
 
 // Schema is bumped when the on-disk shape changes incompatibly.
-const Schema = 1
+const Schema = 2
 
 // IndexFile is the manifest the site always fetches.
 const IndexFile = "index.json"
@@ -24,6 +24,7 @@ const IndexFile = "index.json"
 type EncRow struct {
 	Codec    string
 	Level    int
+	Window   int // 0 is the codec's default
 	Threads  int
 	Lib      int // index into Run.Libs
 	In, Out  int64
@@ -39,6 +40,7 @@ type EncRow struct {
 type DecRow struct {
 	Codec    string
 	Src      string // "<encoder>-<level>"
+	Window   int    // the window Src was encoded with
 	SrcLib   int
 	Threads  int
 	Lib      int
@@ -54,6 +56,7 @@ type RunError struct {
 	Op      string `json:"op"`
 	Codec   string `json:"codec"`
 	Level   int    `json:"level"`
+	Window  int    `json:"window,omitempty"`
 	Threads int    `json:"threads"`
 	Msg     string `json:"msg"`
 }
@@ -69,7 +72,6 @@ type Run struct {
 	CorpusHash  string       `json:"corpus_hash"`
 	Bench       string       `json:"bench"`
 	SrcThreads  int          `json:"src_threads"`
-	BlockSize   int          `json:"block_size"`
 	MinPasses   int          `json:"min_passes"`
 	Merges      int          `json:"merges"`
 	Created     string       `json:"created"`

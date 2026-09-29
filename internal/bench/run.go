@@ -16,7 +16,7 @@ import (
 // best and pass count so far. Round-robin means no measurement is final until
 // its whole group is, which without this leaves a long run with nothing to show.
 type Event struct {
-	Kind string // phase, job, pass, result, warn
+	Kind string // phase, job, pass, result, warn; and corpus, from the TUI, which walks the corpora
 	// Corpus is stamped by emit rather than by each call site, so no event can
 	// arrive without saying which corpus it is about. An Engine measures one
 	// corpus, but a run walks several and they take hours apiece.
@@ -100,9 +100,9 @@ func (e *Engine) runEncode(ctx context.Context) error {
 			if !containsInt(e.Cfg.ThreadsFor(v.Enc.Concurrent(kind)), t) {
 				continue
 			}
-			enc, err := v.Enc.New(v.Level.N, e.opts(t))
+			enc, err := v.Enc.New(v.Level.N, e.opts(t, v.Window))
 			if err != nil {
-				e.fail(OpEncode, v.Enc.ID, "", v.Level.N, t, v.Enc.Module, err)
+				e.fail(OpEncode, v.Enc.ID, "", v.Level.N, v.Window, t, v.Enc.Module, err)
 				e.total-- // Plan counted it; it will never run, so 100% must not require it
 				continue
 			}
@@ -125,7 +125,7 @@ func (e *Engine) runEncode(ctx context.Context) error {
 
 		st, err := e.roundRobin(ctx, len(jobs), func(i int) (time.Duration, error) {
 			j := jobs[i]
-			e.emit(Event{Kind: "job", Phase: "encode", Label: j.v.ID(), Msg: threadLabel(t)})
+			e.emit(Event{Kind: "job", Phase: "encode", Label: j.v.Label(), Msg: threadLabel(t)})
 			d, n, err := e.encodeOnce(j.enc, &dst)
 			j.out = n
 			return d, err
@@ -136,7 +136,7 @@ func (e *Engine) runEncode(ctx context.Context) error {
 		for i, j := range jobs {
 			switch a := st[i]; {
 			case a.err != nil:
-				e.fail(OpEncode, j.v.Enc.ID, "", j.v.Level.N, t, j.v.Enc.Module, a.err)
+				e.fail(OpEncode, j.v.Enc.ID, "", j.v.Level.N, j.v.Window, t, j.v.Enc.Module, a.err)
 			case a.n > 0:
 				e.record(e.encResult(j, t, a))
 			}
@@ -204,11 +204,11 @@ func (e *Engine) runDecode(ctx context.Context) error {
 			return err
 		}
 
-		e.emit(Event{Kind: "job", Phase: "decode", Label: v.ID(), Msg: "preparing input"})
+		e.emit(Event{Kind: "job", Phase: "decode", Label: v.Label(), Msg: "preparing input"})
 		runtime.GOMAXPROCS(e.Cfg.SrcThreads)
 		comp, err := e.compressFor(v)
 		if err != nil {
-			e.fail(OpDecode, "", v.ID(), v.Level.N, e.Cfg.SrcThreads, v.Enc.Module, err)
+			e.fail(OpDecode, "", v.ID(), v.Level.N, v.Window, e.Cfg.SrcThreads, v.Enc.Module, err)
 			// Every decoder planned against this source is now unreachable.
 			for _, d := range decs {
 				e.total -= len(e.Cfg.ThreadsFor(d.Concurrent(kind)))
@@ -219,16 +219,16 @@ func (e *Engine) runDecode(ctx context.Context) error {
 			// Recorded as a result, not just an event: the CLI has no event
 			// channel, and a silent integrity failure defeats the whole mode.
 			if err := e.validate(v, comp, decs); err != nil {
-				e.fail(OpDecode, "", v.ID(), v.Level.N, e.Cfg.SrcThreads, v.Enc.Module, err)
+				e.fail(OpDecode, "", v.ID(), v.Level.N, v.Window, e.Cfg.SrcThreads, v.Enc.Module, err)
 			}
 		}
 
 		var jobs []*decJob
 		for _, d := range decs {
 			for _, t := range e.Cfg.ThreadsFor(d.Concurrent(kind)) {
-				inst, err := d.New(e.opts(t))
+				inst, err := d.New(e.opts(t, 0))
 				if err != nil {
-					e.fail(OpDecode, d.ID, v.ID(), v.Level.N, t, d.Module, err)
+					e.fail(OpDecode, d.ID, v.ID(), v.Level.N, v.Window, t, d.Module, err)
 					e.total--
 					continue
 				}
@@ -243,7 +243,7 @@ func (e *Engine) runDecode(ctx context.Context) error {
 		st, err := e.roundRobin(ctx, len(jobs), func(i int) (time.Duration, error) {
 			j := jobs[i]
 			runtime.GOMAXPROCS(j.t)
-			e.emit(Event{Kind: "job", Phase: "decode", Label: j.dec.ID + " <- " + v.ID(), Msg: threadLabel(j.t)})
+			e.emit(Event{Kind: "job", Phase: "decode", Label: j.dec.ID + " <- " + v.Label(), Msg: threadLabel(j.t)})
 			d, n, err := e.decodeOnce(j.inst, comp, &dst)
 			j.out = n
 			return d, err
@@ -254,7 +254,7 @@ func (e *Engine) runDecode(ctx context.Context) error {
 		for i, j := range jobs {
 			switch a := st[i]; {
 			case a.err != nil:
-				e.fail(OpDecode, j.dec.ID, v.ID(), v.Level.N, j.t, j.dec.Module, a.err)
+				e.fail(OpDecode, j.dec.ID, v.ID(), v.Level.N, v.Window, j.t, j.dec.Module, a.err)
 			case a.n > 0:
 				e.record(decResult(j, v, comp, a))
 			}
@@ -386,15 +386,15 @@ func containsInt(s []int, v int) bool {
 	return false
 }
 
-func (e *Engine) opts(t int) codec.Opts {
-	return codec.Opts{Kind: e.Data.Kind, Threads: t, BlockSize: e.Cfg.BlockSize}
+func (e *Engine) opts(t, window int) codec.Opts {
+	return codec.Opts{Kind: e.Data.Kind, Threads: t, Window: window}
 }
 
 // encResult and decResult build the same Result from a partial and a finished
 // aggregate, so the line the TUI shows mid-run is the line it ends up with.
 func (e *Engine) encResult(j *encJob, t int, a agg) Result {
 	return Result{
-		Op: OpEncode, Codec: j.v.Enc.ID, Level: j.v.Level.N, Threads: t,
+		Op: OpEncode, Codec: j.v.Enc.ID, Level: j.v.Level.N, Window: j.v.Window, Threads: t,
 		Module: j.v.Enc.Module, In: e.Data.Total, Out: j.out,
 		Best: a.best, Passes: a.n, SD: a.relSD(), Verified: -1,
 	}
@@ -402,7 +402,7 @@ func (e *Engine) encResult(j *encJob, t int, a agg) Result {
 
 func decResult(j *decJob, v Variant, c *compressed, a agg) Result {
 	return Result{
-		Op: OpDecode, Codec: j.dec.ID, Src: v.ID(), Level: v.Level.N, Threads: j.t,
+		Op: OpDecode, Codec: j.dec.ID, Src: v.ID(), Level: v.Level.N, Window: v.Window, Threads: j.t,
 		Module: j.dec.Module, SrcModule: v.Enc.Module,
 		In: c.total, Out: j.out,
 		Best: a.best, Passes: a.n, SD: a.relSD(), Verified: c.verified,
@@ -414,8 +414,11 @@ func (e *Engine) record(r Result) {
 	e.emit(Event{Kind: "result", Result: &r})
 }
 
-func (e *Engine) fail(op Op, id, src string, level, t int, module string, err error) {
-	r := Result{Op: op, Codec: id, Src: src, Level: level, Threads: t, Module: module, Err: err.Error(), Verified: -1}
+func (e *Engine) fail(op Op, id, src string, level, window, t int, module string, err error) {
+	r := Result{
+		Op: op, Codec: id, Src: src, Level: level, Window: window, Threads: t,
+		Module: module, Err: err.Error(), Verified: -1,
+	}
 	e.results = append(e.results, r)
 	e.emit(Event{Kind: "warn", Msg: fmt.Sprintf("%s %s: %v", op, id, err)})
 }

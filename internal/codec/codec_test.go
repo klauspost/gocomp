@@ -48,7 +48,7 @@ func TestRoundTrip(t *testing.T) {
 			for _, k := range kinds(e.Kinds) {
 				t.Run(fmt.Sprintf("%s/%d/%s", e.ID, lvl.N, k), func(t *testing.T) {
 					t.Parallel()
-					o := Opts{Kind: k, Threads: 4, BlockSize: 64 << 10}
+					o := Opts{Kind: k, Threads: 4}
 					enc, err := e.New(lvl.N, o)
 					if err != nil {
 						t.Fatalf("New: %v", err)
@@ -103,7 +103,7 @@ func TestEncoderReuse(t *testing.T) {
 		for _, k := range kinds(e.Kinds) {
 			t.Run(fmt.Sprintf("%s/%s", e.ID, k), func(t *testing.T) {
 				t.Parallel()
-				o := Opts{Kind: k, Threads: 2, BlockSize: 64 << 10}
+				o := Opts{Kind: k, Threads: 2}
 				enc, err := e.New(lvl.N, o)
 				if err != nil {
 					t.Fatalf("New: %v", err)
@@ -155,6 +155,11 @@ func TestIDsAndLevels(t *testing.T) {
 			if l.Name == "" {
 				t.Errorf("%s: level %d has no name", e.ID, l.N)
 			}
+			// The site hides levels by class, so a store level registered
+			// without one would quietly top every chart again.
+			if stores := l.Name == "store" || l.Name == "uncompressed"; stores != (l.Class == Uncompressed) {
+				t.Errorf("%s: level %d %q has class %s", e.ID, l.N, l.Name, l.Class)
+			}
 		}
 		if e.Module == "" || e.Format == "" || e.Kinds == 0 {
 			t.Errorf("%s: incomplete registration", e.ID)
@@ -190,6 +195,100 @@ func TestBoundIsSane(t *testing.T) {
 				t.Errorf("%s: Bound(%d) = %d, must exceed the input size", e.ID, n, b)
 			}
 		}
+	}
+}
+
+// TestWindows round-trips every encoder at both ends of its window list, and
+// checks the setting reaches the library at all. The input is a random 256KB
+// chunk repeated, which a large window finds and a small one cannot -- every
+// smallest window is below that distance -- and where the window is a block
+// size the framing differs regardless, so the two outputs must differ in size.
+// An adapter that drops Opts.Window passes a round trip and fails this, the way
+// conc_test catches dropped concurrency.
+func TestWindows(t *testing.T) {
+	chunk := make([]byte, 256<<10)
+	corpus.Rand(chunk)
+	src := bytes.Repeat(chunk, 3)
+	for _, e := range Encoders() {
+		if len(e.Windows) == 0 || (e.Slow && testing.Short()) {
+			continue
+		}
+		// Capped because the top zstd and xz sizes would allocate gigabytes to
+		// compress half a megabyte.
+		lo, hi := e.Windows[0], e.Windows[0]
+		for _, w := range e.Windows {
+			if w <= 8<<20 {
+				hi = w
+			}
+		}
+		lvl := windowTestLevel(e)
+		for _, k := range kinds(e.Kinds) {
+			t.Run(fmt.Sprintf("%s/%s", e.ID, k), func(t *testing.T) {
+				t.Parallel()
+				small := roundTrip(t, e, lvl, Opts{Kind: k, Threads: 4, Window: lo}, src)
+				large := roundTrip(t, e, lvl, Opts{Kind: k, Threads: 4, Window: hi}, src)
+				if small == large {
+					t.Errorf("level %d: windows %d and %d both gave %d bytes; Opts.Window is not reaching the library",
+						lvl, lo, hi, small)
+				}
+			})
+		}
+	}
+}
+
+// windowTestLevel avoids store levels, where a window has nothing to find:
+// the level named default, else the middle of the range.
+func windowTestLevel(e Enc) int {
+	for _, l := range e.Levels {
+		if l.Name == "default" {
+			return l.N
+		}
+	}
+	return e.Levels[len(e.Levels)/2].N
+}
+
+// roundTrip encodes src, decodes it with every decoder of the format and
+// returns the compressed size.
+func roundTrip(t *testing.T, e Enc, level int, o Opts, src []byte) int {
+	t.Helper()
+	enc, err := e.New(level, o)
+	if err != nil {
+		t.Fatalf("window %d: New: %v", o.Window, err)
+	}
+	defer enc.Release()
+	comp, err := enc.Encode(make([]byte, 0, e.Bound(len(src))), src)
+	if err != nil {
+		t.Fatalf("window %d: Encode: %v", o.Window, err)
+	}
+	for _, d := range DecodersFor(e.Format, o.Kind) {
+		dec, err := d.New(Opts{Kind: o.Kind, Threads: o.Threads})
+		if err != nil {
+			t.Fatalf("decoder %s New: %v", d.ID, err)
+		}
+		got, err := dec.Decode(make([]byte, 0, len(src)), comp)
+		dec.Release()
+		if err != nil {
+			t.Fatalf("window %d: decoder %s: %v", o.Window, d.ID, err)
+		}
+		if !bytes.Equal(got, src) {
+			t.Fatalf("window %d: decoder %s: round trip mismatch", o.Window, d.ID)
+		}
+	}
+	return len(comp)
+}
+
+// TestRegisterRejectsBadWindows guards the invariant ParseWindows and Expand
+// rely on: a codec's windows are ascending powers of two.
+func TestRegisterRejectsBadWindows(t *testing.T) {
+	for _, ws := range [][]int{{3 << 10}, {64 << 10, 32 << 10}, {1 << 10, 1 << 10}, {0}} {
+		func() {
+			defer func() {
+				if recover() == nil {
+					t.Errorf("windows %v were accepted", ws)
+				}
+			}()
+			RegisterEnc(Enc{ID: "badwin", Windows: ws})
+		}()
 	}
 }
 

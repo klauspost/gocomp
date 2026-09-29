@@ -9,8 +9,10 @@ import (
 	"path/filepath"
 	"sort"
 	"strconv"
+	"strings"
 	"time"
 
+	"github.com/klauspost/compress/zstd"
 	"github.com/zeebo/xxh3"
 )
 
@@ -32,16 +34,16 @@ func Load(ctx context.Context, c *Cache, cp Corpus, prog ProgressFn) (*Data, err
 		d   *Data
 		err error
 	)
+	e := c.Entries[cp.ID]
 	if cp.Kind == KindDir {
 		d, err = loadDir(ctx, cp, path, prog)
 	} else {
-		d, err = loadFile(cp, path, prog)
+		d, err = loadFile(cp, path, max(e.Size, cp.Size), prog)
 	}
 	if err != nil {
 		return nil, err
 	}
 
-	e := c.Entries[cp.ID]
 	e.ID, e.Path, e.Adopted = cp.ID, path, adopted
 	e.Size, e.Files, e.Hash = d.Total, len(d.Files), strconv.FormatUint(d.Hash, 16)
 	if cp.Kind == KindFile {
@@ -62,20 +64,28 @@ func loadSynth(cp Corpus, prog ProgressFn) *Data {
 	}
 }
 
-func loadFile(cp Corpus, path string, prog ProgressFn) (*Data, error) {
+// loadFile reads a plain payload, or decodes a zstd download straight into
+// memory. known is the uncompressed size when the catalog or an earlier load
+// has measured it, else 0.
+func loadFile(cp Corpus, path string, known int64, prog ProgressFn) (*Data, error) {
 	f, err := os.Open(path)
 	if err != nil {
 		return nil, err
 	}
 	defer f.Close()
-	st, err := f.Stat()
-	if err != nil {
-		return nil, err
-	}
-	prog.report(Progress{Corpus: cp.ID, Stage: "read", Total: st.Size()})
 
-	buf := make([]byte, st.Size())
-	if _, err := io.ReadFull(f, buf); err != nil {
+	var buf []byte
+	if strings.EqualFold(filepath.Ext(path), ".zst") {
+		buf, err = decodeZst(cp, f, known, prog)
+	} else {
+		var st os.FileInfo
+		if st, err = f.Stat(); err == nil {
+			prog.report(Progress{Corpus: cp.ID, Stage: "read", Total: st.Size()})
+			buf = make([]byte, st.Size())
+			_, err = io.ReadFull(f, buf)
+		}
+	}
+	if err != nil {
 		return nil, err
 	}
 	cp.Size, cp.Files = int64(len(buf)), 1
@@ -83,6 +93,44 @@ func loadFile(cp Corpus, path string, prog ProgressFn) (*Data, error) {
 		Corpus: cp, File: buf, Total: int64(len(buf)),
 		Hash: xxh3.Hash(buf), Max: len(buf),
 	}, nil
+}
+
+// decodeZst sizes the buffer from known, else from the frame header. Either can
+// be wrong -- a stale catalog entry, a first frame of several -- and that costs
+// a copy at the end, never a wrong corpus: the data is whatever the stream
+// holds, and the hash is taken from it.
+func decodeZst(cp Corpus, f *os.File, known int64, prog ProgressFn) ([]byte, error) {
+	n := known
+	if n <= 0 {
+		var h zstd.Header
+		hdr := make([]byte, zstd.HeaderMaxSize)
+		k, _ := f.ReadAt(hdr, 0)
+		if h.Decode(hdr[:k]) == nil && h.HasFCS {
+			n = int64(h.FrameContentSize)
+		}
+	}
+	zr, err := zstd.NewReader(f, zstd.WithDecoderConcurrency(0))
+	if err != nil {
+		return nil, err
+	}
+	defer zr.Close()
+
+	r := &progressReader{r: zr, total: n, fn: func(done, total int64) {
+		prog.report(Progress{Corpus: cp.ID, Stage: "decompress", Done: done, Total: total})
+	}}
+	buf := make([]byte, n)
+	k, err := io.ReadFull(r, buf)
+	switch err {
+	case nil:
+		rest, err := io.ReadAll(r)
+		if err != nil {
+			return nil, err
+		}
+		return append(buf, rest...), nil
+	case io.EOF, io.ErrUnexpectedEOF:
+		return buf[:k], nil
+	}
+	return nil, err
 }
 
 func loadDir(ctx context.Context, cp Corpus, root string, prog ProgressFn) (*Data, error) {

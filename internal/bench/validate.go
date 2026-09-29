@@ -27,7 +27,7 @@ func (c *compressed) release() {
 // Fixing the producer's thread count is deliberate: it keeps the decode sweep
 // measuring decoder scaling rather than changes in block layout.
 func (e *Engine) compressFor(v Variant) (*compressed, error) {
-	enc, err := v.Enc.New(v.Level.N, e.opts(e.Cfg.SrcThreads))
+	enc, err := v.Enc.New(v.Level.N, e.opts(e.Cfg.SrcThreads, v.Window))
 	if err != nil {
 		return nil, err
 	}
@@ -74,16 +74,16 @@ func (e *Engine) compressFor(v Variant) (*compressed, error) {
 func (e *Engine) validate(v Variant, c *compressed, decs []codec.Dec) error {
 	c.verified = 1
 	for _, dc := range decs {
-		inst, err := dc.New(e.opts(e.Cfg.SrcThreads))
+		inst, err := dc.New(e.opts(e.Cfg.SrcThreads, 0))
 		if err != nil {
 			c.verified = 0
-			return fmt.Errorf("validate %s <- %s: %w", dc.ID, v.ID(), err)
+			return fmt.Errorf("validate %s <- %s: %w", dc.ID, v.Label(), err)
 		}
 		err = e.checkOne(inst, c)
 		inst.Release()
 		if err != nil {
 			c.verified = 0
-			return fmt.Errorf("validate %s <- %s: %w", dc.ID, v.ID(), err)
+			return fmt.Errorf("validate %s <- %s: %w", dc.ID, v.Label(), err)
 		}
 	}
 	return nil

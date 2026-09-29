@@ -13,9 +13,10 @@ import (
 )
 
 type LevelInfo struct {
-	N    int    `json:"n"`
-	Name string `json:"name"`
-	Slow bool   `json:"slow,omitempty"`
+	N     int    `json:"n"`
+	Name  string `json:"name"`
+	Slow  bool   `json:"slow,omitempty"`
+	Class string `json:"class,omitempty"` // "uncompressed" or "special"; absent is regular
 }
 
 // RoleInfo describes one direction of a codec. Encoding and decoding are kept
@@ -77,6 +78,7 @@ type RunStub struct {
 	GOAMD64 string              `json:"goamd64,omitempty"`
 	Bench   string              `json:"bench"`
 	Threads []int               `json:"threads"`
+	Windows []int               `json:"windows"`
 	Codecs  []string            `json:"codecs"`
 	Libs    map[string][]string `json:"libs"`
 	Variant map[string]string   `json:"variant,omitempty"`
@@ -180,7 +182,11 @@ func (ix *Index) RefreshCatalogs() {
 	for _, e := range codec.Encoders() {
 		lv := make([]LevelInfo, 0, len(e.Levels))
 		for _, l := range e.Levels {
-			lv = append(lv, LevelInfo{N: l.N, Name: l.Name, Slow: l.Slow})
+			li := LevelInfo{N: l.N, Name: l.Name, Slow: l.Slow}
+			if l.Class != codec.Regular {
+				li.Class = l.Class.String()
+			}
+			lv = append(lv, li)
 		}
 		note(e.ID, e.Name, e.Impl, e.Module, e.Format,
 			&RoleInfo{Kinds: kindNames(e.Kinds), Conc: kindNames(e.Conc), Slow: e.Slow, Levels: lv}, true)

@@ -31,23 +31,29 @@ func init() {
 	// genuinely different depths, and where hash chains are long the sweep is
 	// the most interesting LZ4 result there is (consensus-db runs 1213 MB/s at
 	// level 1 and 138 MB/s at level 7 to buy 0.4% of ratio).
-	lv := []Level{{0, "fast", false}}
+	lv := []Level{{N: 0, Name: "fast"}}
 	for i := 1; i <= 8; i++ {
-		lv = append(lv, Level{i, strconv.Itoa(i), i == 8})
+		lv = append(lv, Level{N: i, Name: strconv.Itoa(i), Slow: i == 8})
 	}
 
 	RegisterEnc(Enc{
 		ID: "lz4", Name: "LZ4", Impl: "pierrec/lz4", Format: FmtLZ4,
 		Module: "github.com/pierrec/lz4/v4", Kinds: bothKinds, Conc: corpus.KindFile,
 		Levels: lv,
+		// The frame format has exactly these four; the match window is 64KB
+		// whatever the block size.
+		Windows: []int{int(lz4.Block64Kb), int(lz4.Block256Kb), int(lz4.Block1Mb), int(lz4.Block4Mb)},
 		New: func(lvl int, o Opts) (Encoder, error) {
 			w := lz4.NewWriter(nil)
-			// Options survive Reset, so they are applied once here.
-			if err := w.Apply(
-				lz4.BlockSizeOption(lz4.Block4Mb),
+			opts := []lz4.Option{
 				lz4.ConcurrencyOption(o.LibThreads(corpus.KindFile)),
 				lz4.CompressionLevelOption(lz4Level(lvl)),
-			); err != nil {
+			}
+			if o.Window > 0 {
+				opts = append(opts, lz4.BlockSizeOption(lz4.BlockSize(o.Window)))
+			}
+			// Options survive Reset, so they are applied once here.
+			if err := w.Apply(opts...); err != nil {
 				return nil, err
 			}
 			return &streamEnc{rst: w.Reset, w: w, fin: w.Close}, nil

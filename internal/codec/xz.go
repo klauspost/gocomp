@@ -11,14 +11,21 @@ const xzMod = "github.com/ulikunitz/xz"
 
 // xz and lzma2 have no Reset, so a writer is built per call. They are Slow and
 // opt-in, and the construction cost is negligible against their run time.
+//
+// The window is the dictionary capacity, 0 leaving the library's 8MB. The
+// format allows up to 4GB-1, so 2GB is the largest power of two. The library
+// claims a 4KB minimum, but a chunk that does not compress is copied out of the
+// dictionary buffer whole, and a chunk can reach 64KB: anything smaller fails
+// with "insufficient space" on the first incompressible stretch.
 func init() {
+	dicts := pow2s(64<<10, 1<<31)
 	RegisterEnc(Enc{
 		ID: "xz", Name: "xz", Impl: "ulikunitz/xz", Format: FmtXZ,
-		Module: xzMod, Kinds: bothKinds, Slow: true,
+		Module: xzMod, Kinds: bothKinds, Slow: true, Windows: dicts,
 		New: func(lvl int, o Opts) (Encoder, error) {
 			return blockFn{fn: func(dst, src []byte) ([]byte, error) {
 				a := appender{b: dst[:0]}
-				w, err := xz.NewWriter(&a)
+				w, err := xz.WriterConfig{DictCap: o.Window}.NewWriter(&a)
 				if err != nil {
 					return nil, err
 				}
@@ -50,11 +57,11 @@ func init() {
 
 	RegisterEnc(Enc{
 		ID: "lzma2", Name: "LZMA2", Impl: "ulikunitz/xz", Format: FmtLZMA2,
-		Module: xzMod, Kinds: bothKinds, Slow: true,
+		Module: xzMod, Kinds: bothKinds, Slow: true, Windows: dicts,
 		New: func(lvl int, o Opts) (Encoder, error) {
 			return blockFn{fn: func(dst, src []byte) ([]byte, error) {
 				a := appender{b: dst[:0]}
-				w, err := lzma.Writer2Config{}.NewWriter2(&a)
+				w, err := lzma.Writer2Config{DictCap: o.Window}.NewWriter2(&a)
 				if err != nil {
 					return nil, err
 				}

@@ -16,6 +16,7 @@ import (
 type encKey struct {
 	codec   string
 	level   int
+	window  int
 	threads int
 	lib     string
 }
@@ -23,6 +24,7 @@ type encKey struct {
 type decKey struct {
 	codec   string
 	src     string
+	window  int
 	threads int
 	lib     string
 	srcLib  string
@@ -37,11 +39,11 @@ func (r *Run) lib(i int) string {
 }
 
 func (r *Run) encKey(x EncRow) encKey {
-	return encKey{x.Codec, x.Level, x.Threads, r.lib(x.Lib)}
+	return encKey{x.Codec, x.Level, x.Window, x.Threads, r.lib(x.Lib)}
 }
 
 func (r *Run) decKey(x DecRow) decKey {
-	return decKey{x.Codec, x.Src, x.Threads, r.lib(x.Lib), r.lib(x.SrcLib)}
+	return decKey{x.Codec, x.Src, x.Window, x.Threads, r.lib(x.Lib), r.lib(x.SrcLib)}
 }
 
 // gated is the environment the numbers depend on but the run ID deliberately
@@ -59,7 +61,6 @@ func gated(r *Run) [][2]string {
 		{"cgo", strconv.FormatBool(r.Env.CGO)},
 		{"corpus_hash", r.CorpusHash},
 		{"src_threads", strconv.Itoa(r.SrcThreads)},
-		{"block_size", strconv.Itoa(r.BlockSize)},
 		{"numcpu", strconv.Itoa(r.Env.NumCPU)},
 		{"gogc", strconv.Itoa(r.Env.GOGC)},
 		{"gomemlimit", strconv.FormatInt(r.Env.GOMemLimit, 10)},
@@ -186,8 +187,8 @@ func Merge(dir string, r *Run, newRun bool) (MergeResult, error) {
 		cur := &merged.Encode[i]
 		if cur.Out != x.Out {
 			res.Warnings = append(res.Warnings, fmt.Sprintf(
-				"%s level %d threads %d: output size changed %d -> %d with no library change; taking the new row",
-				x.Codec, x.Level, x.Threads, cur.Out, x.Out))
+				"%s level %d window %d threads %d: output size changed %d -> %d with no library change; taking the new row",
+				x.Codec, x.Level, x.Window, x.Threads, cur.Out, x.Out))
 			passes := cur.Passes
 			*cur = x
 			cur.Passes += passes
@@ -257,6 +258,9 @@ func sortRows(r *Run) {
 		if a.Level != b.Level {
 			return a.Level < b.Level
 		}
+		if a.Window != b.Window {
+			return a.Window < b.Window
+		}
 		if a.Threads != b.Threads {
 			return a.Threads < b.Threads
 		}
@@ -269,6 +273,9 @@ func sortRows(r *Run) {
 		}
 		if a.Src != b.Src {
 			return a.Src < b.Src
+		}
+		if a.Window != b.Window {
+			return a.Window < b.Window
 		}
 		if a.Threads != b.Threads {
 			return a.Threads < b.Threads
@@ -288,6 +295,7 @@ func (ix *Index) upsert(r *Run) {
 	}
 
 	threads := map[int]bool{}
+	windows := map[int]bool{}
 	codecs := map[string]bool{}
 	libs := map[string]map[string]bool{}
 	noteLib := func(i int) {
@@ -302,11 +310,13 @@ func (ix *Index) upsert(r *Run) {
 	}
 	for _, x := range r.Encode {
 		threads[x.Threads] = true
+		windows[x.Window] = true
 		codecs[x.Codec] = true
 		noteLib(x.Lib)
 	}
 	for _, x := range r.Decode {
 		threads[x.Threads] = true
+		windows[x.Window] = true
 		codecs[x.Codec] = true
 		noteLib(x.Lib)
 		noteLib(x.SrcLib)
@@ -316,7 +326,7 @@ func (ix *Index) upsert(r *Run) {
 		ID: r.ID, File: "runs/" + r.Corpus + "-" + r.ID + ".json",
 		Corpus: r.Corpus, Kind: r.Kind, Machine: mid,
 		Go: r.Env.Go, GOOS: r.Env.GOOS, GOARCH: r.Env.GOARCH, GOAMD64: r.Env.GOAMD64,
-		Bench: r.Bench, Threads: sortedKeys(threads), Codecs: sortedStrings(codecs),
+		Bench: r.Bench, Threads: sortedKeys(threads), Windows: sortedKeys(windows), Codecs: sortedStrings(codecs),
 		Libs: map[string][]string{}, Variant: r.Variant(),
 		NEncode: len(r.Encode), NDecode: len(r.Decode),
 		Merges: r.Merges, Created: r.Created, Updated: r.Updated,

@@ -10,7 +10,7 @@ import (
 func runFixture(lib string, ns int64, verified int) *Run {
 	r := &Run{
 		ID: "test", Corpus: "demo", Kind: "file", Bench: "1",
-		CorpusHash: "abc", SrcThreads: 8, BlockSize: 4 << 20, MinPasses: 3,
+		CorpusHash: "abc", SrcThreads: 8, MinPasses: 3,
 		Env: sysinfo.Env{
 			Go: "go1.26.1", GOOS: "linux", GOARCH: "amd64", GOAMD64: "v3",
 			NumCPU: 32, GOGC: 100,
@@ -103,7 +103,6 @@ func TestIncompatibleEnvGetsItsOwnRun(t *testing.T) {
 		mutate func(*Run)
 	}{
 		{"goamd64", func(r *Run) { r.Env.GOAMD64 = "v1" }},
-		{"block size", func(r *Run) { r.BlockSize = 64 << 10 }},
 		{"corpus hash", func(r *Run) { r.CorpusHash = "different" }},
 		{"src threads", func(r *Run) { r.SrcThreads = 1 }},
 		{"build tags", func(r *Run) { r.Env.Tags = "withasm" }},
@@ -222,6 +221,38 @@ func TestMergeSurvivesOutOfRangeLibIndex(t *testing.T) {
 	}
 	if _, err := Merge(dir, runFixture("v1.0.0", 900, 1), false); err != nil {
 		t.Fatalf("merging onto a file with a bad lib index: %v", err)
+	}
+}
+
+// A window is a different setting, so it coexists with the default the same
+// way a library version does, and the index learns it exists.
+func TestMergeWindowsCoexist(t *testing.T) {
+	dir := t.TempDir()
+	if _, err := Merge(dir, runFixture("v1.0.0", 1000, 1), false); err != nil {
+		t.Fatal(err)
+	}
+	win := runFixture("v1.0.0", 900, 1)
+	win.Encode[0].Window, win.Decode[0].Window = 64<<10, 64<<10
+	res, err := Merge(dir, win, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if res.Added != 2 {
+		t.Fatalf("a new window should add rows, got %+v", res)
+	}
+	got, _ := LoadRun(dir, "demo", "test")
+	if len(got.Encode) != 2 || len(got.Decode) != 2 {
+		t.Fatalf("got %d/%d rows, want one per window", len(got.Encode), len(got.Decode))
+	}
+	if got.Encode[0].NS != 1000 || got.Encode[1].Window != 64<<10 || got.Encode[1].NS != 900 {
+		t.Errorf("windows did not keep their own timings: %+v", got.Encode)
+	}
+	ix, err := LoadIndex(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if w := ix.Runs[0].Windows; len(w) != 2 || w[0] != 0 || w[1] != 64<<10 {
+		t.Errorf("index windows = %v, want [0 65536]", w)
 	}
 }
 

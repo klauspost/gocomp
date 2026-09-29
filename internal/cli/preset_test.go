@@ -59,7 +59,7 @@ func TestPresetFillsTheRunOptions(t *testing.T) {
 		t.Errorf("config did not come through: %+v", o)
 	}
 	// Untouched by the preset, so still the flag default.
-	if o.block != 4<<20 || o.out != "web/data" {
+	if o.windows != "default" || o.out != "web/data" {
 		t.Errorf("a preset must not disturb defaults it does not set: %+v", o)
 	}
 }

@@ -27,13 +27,25 @@ func (o Op) String() string {
 	return "c"
 }
 
-// Variant is one encoder at one level, the unit a decode measurement names.
+// Variant is one encoder at one level and window, the unit a decode
+// measurement names.
 type Variant struct {
-	Enc   codec.Enc
-	Level codec.Level
+	Enc    codec.Enc
+	Level  codec.Level
+	Window int // 0 is the codec's default
 }
 
+// ID is the stored source name. It leaves the window out: that has a column of
+// its own, so "zskp-3" keeps meaning what it meant before windows existed.
 func (v Variant) ID() string { return codec.Variant(v.Enc.ID, v.Level.N) }
+
+// Label is the ID with the window, for progress and warnings.
+func (v Variant) Label() string {
+	if v.Window == 0 {
+		return v.ID()
+	}
+	return v.ID() + " w" + WindowName(v.Window)
+}
 
 // Config controls scheduling and what gets measured.
 type Config struct {
@@ -43,7 +55,7 @@ type Config struct {
 	MinWall    time.Duration // adaptive target wall time per measurement
 	MaxPasses  int
 	MaxJob     time.Duration // a first pass longer than this gets no repeats
-	BlockSize  int
+	Windows    []int         // the window sweep; 0 is each codec's default
 	Validate   bool
 	Collapse   bool // run codecs that declare no concurrency at one thread value
 	Encode     bool
@@ -55,7 +67,7 @@ func DefaultConfig(numCPU int) Config {
 	return Config{
 		Threads: []int{numCPU}, SrcThreads: numCPU,
 		Passes: 3, MinWall: 2 * time.Second, MaxPasses: 25, MaxJob: 5 * time.Minute,
-		BlockSize: 4 << 20, Encode: true, Decode: true,
+		Windows: []int{0}, Encode: true, Decode: true,
 	}
 }
 
@@ -65,6 +77,7 @@ type Result struct {
 	Codec     string // encoder id, or decoder id for OpDecode
 	Src       string // OpDecode: the encoder variant that produced the input
 	Level     int
+	Window    int // OpDecode: the window the source was encoded with
 	Threads   int
 	Module    string
 	SrcModule string

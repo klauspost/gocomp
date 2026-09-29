@@ -139,6 +139,7 @@ function describeBar(r, emph) {
       { value: fmt.bytes(comp), name: `from ${fmt.bytes(plain)}` },
     ],
     note: `${r.threads} thread${r.threads === 1 ? '' : 's'} · best of ${r.passes}`
+      + `${r.window ? ` · ${fmt.windowName(r.window)} window` : ''}`
       + ` · ${r.go} · ${r.libVer || 'unknown library'} · ${clickHint(emph)}`,
   };
 }
@@ -173,6 +174,7 @@ export function paretoCard(ctx) {
       datasets.push({
         label: s.label,
         __label: s.label,
+        __endLabel: s.endLabel,
         __emph: col.emph,
         __entity: s.entity,
         __markColor: col.emph ? col.stroke : t.dim,
@@ -246,6 +248,7 @@ export function paretoCard(ctx) {
     const head = r.levelName ? `${ds.__label} · ${r.levelName}` : ds.__label;
     const note = [
       r.src ? `decoding ${r.srcLabel}` : null,
+      r.window ? `${fmt.windowName(r.window)} window` : null,
       `${r.threads} thread${r.threads === 1 ? '' : 's'} · best of ${r.passes}`,
       clickHint(ds.__emph),
     ].filter(Boolean).join(' · ');
@@ -350,6 +353,7 @@ export function measurementColumns(dim) {
     { key: 'op', label: 'Op', get: (r) => (r.op === 'c' ? 'compress' : 'decompress') },
     { key: 'corpus', label: 'Corpus', get: (r) => r.corpus },
     { key: 'threads', label: 'Threads', num: true, get: (r) => String(r.threads) },
+    { key: 'window', label: 'Window', num: true, get: (r) => fmt.windowName(r.window) },
     { key: 'ratio', label: 'Ratio', num: true, get: (r) => fmtRatio(r.ratio) },
     { key: 'pct', label: '% reduction', num: true, get: (r) => r.pct.toFixed(2) },
     { key: 'cspeed', label: 'MB/s', num: true, get: (r) => (r.op === 'c' ? r.cspeed : r.dspeed).toFixed(1) },
@@ -395,12 +399,13 @@ export function barsCard(ctx) {
       const top = rows.slice(0, 24);
 
       // Codec and level alone repeat as soon as anything else is in scope: a
-      // thread sweep, two Go versions, two library versions. Whatever actually
-      // varies among the bars on screen joins the label, so no two bars are
-      // labelled the same.
+      // thread sweep, a window sweep, two Go versions, two library versions.
+      // Whatever actually varies among the bars on screen joins the label, so
+      // no two bars are labelled the same.
       const varies = (get) => new Set(top.map((x) => get(x.r))).size > 1;
       const extra = [
         [varies((r) => r.threads), (r) => `${r.threads}t`],
+        [varies((r) => r.window), (r) => `w${fmt.windowName(r.window)}`],
         [varies((r) => r.go), (r) => r.go],
         [varies((r) => r.libVer), (r) => r.libVer],
       ].filter(([on]) => on);
@@ -534,6 +539,7 @@ export function threadsCard(db, ctx) {
         datasets.push({
           label: s.label,
           __label: s.label,
+          __endLabel: s.endLabel,
           __emph: col.emph,
           __entity: s.entity,
           __markColor: col.emph ? col.stroke : t.dim,

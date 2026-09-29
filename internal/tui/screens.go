@@ -7,6 +7,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/klauspost/compress-site/internal/bench"
 	"github.com/klauspost/compress-site/internal/corpus"
 	"github.com/pbnjay/memory"
 )
@@ -346,6 +347,15 @@ func (m *Model) buildFields() {
 			set: func(s string) {
 				if v := parseInts(s); len(v) > 0 {
 					m.cfg.Threads = v
+				}
+			},
+		},
+		{
+			label: "window sizes (-window)", kind: "text",
+			get: func() string { return bench.WindowSpec(m.cfg.Windows) },
+			set: func(s string) {
+				if w, err := bench.ParseWindows(s); err == nil {
+					m.cfg.Windows = w
 				}
 			},
 		},

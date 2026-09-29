@@ -156,6 +156,9 @@ func corpusRemove(cache *corpus.Cache, args []string) error {
 		if err := os.RemoveAll(path); err != nil {
 			return err
 		}
+		// A corpus read from its download resolves to the download, so an
+		// extracted copy an older build left behind has to be named here.
+		_ = os.RemoveAll(filepath.Join(cache.Dir, "ex", c.ID))
 		if c.Remote != "" {
 			_ = os.Remove(filepath.Join(cache.Dir, "dl", c.Remote))
 		}

@@ -103,6 +103,5 @@
   "passes": 3,
   "min_wall": "2s",
   "max_passes": 25,
-  "max_job": "5m0s",
-  "block": 4194304
+  "max_job": "5m0s"
 }

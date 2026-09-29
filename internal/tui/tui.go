@@ -295,7 +295,8 @@ func (m *Model) selection() ([]corpus.Corpus, int, int, int64) {
 	}
 	var enc, dec int
 	for _, cp := range out {
-		e, d := bench.Plan(m.cfg, cp.Kind, m.variants(cp.Kind))
+		// An upper bound until the corpus is loaded and oversize windows go.
+		e, d := bench.Plan(m.cfg, cp.Kind, m.cfg.Expand(m.variants(cp.Kind), 0))
 		enc, dec = enc+e, dec+d
 	}
 	return out, enc, dec, peak

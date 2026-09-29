@@ -32,7 +32,7 @@ type runOpts struct {
 	minWall  time.Duration
 	maxPass  int
 	maxJob   time.Duration
-	block    int
+	windows  string
 	slow     bool
 	collapse bool
 	validate bool
@@ -58,7 +58,7 @@ func (o *runOpts) bind(fs *flag.FlagSet) {
 	fs.DurationVar(&o.minWall, "min", 2*time.Second, "adaptive target wall time per measurement")
 	fs.IntVar(&o.maxPass, "max-passes", 25, "cap on adaptive passes")
 	fs.DurationVar(&o.maxJob, "max-job", 5*time.Minute, "a first pass longer than this gets no repeats")
-	fs.IntVar(&o.block, "block", 4<<20, "stream block size for concurrent codecs")
+	fs.StringVar(&o.windows, "window", "default", "window/block size sweep, powers of two: \"default,64K,1M,8M\"; sizes a codec does not take are skipped")
 	fs.BoolVar(&o.slow, "slow", false, "include codecs and levels marked slow (xz, brotli 10-11)")
 	fs.BoolVar(&o.collapse, "collapse", false, "run codecs that declare no concurrency at one thread value only")
 	fs.BoolVar(&o.validate, "validate", false, "xxh3 round-trip check for every encoder variant")
@@ -116,8 +116,8 @@ func (o *runOpts) loadPreset(fs *flag.FlagSet) error {
 	if p.MaxJob > 0 {
 		o.maxJob = time.Duration(p.MaxJob)
 	}
-	if p.Block > 0 {
-		o.block = p.Block
+	if s := p.WindowSpec(); s != "" {
+		o.windows = s
 	}
 	o.validate, o.collapse, o.slow = p.Validate, p.Collapse, p.Slow
 
@@ -201,6 +201,9 @@ func runBench(o runOpts) error {
 			return nil
 		}
 		variants, err := variantsFor(sels, mode, cp.Kind, o.slow)
+		if err == nil && len(cfg.Expand(variants, 0)) == 0 {
+			err = fmt.Errorf("no selected codec takes any of the windows %s", o.windows)
+		}
 		if err != nil {
 			if !o.quiet {
 				fmt.Fprintf(os.Stderr, "skipping %s: %v\n", cp.ID, err)
@@ -223,6 +226,9 @@ func runBench(o runOpts) error {
 			return err
 		}
 
+		// Only now is the largest input known, which decides the windows that
+		// can still differ from each other.
+		variants = cfg.Expand(variants, data.Max)
 		eng := &bench.Engine{Cfg: cfg, Data: data, Variants: variants}
 		if !o.quiet {
 			enc, dec := bench.Plan(cfg, data.Kind, variants)
@@ -283,8 +289,13 @@ func (o runOpts) config() (bench.Config, error) {
 		return cfg, fmt.Errorf("-op selected nothing")
 	}
 	cfg.Passes, cfg.MinWall, cfg.MaxPasses = o.passes, o.minWall, o.maxPass
-	cfg.MaxJob, cfg.BlockSize = o.maxJob, o.block
+	cfg.MaxJob = o.maxJob
 	cfg.Validate, cfg.Collapse = o.validate, o.collapse
+	w, err := bench.ParseWindows(o.windows)
+	if err != nil {
+		return cfg, err
+	}
+	cfg.Windows = w
 	return cfg, nil
 }
 
@@ -349,7 +360,9 @@ func dryRun(o runOpts, cfg bench.Config, sels []codecSel, mode levelMode, corpor
 		if err != nil {
 			continue
 		}
-		enc, dec := bench.Plan(cfg, cp.Kind, variants)
+		// An upper bound: windows past the largest input are trimmed after
+		// loading, and a directory's largest member is not known before that.
+		enc, dec := bench.Plan(cfg, cp.Kind, cfg.Expand(variants, 0))
 		totalEnc, totalDec = totalEnc+enc, totalDec+dec
 		_, _, cached := cache.Resolve(cp)
 		fmt.Fprintf(tw, "%s\t%s\t%s\t%t\t%d\t%d\t%s\n",
@@ -361,18 +374,30 @@ func dryRun(o runOpts, cfg bench.Config, sels []codecSel, mode levelMode, corpor
 	fmt.Println()
 	fmt.Println("concurrency paths (threads only matter where concurrent is true):")
 	ctw := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-	fmt.Fprintln(ctw, "codec\trole\tformat\tfile\tdir\tthreads swept")
+	fmt.Fprintln(ctw, "codec\trole\tformat\tfile\tdir\tthreads swept\twindows")
 	for _, e := range codec.Encoders() {
-		fmt.Fprintf(ctw, "%s\t%s\t%s\t%t\t%t\t%v\n", e.ID, "encode", e.Format,
+		fmt.Fprintf(ctw, "%s\t%s\t%s\t%t\t%t\t%v\t%s\n", e.ID, "encode", e.Format,
 			e.Concurrent(corpus.KindFile), e.Concurrent(corpus.KindDir),
-			cfg.ThreadsFor(concIn(corpora, e.Conc)))
+			cfg.ThreadsFor(concIn(corpora, e.Conc)), windowRange(e.Windows))
 	}
 	for _, d := range codec.Decoders() {
-		fmt.Fprintf(ctw, "%s\t%s\t%s\t%t\t%t\t%v\n", d.ID, "decode", d.Format,
+		fmt.Fprintf(ctw, "%s\t%s\t%s\t%t\t%t\t%v\t\n", d.ID, "decode", d.Format,
 			d.Concurrent(corpus.KindFile), d.Concurrent(corpus.KindDir),
 			cfg.ThreadsFor(concIn(corpora, d.Conc)))
 	}
 	return ctw.Flush()
+}
+
+// windowRange shows a codec's windows as bounds when they are every power of
+// two in between, and as the list when they are not (lz4).
+func windowRange(ws []int) string {
+	switch {
+	case len(ws) == 0:
+		return "fixed"
+	case ws[len(ws)-1] == ws[0]<<(len(ws)-1):
+		return bench.WindowName(ws[0]) + "-" + bench.WindowName(ws[len(ws)-1])
+	}
+	return bench.WindowSpec(ws)
 }
 
 // concIn reports whether conc covers any selected corpus's kind, so the dry
@@ -409,6 +434,7 @@ func (w *writer) write(cp corpus.Corpus, r bench.Result) {
 			Codec  string  `json:"codec"`
 			Src    string  `json:"src,omitempty"`
 			Level  int     `json:"level"`
+			Window int     `json:"window"`
 			T      int     `json:"threads"`
 			In     int64   `json:"in"`
 			Out    int64   `json:"out"`
@@ -419,31 +445,32 @@ func (w *writer) write(cp corpus.Corpus, r bench.Result) {
 			Ratio  float64 `json:"ratio"`
 			Err    string  `json:"err,omitempty"`
 		}{
-			cp.ID, r.Op.String(), r.Codec, r.Src, r.Level, r.Threads, r.In, r.Out,
+			cp.ID, r.Op.String(), r.Codec, r.Src, r.Level, r.Window, r.Threads, r.In, r.Out,
 			int64(r.Best), r.Passes, r.SD, r.MBps(), r.Ratio(), r.Err,
 		})
 		fmt.Println(string(b))
 		return
 	}
 	if !w.header {
-		fmt.Fprintln(w.tw, "corpus\top\tcodec\tlevel\tsrc\tthr\tin\tout\tratio\tms\tMB/s\tn")
+		fmt.Fprintln(w.tw, "corpus\top\tcodec\tlevel\tsrc\twin\tthr\tin\tout\tratio\tms\tMB/s\tn")
 		w.header = true
 	}
 	// A decode row's level belongs to its source encoder, which src already
-	// names; repeating it in the level column only invites misreading.
-	level, src := strconv.Itoa(r.Level), r.Src
+	// names; repeating it in the level column only invites misreading. The
+	// window stays on both: src does not carry it.
+	level, src, win := strconv.Itoa(r.Level), r.Src, bench.WindowName(r.Window)
 	if r.Op == bench.OpDecode {
 		level = "-"
 	} else {
 		src = "-"
 	}
 	if r.Err != "" {
-		fmt.Fprintf(w.tw, "%s\t%s\t%s\t%s\t%s\t%d\tERROR: %s\n",
-			cp.ID, r.Op, r.Codec, level, src, r.Threads, r.Err)
+		fmt.Fprintf(w.tw, "%s\t%s\t%s\t%s\t%s\t%s\t%d\tERROR: %s\n",
+			cp.ID, r.Op, r.Codec, level, src, win, r.Threads, r.Err)
 		return
 	}
-	fmt.Fprintf(w.tw, "%s\t%s\t%s\t%s\t%s\t%d\t%d\t%d\t%.3f\t%.3f\t%.02f\t%d\n",
-		cp.ID, r.Op, r.Codec, level, src, r.Threads, r.In, r.Out,
+	fmt.Fprintf(w.tw, "%s\t%s\t%s\t%s\t%s\t%s\t%d\t%d\t%d\t%.3f\t%.3f\t%.02f\t%d\n",
+		cp.ID, r.Op, r.Codec, level, src, win, r.Threads, r.In, r.Out,
 		r.Ratio(), float64(r.Best.Nanoseconds())/1e6, r.MBps(), r.Passes)
 }
 

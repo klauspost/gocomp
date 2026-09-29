@@ -24,15 +24,17 @@ const bothKinds = corpus.KindFile | corpus.KindDir
 func deflateLevels(stateless bool, def int) []Level {
 	var lv []Level
 	if stateless {
-		lv = append(lv, Level{-3, "stateless", false})
+		lv = append(lv, Level{N: -3, Name: "stateless", Class: Special})
 	}
-	lv = append(lv, Level{-2, "huffman", false}, Level{0, "store", false})
+	lv = append(lv,
+		Level{N: -2, Name: "huffman", Class: Special},
+		Level{N: 0, Name: "store", Class: Uncompressed})
 	for i := 1; i <= 9; i++ {
 		name := strconv.Itoa(i)
 		if i == def {
 			name = "default"
 		}
-		lv = append(lv, Level{i, name, false})
+		lv = append(lv, Level{N: i, Name: name})
 	}
 	return lv
 }
@@ -84,14 +86,24 @@ func init() {
 		// Blocks are only split within a single stream, so many small files
 		// give it nothing to parallelise.
 		Conc: corpus.KindFile, Levels: deflateLevels(false, 5), // klauspost/compress/flate
+		// The block is the unit split across goroutines; the deflate window
+		// stays 32KB. SetConcurrency rejects a block at or below pgzip's 16KB
+		// tail, and swallowing that error would leave concurrency at Reset's
+		// default, so the list starts above it. pgzip sets no upper limit;
+		// 64MB is already a 2GB working set at 32 threads.
+		Windows: pow2s(32<<10, 64<<20),
 		New: func(lvl int, o Opts) (Encoder, error) {
 			w, err := pgz.NewWriterLevel(nil, lvl)
 			if err != nil {
 				return nil, err
 			}
-			// SetConcurrency rejects a block size at or below pgzip's 16KB tail,
-			// and swallowing that error leaves concurrency at Reset's default.
-			bs := max(o.BlockSize, 64<<10)
+			// SetConcurrency takes the block size along with the thread count,
+			// so the default has to be spelled out: it is pgzip's own
+			// defaultBlockSize, which the package does not export.
+			bs := o.Window
+			if bs == 0 {
+				bs = 1 << 20
+			}
 			// Reset resets concurrency to its own defaults, so re-apply every time.
 			rst := func(out io.Writer) {
 				w.Reset(out)

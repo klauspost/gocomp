@@ -32,7 +32,7 @@ func TestConcurrencyDeclarations(t *testing.T) {
 	src := realisticData(concProbeSize)
 
 	measure := func(e Enc, lvl, threads int) time.Duration {
-		o := Opts{Kind: corpus.KindFile, Threads: threads, BlockSize: 4 << 20}
+		o := Opts{Kind: corpus.KindFile, Threads: threads}
 		enc, err := e.New(lvl, o)
 		if err != nil {
 			t.Fatalf("%s: %v", e.ID, err)

@@ -54,12 +54,15 @@ func Fetch(ctx context.Context, c *Cache, cp Corpus, prog ProgressFn) error {
 		return fmt.Errorf("downloading %s: %w", cp.URL(), err)
 	}
 
-	dst := c.exPath(cp.ID)
-	if err := os.MkdirAll(filepath.Dir(dst), 0o755); err != nil {
-		return err
-	}
-	if err := extract(archive, cp, dst, prog); err != nil {
-		return fmt.Errorf("extracting %s: %w", cp.Remote, err)
+	dst := archive
+	if !cp.direct() {
+		dst = c.exPath(cp.ID)
+		if err := os.MkdirAll(filepath.Dir(dst), 0o755); err != nil {
+			return err
+		}
+		if err := extract(archive, cp, dst, prog); err != nil {
+			return fmt.Errorf("extracting %s: %w", cp.Remote, err)
+		}
 	}
 
 	st, _ := os.Stat(archive)
