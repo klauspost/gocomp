@@ -8,6 +8,7 @@
     "github-ranks",
     "gob-stream",
     "nyc-taxi",
+    "rand2gb",
     "10gb-tar",
     "consensus-db",
     "github-june",
@@ -71,5 +72,13 @@
   "passes": 3,
   "min_wall": "2s",
   "max_passes": 25,
-  "max_job": "5m0s"
+  "max_job": "5m0s",
+  "windows": [
+    "64K",
+    "512K",
+    "1M",
+    "2M",
+    "4M",
+    "8M"
+  ]
 }

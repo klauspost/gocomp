@@ -1,6 +1,6 @@
 {
  "schema": 2,
- "generated": "2026-09-29T18:32:42Z",
+ "generated": "2026-10-01T07:10:10Z",
  "formats": [
   {
    "id": "brotli",
@@ -75,53 +75,65 @@
     "levels": [
      {
       "n": 0,
-      "name": "0"
+      "name": "0",
+      "window": 4194304
      },
      {
       "n": 1,
-      "name": "1"
+      "name": "1",
+      "window": 4194304
      },
      {
       "n": 2,
-      "name": "2"
+      "name": "2",
+      "window": 4194304
      },
      {
       "n": 3,
-      "name": "3"
+      "name": "3",
+      "window": 4194304
      },
      {
       "n": 4,
-      "name": "4"
+      "name": "4",
+      "window": 4194304
      },
      {
       "n": 5,
-      "name": "5"
+      "name": "5",
+      "window": 4194304
      },
      {
       "n": 6,
-      "name": "6"
+      "name": "6",
+      "window": 4194304
      },
      {
       "n": 7,
-      "name": "7"
+      "name": "7",
+      "window": 4194304
      },
      {
       "n": 8,
-      "name": "8"
+      "name": "8",
+      "window": 4194304
      },
      {
       "n": 9,
-      "name": "9"
+      "name": "9",
+      "window": 4194304
      },
      {
       "n": 10,
       "name": "10",
-      "slow": true
+      "slow": true,
+      "window": 4194304
      },
      {
       "n": 11,
       "name": "11",
-      "slow": true
+      "slow": true,
+      "window": 4194304
      }
     ]
    },
@@ -562,48 +574,59 @@
      {
       "n": -2,
       "name": "huffman",
-      "class": "special"
+      "class": "special",
+      "window": 1048576
      },
      {
       "n": 0,
       "name": "store",
-      "class": "uncompressed"
+      "class": "uncompressed",
+      "window": 1048576
      },
      {
       "n": 1,
-      "name": "1"
+      "name": "1",
+      "window": 1048576
      },
      {
       "n": 2,
-      "name": "2"
+      "name": "2",
+      "window": 1048576
      },
      {
       "n": 3,
-      "name": "3"
+      "name": "3",
+      "window": 1048576
      },
      {
       "n": 4,
-      "name": "4"
+      "name": "4",
+      "window": 1048576
      },
      {
       "n": 5,
-      "name": "default"
+      "name": "default",
+      "window": 1048576
      },
      {
       "n": 6,
-      "name": "6"
+      "name": "6",
+      "window": 1048576
      },
      {
       "n": 7,
-      "name": "7"
+      "name": "7",
+      "window": 1048576
      },
      {
       "n": 8,
-      "name": "8"
+      "name": "8",
+      "window": 1048576
      },
      {
       "n": 9,
-      "name": "9"
+      "name": "9",
+      "window": 1048576
      }
     ]
    },
@@ -632,40 +655,49 @@
     "levels": [
      {
       "n": 0,
-      "name": "fast"
+      "name": "fast",
+      "window": 4194304
      },
      {
       "n": 1,
-      "name": "1"
+      "name": "1",
+      "window": 4194304
      },
      {
       "n": 2,
-      "name": "2"
+      "name": "2",
+      "window": 4194304
      },
      {
       "n": 3,
-      "name": "3"
+      "name": "3",
+      "window": 4194304
      },
      {
       "n": 4,
-      "name": "4"
+      "name": "4",
+      "window": 4194304
      },
      {
       "n": 5,
-      "name": "5"
+      "name": "5",
+      "window": 4194304
      },
      {
       "n": 6,
-      "name": "6"
+      "name": "6",
+      "window": 4194304
      },
      {
       "n": 7,
-      "name": "7"
+      "name": "7",
+      "window": 4194304
      },
      {
       "n": 8,
       "name": "8",
-      "slow": true
+      "slow": true,
+      "window": 4194304
      }
     ]
    },
@@ -695,7 +727,8 @@
     "levels": [
      {
       "n": 0,
-      "name": "default"
+      "name": "default",
+      "window": 8388608
      }
     ]
    },
@@ -725,24 +758,29 @@
     "levels": [
      {
       "n": -1,
-      "name": "superfast"
+      "name": "superfast",
+      "window": 2097152
      },
      {
       "n": 0,
       "name": "uncompressed",
-      "class": "uncompressed"
+      "class": "uncompressed",
+      "window": 2097152
      },
      {
       "n": 1,
-      "name": "fastest"
+      "name": "fastest",
+      "window": 2097152
      },
      {
       "n": 2,
-      "name": "balanced"
+      "name": "balanced",
+      "window": 2097152
      },
      {
       "n": 3,
-      "name": "smallest"
+      "name": "smallest",
+      "window": 2097152
      }
     ]
    },
@@ -811,19 +849,23 @@
      {
       "n": 0,
       "name": "uncompressed",
-      "class": "uncompressed"
+      "class": "uncompressed",
+      "window": 1048576
      },
      {
       "n": 1,
-      "name": "default"
+      "name": "default",
+      "window": 1048576
      },
      {
       "n": 2,
-      "name": "better"
+      "name": "better",
+      "window": 1048576
      },
      {
       "n": 3,
-      "name": "best"
+      "name": "best",
+      "window": 1048576
      }
     ]
    },
@@ -888,19 +930,23 @@
      {
       "n": 0,
       "name": "uncompressed",
-      "class": "uncompressed"
+      "class": "uncompressed",
+      "window": 65528
      },
      {
       "n": 1,
-      "name": "default"
+      "name": "default",
+      "window": 65528
      },
      {
       "n": 2,
-      "name": "better"
+      "name": "better",
+      "window": 65528
      },
      {
       "n": 3,
-      "name": "best"
+      "name": "best",
+      "window": 65528
      }
     ]
    }
@@ -1022,7 +1068,8 @@
     "levels": [
      {
       "n": 0,
-      "name": "default"
+      "name": "default",
+      "window": 8388608
      }
     ]
    },
@@ -1055,39 +1102,48 @@
      },
      {
       "n": 1,
-      "name": "1"
+      "name": "1",
+      "window": 2097152
      },
      {
       "n": 2,
-      "name": "2"
+      "name": "2",
+      "window": 3145728
      },
      {
       "n": 3,
-      "name": "default"
+      "name": "default",
+      "window": 4194304
      },
      {
       "n": 4,
-      "name": "4"
+      "name": "4",
+      "window": 4194304
      },
      {
       "n": 5,
-      "name": "5"
+      "name": "5",
+      "window": 4194304
      },
      {
       "n": 6,
-      "name": "6"
+      "name": "6",
+      "window": 5242880
      },
      {
       "n": 7,
-      "name": "7"
+      "name": "7",
+      "window": 6291456
      },
      {
       "n": 8,
-      "name": "8"
+      "name": "8",
+      "window": 7340032
      },
      {
       "n": 9,
-      "name": "9"
+      "name": "9",
+      "window": 8388608
      }
     ]
    },
@@ -1116,19 +1172,23 @@
     "levels": [
      {
       "n": 1,
-      "name": "fastest"
+      "name": "fastest",
+      "window": 4194304
      },
      {
       "n": 2,
-      "name": "default"
+      "name": "default",
+      "window": 8388608
      },
      {
       "n": 3,
-      "name": "better"
+      "name": "better",
+      "window": 8388608
      },
      {
       "n": 4,
-      "name": "best"
+      "name": "best",
+      "window": 8388608
      }
     ]
    },
@@ -1606,13 +1666,15 @@
      "v1.20.1"
     ],
     "github.com/klauspost/pgzip": [
-     "v1.2.6"
+     "v1.2.6",
+     "v1.2.7"
     ],
     "github.com/klauspost/stdgozstd": [
      "v0.0.0-20260722174150-eb4821197265"
     ],
     "github.com/minio/minlz": [
-     "v1.2.0"
+     "v1.2.0",
+     "v1.2.1"
     ],
     "github.com/pierrec/lz4/v4": [
      "v4.1.30"
@@ -1632,11 +1694,11 @@
     "numcpu": "32",
     "src_threads": "16"
    },
-   "n_encode": 126,
-   "n_decode": 144,
-   "merges": 2,
+   "n_encode": 208,
+   "n_decode": 231,
+   "merges": 5,
    "created": "2026-09-23T18:47:02Z",
-   "updated": "2026-09-29T13:38:52Z"
+   "updated": "2026-09-30T20:11:56Z"
   },
   {
    "id": "1zmox5zrt1rsn-20kamtrkrbpwm",
@@ -1887,6 +1949,7 @@
    ],
    "windows": [
     0,
+    65536,
     524288,
     1048576,
     2097152,
@@ -1915,13 +1978,15 @@
      "v1.20.1"
     ],
     "github.com/klauspost/pgzip": [
-     "v1.2.6"
+     "v1.2.6",
+     "v1.2.7"
     ],
     "github.com/klauspost/stdgozstd": [
      "v0.0.0-20260722174150-eb4821197265"
     ],
     "github.com/minio/minlz": [
-     "v1.2.0"
+     "v1.2.0",
+     "v1.2.1"
     ],
     "github.com/pierrec/lz4/v4": [
      "v4.1.30"
@@ -1941,11 +2006,11 @@
     "numcpu": "32",
     "src_threads": "16"
    },
-   "n_encode": 107,
-   "n_decode": 155,
-   "merges": 1,
+   "n_encode": 189,
+   "n_decode": 237,
+   "merges": 4,
    "created": "2026-09-23T16:13:56Z",
-   "updated": "2026-09-29T11:30:40Z"
+   "updated": "2026-09-30T20:06:40Z"
   },
   {
    "id": "11u1m7jbmgnj2",
@@ -2115,6 +2180,7 @@
    ],
    "windows": [
     0,
+    65536,
     524288,
     1048576,
     2097152,
@@ -2143,13 +2209,15 @@
      "v1.20.1"
     ],
     "github.com/klauspost/pgzip": [
-     "v1.2.6"
+     "v1.2.6",
+     "v1.2.7"
     ],
     "github.com/klauspost/stdgozstd": [
      "v0.0.0-20260722174150-eb4821197265"
     ],
     "github.com/minio/minlz": [
-     "v1.2.0"
+     "v1.2.0",
+     "v1.2.1"
     ],
     "github.com/pierrec/lz4/v4": [
      "v4.1.30"
@@ -2169,11 +2237,11 @@
     "numcpu": "32",
     "src_threads": "16"
    },
-   "n_encode": 107,
-   "n_decode": 135,
-   "merges": 2,
+   "n_encode": 189,
+   "n_decode": 217,
+   "merges": 5,
    "created": "2026-09-23T16:42:41Z",
-   "updated": "2026-09-29T11:49:23Z"
+   "updated": "2026-09-30T20:07:35Z"
   },
   {
    "id": "1rxejhkl4h7xx",
@@ -2220,13 +2288,15 @@
      "v1.20.1"
     ],
     "github.com/klauspost/pgzip": [
-     "v1.2.6"
+     "v1.2.6",
+     "v1.2.7"
     ],
     "github.com/klauspost/stdgozstd": [
      "v0.0.0-20260722174150-eb4821197265"
     ],
     "github.com/minio/minlz": [
-     "v1.2.0"
+     "v1.2.0",
+     "v1.2.1"
     ],
     "github.com/pierrec/lz4/v4": [
      "v4.1.30"
@@ -2246,11 +2316,11 @@
     "numcpu": "32",
     "src_threads": "16"
    },
-   "n_encode": 116,
-   "n_decode": 63,
-   "merges": 1,
+   "n_encode": 203,
+   "n_decode": 153,
+   "merges": 4,
    "created": "2026-09-23T20:03:09Z",
-   "updated": "2026-09-29T14:22:34Z"
+   "updated": "2026-09-30T20:15:02Z"
   },
   {
    "id": "1rxejhkl4h7xx-1mzmj1sxvwnjw",
@@ -2501,6 +2571,7 @@
    ],
    "windows": [
     0,
+    65536,
     524288,
     1048576,
     2097152,
@@ -2529,13 +2600,15 @@
      "v1.20.1"
     ],
     "github.com/klauspost/pgzip": [
-     "v1.2.6"
+     "v1.2.6",
+     "v1.2.7"
     ],
     "github.com/klauspost/stdgozstd": [
      "v0.0.0-20260722174150-eb4821197265"
     ],
     "github.com/minio/minlz": [
-     "v1.2.0"
+     "v1.2.0",
+     "v1.2.1"
     ],
     "github.com/pierrec/lz4/v4": [
      "v4.1.30"
@@ -2555,11 +2628,11 @@
     "numcpu": "32",
     "src_threads": "16"
    },
-   "n_encode": 107,
-   "n_decode": 155,
-   "merges": 1,
+   "n_encode": 189,
+   "n_decode": 237,
+   "merges": 4,
    "created": "2026-09-23T15:58:30Z",
-   "updated": "2026-09-29T10:48:02Z"
+   "updated": "2026-09-30T20:05:48Z"
   },
   {
    "id": "gkrn7gt17why",
@@ -2577,7 +2650,12 @@
    ],
    "windows": [
     0,
-    4194304
+    65536,
+    524288,
+    1048576,
+    2097152,
+    4194304,
+    8388608
    ],
    "codecs": [
     "gzkp",
@@ -2600,13 +2678,15 @@
      "v1.20.0"
     ],
     "github.com/klauspost/pgzip": [
-     "v1.2.6"
+     "v1.2.6",
+     "v1.2.7"
     ],
     "github.com/klauspost/stdgozstd": [
      "v0.0.0-20260722174150-eb4821197265"
     ],
     "github.com/minio/minlz": [
-     "v1.2.0"
+     "v1.2.0",
+     "v1.2.1"
     ],
     "github.com/pierrec/lz4/v4": [
      "v4.1.30"
@@ -2626,11 +2706,11 @@
     "numcpu": "32",
     "src_threads": "16"
    },
-   "n_encode": 35,
-   "n_decode": 63,
-   "merges": 0,
+   "n_encode": 125,
+   "n_decode": 153,
+   "merges": 3,
    "created": "2026-09-23T20:29:38Z",
-   "updated": "2026-09-23T20:29:38Z"
+   "updated": "2026-09-30T20:15:48Z"
   },
   {
    "id": "gkrn7gt17why-zdccsrhcesqs",
@@ -2729,6 +2809,7 @@
    ],
    "windows": [
     0,
+    65536,
     524288,
     1048576,
     2097152,
@@ -2757,13 +2838,15 @@
      "v1.20.1"
     ],
     "github.com/klauspost/pgzip": [
-     "v1.2.6"
+     "v1.2.6",
+     "v1.2.7"
     ],
     "github.com/klauspost/stdgozstd": [
      "v0.0.0-20260722174150-eb4821197265"
     ],
     "github.com/minio/minlz": [
-     "v1.2.0"
+     "v1.2.0",
+     "v1.2.1"
     ],
     "github.com/pierrec/lz4/v4": [
      "v4.1.30"
@@ -2783,11 +2866,11 @@
     "numcpu": "32",
     "src_threads": "16"
    },
-   "n_encode": 107,
-   "n_decode": 135,
-   "merges": 1,
+   "n_encode": 189,
+   "n_decode": 217,
+   "merges": 4,
    "created": "2026-09-23T16:55:20Z",
-   "updated": "2026-09-29T12:00:27Z"
+   "updated": "2026-09-30T20:08:10Z"
   },
   {
    "id": "1yc3fcmtobxif-25ztetif2gesr",
@@ -2886,6 +2969,7 @@
    ],
    "windows": [
     0,
+    65536,
     524288,
     1048576,
     2097152,
@@ -2914,13 +2998,15 @@
      "v1.20.1"
     ],
     "github.com/klauspost/pgzip": [
-     "v1.2.6"
+     "v1.2.6",
+     "v1.2.7"
     ],
     "github.com/klauspost/stdgozstd": [
      "v0.0.0-20260722174150-eb4821197265"
     ],
     "github.com/minio/minlz": [
-     "v1.2.0"
+     "v1.2.0",
+     "v1.2.1"
     ],
     "github.com/pierrec/lz4/v4": [
      "v4.1.30"
@@ -2940,11 +3026,11 @@
     "numcpu": "32",
     "src_threads": "16"
    },
-   "n_encode": 107,
-   "n_decode": 135,
-   "merges": 1,
+   "n_encode": 189,
+   "n_decode": 217,
+   "merges": 4,
    "created": "2026-09-23T17:04:27Z",
-   "updated": "2026-09-29T12:07:25Z"
+   "updated": "2026-09-30T20:08:35Z"
   },
   {
    "id": "kh4sr0y2n0do-ry3rb0yoayw8",
@@ -3043,6 +3129,7 @@
    ],
    "windows": [
     0,
+    65536,
     524288,
     1048576,
     2097152,
@@ -3071,13 +3158,15 @@
      "v1.20.1"
     ],
     "github.com/klauspost/pgzip": [
-     "v1.2.6"
+     "v1.2.6",
+     "v1.2.7"
     ],
     "github.com/klauspost/stdgozstd": [
      "v0.0.0-20260722174150-eb4821197265"
     ],
     "github.com/minio/minlz": [
-     "v1.2.0"
+     "v1.2.0",
+     "v1.2.1"
     ],
     "github.com/pierrec/lz4/v4": [
      "v4.1.30"
@@ -3097,11 +3186,11 @@
     "numcpu": "32",
     "src_threads": "16"
    },
-   "n_encode": 107,
-   "n_decode": 135,
-   "merges": 1,
+   "n_encode": 189,
+   "n_decode": 217,
+   "merges": 4,
    "created": "2026-09-23T17:26:21Z",
-   "updated": "2026-09-29T12:22:20Z"
+   "updated": "2026-09-30T20:09:16Z"
   },
   {
    "id": "dh7rry8o87zf-3b2674nvla1it",
@@ -3281,6 +3370,7 @@
    ],
    "windows": [
     0,
+    65536,
     524288,
     1048576,
     2097152,
@@ -3309,13 +3399,15 @@
      "v1.20.1"
     ],
     "github.com/klauspost/pgzip": [
-     "v1.2.6"
+     "v1.2.6",
+     "v1.2.7"
     ],
     "github.com/klauspost/stdgozstd": [
      "v0.0.0-20260722174150-eb4821197265"
     ],
     "github.com/minio/minlz": [
-     "v1.2.0"
+     "v1.2.0",
+     "v1.2.1"
     ],
     "github.com/pierrec/lz4/v4": [
      "v4.1.30"
@@ -3335,11 +3427,11 @@
     "numcpu": "32",
     "src_threads": "16"
    },
-   "n_encode": 107,
-   "n_decode": 155,
-   "merges": 1,
+   "n_encode": 189,
+   "n_decode": 237,
+   "merges": 4,
    "created": "2026-09-23T16:01:18Z",
-   "updated": "2026-09-29T10:52:23Z"
+   "updated": "2026-09-30T20:05:57Z"
   },
   {
    "id": "2vrmjqwnll1kv",
@@ -3357,7 +3449,12 @@
    ],
    "windows": [
     0,
-    4194304
+    65536,
+    524288,
+    1048576,
+    2097152,
+    4194304,
+    8388608
    ],
    "codecs": [
     "gzkp",
@@ -3380,13 +3477,15 @@
      "v1.20.0"
     ],
     "github.com/klauspost/pgzip": [
-     "v1.2.6"
+     "v1.2.6",
+     "v1.2.7"
     ],
     "github.com/klauspost/stdgozstd": [
      "v0.0.0-20260722174150-eb4821197265"
     ],
     "github.com/minio/minlz": [
-     "v1.2.0"
+     "v1.2.0",
+     "v1.2.1"
     ],
     "github.com/pierrec/lz4/v4": [
      "v4.1.30"
@@ -3406,11 +3505,11 @@
     "numcpu": "32",
     "src_threads": "16"
    },
-   "n_encode": 35,
-   "n_decode": 63,
-   "merges": 0,
+   "n_encode": 125,
+   "n_decode": 153,
+   "merges": 3,
    "created": "2026-09-24T07:29:59Z",
-   "updated": "2026-09-24T07:29:59Z"
+   "updated": "2026-09-30T20:09:36Z"
   },
   {
    "id": "2vrmjqwnll1kv-2whiahejlokt2",
@@ -3509,7 +3608,12 @@
    ],
    "windows": [
     0,
-    4194304
+    65536,
+    524288,
+    1048576,
+    2097152,
+    4194304,
+    8388608
    ],
    "codecs": [
     "gzkp",
@@ -3532,13 +3636,15 @@
      "v1.20.0"
     ],
     "github.com/klauspost/pgzip": [
-     "v1.2.6"
+     "v1.2.6",
+     "v1.2.7"
     ],
     "github.com/klauspost/stdgozstd": [
      "v0.0.0-20260722174150-eb4821197265"
     ],
     "github.com/minio/minlz": [
-     "v1.2.0"
+     "v1.2.0",
+     "v1.2.1"
     ],
     "github.com/pierrec/lz4/v4": [
      "v4.1.30"
@@ -3558,11 +3664,11 @@
     "numcpu": "32",
     "src_threads": "16"
    },
-   "n_encode": 35,
-   "n_decode": 63,
-   "merges": 0,
+   "n_encode": 125,
+   "n_decode": 153,
+   "merges": 3,
    "created": "2026-09-24T08:41:15Z",
-   "updated": "2026-09-24T08:41:15Z"
+   "updated": "2026-09-30T20:17:41Z"
   },
   {
    "id": "1qhqu6kb3f2f5-1gzl3gfuj9d7r",
@@ -3742,6 +3848,7 @@
    ],
    "windows": [
     0,
+    65536,
     524288,
     1048576,
     2097152,
@@ -3770,13 +3877,15 @@
      "v1.20.1"
     ],
     "github.com/klauspost/pgzip": [
-     "v1.2.6"
+     "v1.2.6",
+     "v1.2.7"
     ],
     "github.com/klauspost/stdgozstd": [
      "v0.0.0-20260722174150-eb4821197265"
     ],
     "github.com/minio/minlz": [
-     "v1.2.0"
+     "v1.2.0",
+     "v1.2.1"
     ],
     "github.com/pierrec/lz4/v4": [
      "v4.1.30"
@@ -3796,11 +3905,11 @@
     "numcpu": "32",
     "src_threads": "16"
    },
-   "n_encode": 107,
-   "n_decode": 155,
-   "merges": 2,
+   "n_encode": 189,
+   "n_decode": 237,
+   "merges": 5,
    "created": "2026-09-23T16:06:16Z",
-   "updated": "2026-09-29T11:19:59Z"
+   "updated": "2026-09-30T20:06:15Z"
   },
   {
    "id": "2knsx6y0c5dgn",
@@ -3818,7 +3927,12 @@
    ],
    "windows": [
     0,
-    4194304
+    65536,
+    524288,
+    1048576,
+    2097152,
+    4194304,
+    8388608
    ],
    "codecs": [
     "gzkp",
@@ -3841,13 +3955,15 @@
      "v1.20.0"
     ],
     "github.com/klauspost/pgzip": [
-     "v1.2.6"
+     "v1.2.6",
+     "v1.2.7"
     ],
     "github.com/klauspost/stdgozstd": [
      "v0.0.0-20260722174150-eb4821197265"
     ],
     "github.com/minio/minlz": [
-     "v1.2.0"
+     "v1.2.0",
+     "v1.2.1"
     ],
     "github.com/pierrec/lz4/v4": [
      "v4.1.30"
@@ -3867,11 +3983,11 @@
     "numcpu": "32",
     "src_threads": "16"
    },
-   "n_encode": 35,
-   "n_decode": 63,
-   "merges": 0,
+   "n_encode": 125,
+   "n_decode": 153,
+   "merges": 3,
    "created": "2026-09-24T12:18:45Z",
-   "updated": "2026-09-24T12:18:45Z"
+   "updated": "2026-09-30T20:20:24Z"
   }
  ]
 }
