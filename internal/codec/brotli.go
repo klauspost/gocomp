@@ -27,6 +27,7 @@ func init() {
 		// LGWin 10-24. Levels 0 and 1 floor the stream header at 256KB, so
 		// below that those two may measure the same setting more than once.
 		Module: brotliMod, Kinds: bothKinds, Levels: lv, Windows: pow2s(1<<10, 16<<20),
+		DefWindow: fixedWindow(4 << 20), // lgwin 22
 		New: func(lvl int, o Opts) (Encoder, error) {
 			// LGWin 0 is the library's own choice for the quality.
 			w := brotli.NewWriterOptions(nil, brotli.WriterOptions{Quality: lvl, LGWin: log2(o.Window)})

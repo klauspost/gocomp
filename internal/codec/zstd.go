@@ -23,6 +23,12 @@ func init() {
 		// stream path with concurrent blocks parallelises.
 		Conc: corpus.KindFile, Levels: zstdLevels,
 		Windows: pow2s(zstd.MinWindowSize, zstd.MaxWindowSize),
+		DefWindow: func(lvl int) int {
+			if lvl == int(zstd.SpeedFastest) {
+				return 4 << 20
+			}
+			return 8 << 20
+		},
 		New: func(lvl int, o Opts) (Encoder, error) {
 			// WithConcurrentBlocks cannot be changed on Reset, so it is fixed here.
 			concurrent := o.Kind == corpus.KindFile && o.Threads > 1
@@ -82,6 +88,8 @@ func init() {
 		// and a block larger than the window is invalid, so below 128KB both
 		// decoders reject the frame ("window size exceeded").
 		Windows: pow2s(128<<10, stdzstd.MaxWindowSize),
+		// SetLevel's own table; level 0 stores and has no window.
+		DefWindow: func(lvl int) int { return []int{0, 2, 3, 4, 4, 4, 5, 6, 7, 8}[lvl] << 20 },
 		New: func(lvl int, o Opts) (Encoder, error) {
 			w := stdzstd.NewWriter(nil)
 			if err := w.SetLevel(lvl); err != nil {

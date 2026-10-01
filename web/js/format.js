@@ -21,6 +21,13 @@ export function windowName(n) {
   return String(n);
 }
 
+// windowLabel names a row's window, the default by the size it stands for
+// where the codec declares one.
+export function windowLabel(r) {
+  if (r.window) return `${windowName(r.window)} window`;
+  return r.size ? `default window (${windowName(r.size)})` : 'default window';
+}
+
 export function ms(ns) {
   return (ns / 1e6).toFixed(3);
 }

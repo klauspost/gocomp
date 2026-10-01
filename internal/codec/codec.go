@@ -135,6 +135,10 @@ type Enc struct {
 	// window is fixed. A requested size not listed is skipped, never clamped:
 	// clamping would measure the same setting twice under two names.
 	Windows []int
+	// DefWindow is the size window 0 leaves the library at, by level. A sweep
+	// size equal to it is the same setting, and the site names the default by
+	// it. Required with Windows; TestDefWindows holds it to the library.
+	DefWindow func(level int) int
 
 	// MaxSize bounds the compressed size of n input bytes. Defaults to a
 	// generous bound that also covers incompressible input.
@@ -167,6 +171,16 @@ func (d Dec) Concurrent(k corpus.Kind) bool { return d.Conc&k != 0 }
 
 // AcceptsWindow reports whether the encoder can run at window w.
 func (e Enc) AcceptsWindow(w int) bool { return w == 0 || slices.Contains(e.Windows, w) }
+
+// DefaultWindow is the size window 0 means at level, 0 for a fixed window.
+func (e Enc) DefaultWindow(level int) int {
+	if e.DefWindow == nil {
+		return 0
+	}
+	return e.DefWindow(level)
+}
+
+func fixedWindow(n int) func(int) int { return func(int) int { return n } }
 
 // Level returns the named level.
 func (e Enc) Level(n int) (Level, bool) {

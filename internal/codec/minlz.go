@@ -22,7 +22,7 @@ func init() {
 	RegisterEnc(Enc{
 		ID: "minlz", Name: "MinLZ", Impl: "minio/minlz", Format: FmtMinLZ,
 		Module: "github.com/minio/minlz", Kinds: bothKinds, Conc: corpus.KindFile,
-		Levels: minlzLevels, Windows: pow2s(4<<10, minlz.MaxBlockSize),
+		Levels: minlzLevels, Windows: pow2s(4<<10, minlz.MaxBlockSize), DefWindow: fixedWindow(2 << 20),
 		New: func(lvl int, o Opts) (Encoder, error) {
 			opts := []minlz.WriterOption{minlz.WriterConcurrency(o.LibThreads(corpus.KindFile))}
 			if lvl == minlz.LevelUncompressed {

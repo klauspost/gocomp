@@ -12,6 +12,9 @@ import (
 
 const bothKinds = corpus.KindFile | corpus.KindDir
 
+// pgzBlock is pgzip's defaultBlockSize, which the package does not export.
+const pgzBlock = 1 << 20
+
 // deflateLevels are the levels shared by the gzip/flate family. Stateless (-3)
 // only exists in the klauspost implementations.
 //
@@ -91,18 +94,17 @@ func init() {
 		// tail, and swallowing that error would leave concurrency at Reset's
 		// default, so the list starts above it. pgzip sets no upper limit;
 		// 64MB is already a 2GB working set at 32 threads.
-		Windows: pow2s(32<<10, 64<<20),
+		Windows: pow2s(32<<10, 64<<20), DefWindow: fixedWindow(pgzBlock),
 		New: func(lvl int, o Opts) (Encoder, error) {
 			w, err := pgz.NewWriterLevel(nil, lvl)
 			if err != nil {
 				return nil, err
 			}
 			// SetConcurrency takes the block size along with the thread count,
-			// so the default has to be spelled out: it is pgzip's own
-			// defaultBlockSize, which the package does not export.
+			// so the default has to be spelled out.
 			bs := o.Window
 			if bs == 0 {
-				bs = 1 << 20
+				bs = pgzBlock
 			}
 			// Reset resets concurrency to its own defaults, so re-apply every time.
 			rst := func(out io.Writer) {

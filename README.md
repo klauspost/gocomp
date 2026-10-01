@@ -153,7 +153,8 @@ a clamped setting twice under two names. A codec with a fixed window runs at
 `default` only, and not at all if `default` is not in the list. Once the corpus
 is loaded, windows that cannot differ are dropped too: of the sizes at or above
 the largest single input (the file, or a directory's largest member), only the
-smallest runs.
+smallest runs. A size equal to the codec's default *is* the default: `2M` on
+`minlz` measures and stores its default row, never a second copy of it.
 
 | codec | setting | sizes | `default`, as the library sets it |
 |---|---|---|---|
@@ -322,7 +323,8 @@ the level number: `lz4` level 0 is `fast` and compresses, so it is Regular.
 experiment, and mixing its sizes into the headline charts would put one codec on
 screen several times. The `Window` chips appear once a run holds more than one
 size; `Compare by → Window size` draws one series per window, best read with a
-single codec selected.
+single codec selected. A default row shows the size it stands for — `minlz`'s
+as 2M — and that size's chip selects it too.
 
 The filter row describes what the data holds, not what the schema allows. A
 control with one option is not shown, and the options cascade: narrowing to one

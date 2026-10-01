@@ -15,7 +15,8 @@ import (
 // that is not known yet. Once a window holds the whole of it, every larger one
 // does too and they cannot differ, so only the smallest such window is kept.
 // The default is always kept: it is the baseline every other window is read
-// against.
+// against. A size equal to the default is the default, stored as 0, so one
+// setting is never two rows.
 func (c Config) Expand(vs []Variant, largest int) []Variant {
 	ws := slices.Compact(slices.Sorted(slices.Values(c.Windows)))
 	if len(ws) == 0 {
@@ -23,7 +24,7 @@ func (c Config) Expand(vs []Variant, largest int) []Variant {
 	}
 	var out []Variant
 	for _, v := range vs {
-		covered := false
+		covered, def := false, false
 		for _, w := range ws {
 			if !v.Enc.AcceptsWindow(w) {
 				continue
@@ -33,6 +34,15 @@ func (c Config) Expand(vs []Variant, largest int) []Variant {
 					continue
 				}
 				covered = w >= largest
+			}
+			if w == v.Enc.DefaultWindow(v.Level.N) {
+				w = 0
+			}
+			if w == 0 {
+				if def {
+					continue
+				}
+				def = true
 			}
 			v.Window = w
 			out = append(out, v)

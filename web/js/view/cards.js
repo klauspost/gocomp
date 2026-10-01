@@ -139,7 +139,7 @@ function describeBar(r, emph) {
       { value: fmt.bytes(comp), name: `from ${fmt.bytes(plain)}` },
     ],
     note: `${r.threads} thread${r.threads === 1 ? '' : 's'} · best of ${r.passes}`
-      + `${r.window ? ` · ${fmt.windowName(r.window)} window` : ''}`
+      + `${r.size ? ` · ${fmt.windowLabel(r)}` : ''}`
       + ` · ${r.go} · ${r.libVer || 'unknown library'} · ${clickHint(emph)}`,
   };
 }
@@ -248,7 +248,7 @@ export function paretoCard(ctx) {
     const head = r.levelName ? `${ds.__label} · ${r.levelName}` : ds.__label;
     const note = [
       r.src ? `decoding ${r.srcLabel}` : null,
-      r.window ? `${fmt.windowName(r.window)} window` : null,
+      r.size ? fmt.windowLabel(r) : null,
       `${r.threads} thread${r.threads === 1 ? '' : 's'} · best of ${r.passes}`,
       clickHint(ds.__emph),
     ].filter(Boolean).join(' · ');
@@ -353,7 +353,7 @@ export function measurementColumns(dim) {
     { key: 'op', label: 'Op', get: (r) => (r.op === 'c' ? 'compress' : 'decompress') },
     { key: 'corpus', label: 'Corpus', get: (r) => r.corpus },
     { key: 'threads', label: 'Threads', num: true, get: (r) => String(r.threads) },
-    { key: 'window', label: 'Window', num: true, get: (r) => fmt.windowName(r.window) },
+    { key: 'window', label: 'Window', num: true, get: (r) => (r.window || !r.size ? fmt.windowName(r.window) : `${fmt.windowName(r.size)} (default)`) },
     { key: 'ratio', label: 'Ratio', num: true, get: (r) => fmtRatio(r.ratio) },
     { key: 'pct', label: '% reduction', num: true, get: (r) => r.pct.toFixed(2) },
     { key: 'cspeed', label: 'MB/s', num: true, get: (r) => (r.op === 'c' ? r.cspeed : r.dspeed).toFixed(1) },
@@ -405,7 +405,7 @@ export function barsCard(ctx) {
       const varies = (get) => new Set(top.map((x) => get(x.r))).size > 1;
       const extra = [
         [varies((r) => r.threads), (r) => `${r.threads}t`],
-        [varies((r) => r.window), (r) => `w${fmt.windowName(r.window)}`],
+        [varies((r) => r.window), (r) => `w${fmt.windowName(r.size)}`],
         [varies((r) => r.go), (r) => r.go],
         [varies((r) => r.libVer), (r) => r.libVer],
       ].filter(([on]) => on);

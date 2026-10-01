@@ -21,7 +21,7 @@ func init() {
 	dicts := pow2s(64<<10, 1<<31)
 	RegisterEnc(Enc{
 		ID: "xz", Name: "xz", Impl: "ulikunitz/xz", Format: FmtXZ,
-		Module: xzMod, Kinds: bothKinds, Slow: true, Windows: dicts,
+		Module: xzMod, Kinds: bothKinds, Slow: true, Windows: dicts, DefWindow: fixedWindow(8 << 20),
 		New: func(lvl int, o Opts) (Encoder, error) {
 			return blockFn{fn: func(dst, src []byte) ([]byte, error) {
 				a := appender{b: dst[:0]}
@@ -57,7 +57,7 @@ func init() {
 
 	RegisterEnc(Enc{
 		ID: "lzma2", Name: "LZMA2", Impl: "ulikunitz/xz", Format: FmtLZMA2,
-		Module: xzMod, Kinds: bothKinds, Slow: true, Windows: dicts,
+		Module: xzMod, Kinds: bothKinds, Slow: true, Windows: dicts, DefWindow: fixedWindow(8 << 20),
 		New: func(lvl int, o Opts) (Encoder, error) {
 			return blockFn{fn: func(dst, src []byte) ([]byte, error) {
 				a := appender{b: dst[:0]}

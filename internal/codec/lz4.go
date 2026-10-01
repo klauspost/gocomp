@@ -42,7 +42,8 @@ func init() {
 		Levels: lv,
 		// The frame format has exactly these four; the match window is 64KB
 		// whatever the block size.
-		Windows: []int{int(lz4.Block64Kb), int(lz4.Block256Kb), int(lz4.Block1Mb), int(lz4.Block4Mb)},
+		Windows:   []int{int(lz4.Block64Kb), int(lz4.Block256Kb), int(lz4.Block1Mb), int(lz4.Block4Mb)},
+		DefWindow: fixedWindow(int(lz4.Block4Mb)),
 		New: func(lvl int, o Opts) (Encoder, error) {
 			w := lz4.NewWriter(nil)
 			opts := []lz4.Option{

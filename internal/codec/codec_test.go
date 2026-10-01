@@ -245,6 +245,56 @@ func TestWindows(t *testing.T) {
 	}
 }
 
+// TestDefWindows holds each declared default to the library: window 0 and the
+// declared size must write the same bytes. Every format records its window or
+// block size in the stream, and the input is longer than any default, so a
+// declaration a library upgrade has made wrong changes the output.
+func TestDefWindows(t *testing.T) {
+	chunk := make([]byte, 256<<10)
+	corpus.Rand(chunk)
+	src := bytes.Repeat(chunk, 36)
+	for _, e := range Encoders() {
+		if e.DefWindow == nil || (e.Slow && testing.Short()) {
+			continue
+		}
+		seen := map[int]bool{}
+		for _, l := range e.Levels {
+			def := e.DefaultWindow(l.N)
+			if def == 0 || seen[def] || (l.Slow && testing.Short()) {
+				continue
+			}
+			seen[def] = true
+			t.Run(fmt.Sprintf("%s/%d", e.ID, l.N), func(t *testing.T) {
+				t.Parallel()
+				a, b := encode(t, e, l.N, Opts{Kind: corpus.KindFile, Threads: 1}, src),
+					encode(t, e, l.N, Opts{Kind: corpus.KindFile, Threads: 1, Window: def}, src)
+				if !bytes.Equal(a, b) {
+					t.Errorf("window 0 and the declared default %d differ (%d vs %d bytes)", def, len(a), len(b))
+				}
+				// Otherwise this level could not tell a wrong declaration apart.
+				lo := e.Windows[0]
+				if bytes.Equal(a, encode(t, e, l.N, Opts{Kind: corpus.KindFile, Threads: 1, Window: lo}, src)) {
+					t.Errorf("window %d writes the same bytes as the default", lo)
+				}
+			})
+		}
+	}
+}
+
+func encode(t *testing.T, e Enc, level int, o Opts, src []byte) []byte {
+	t.Helper()
+	enc, err := e.New(level, o)
+	if err != nil {
+		t.Fatalf("window %d: New: %v", o.Window, err)
+	}
+	defer enc.Release()
+	comp, err := enc.Encode(make([]byte, 0, e.Bound(len(src))), src)
+	if err != nil {
+		t.Fatalf("window %d: Encode: %v", o.Window, err)
+	}
+	return comp
+}
+
 // windowTestLevel avoids store levels, where a window has nothing to find:
 // the level named default, else the middle of the range.
 func windowTestLevel(e Enc) int {
@@ -260,15 +310,7 @@ func windowTestLevel(e Enc) int {
 // returns the compressed size.
 func roundTrip(t *testing.T, e Enc, level int, o Opts, src []byte) int {
 	t.Helper()
-	enc, err := e.New(level, o)
-	if err != nil {
-		t.Fatalf("window %d: New: %v", o.Window, err)
-	}
-	defer enc.Release()
-	comp, err := enc.Encode(make([]byte, 0, e.Bound(len(src))), src)
-	if err != nil {
-		t.Fatalf("window %d: Encode: %v", o.Window, err)
-	}
+	comp := encode(t, e, level, o, src)
 	for _, d := range DecodersFor(e.Format, o.Kind) {
 		dec, err := d.New(Opts{Kind: o.Kind, Threads: o.Threads})
 		if err != nil {

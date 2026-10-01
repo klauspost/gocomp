@@ -27,6 +27,9 @@ func RegisterEnc(e Enc) {
 			panic("codec: " + e.ID + " windows must be ascending powers of two")
 		}
 	}
+	if (e.Windows == nil) != (e.DefWindow == nil) {
+		panic("codec: " + e.ID + " must declare DefWindow exactly when it lists Windows")
+	}
 	if len(e.Levels) == 0 {
 		e.Levels = []Level{{N: 0, Name: "default"}}
 	}

@@ -13,10 +13,11 @@ import (
 )
 
 type LevelInfo struct {
-	N     int    `json:"n"`
-	Name  string `json:"name"`
-	Slow  bool   `json:"slow,omitempty"`
-	Class string `json:"class,omitempty"` // "uncompressed" or "special"; absent is regular
+	N      int    `json:"n"`
+	Name   string `json:"name"`
+	Slow   bool   `json:"slow,omitempty"`
+	Class  string `json:"class,omitempty"`  // "uncompressed" or "special"; absent is regular
+	Window int    `json:"window,omitempty"` // the size window 0 means here; absent where it is fixed
 }
 
 // RoleInfo describes one direction of a codec. Encoding and decoding are kept
@@ -182,7 +183,7 @@ func (ix *Index) RefreshCatalogs() {
 	for _, e := range codec.Encoders() {
 		lv := make([]LevelInfo, 0, len(e.Levels))
 		for _, l := range e.Levels {
-			li := LevelInfo{N: l.N, Name: l.Name, Slow: l.Slow}
+			li := LevelInfo{N: l.N, Name: l.Name, Slow: l.Slow, Window: e.DefaultWindow(l.N)}
 			if l.Class != codec.Regular {
 				li.Class = l.Class.String()
 			}

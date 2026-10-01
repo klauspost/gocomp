@@ -71,8 +71,8 @@ func init() {
 	RegisterEnc(Enc{
 		ID: "s2", Name: "S2", Impl: "klauspost/compress", Format: FmtS2,
 		Module: kpCompress, Kinds: bothKinds, Conc: corpus.KindFile, Levels: s2Levels,
-		Windows: pow2s(4<<10, 4<<20),
-		New:     func(lvl int, o Opts) (Encoder, error) { return newS2Writer(lvl, o), nil },
+		Windows: pow2s(4<<10, 4<<20), DefWindow: fixedWindow(1 << 20),
+		New: func(lvl int, o Opts) (Encoder, error) { return newS2Writer(lvl, o), nil },
 	})
 	RegisterDec(Dec{
 		ID: "s2", Name: "S2", Impl: "klauspost/compress", Format: FmtS2,
@@ -87,6 +87,8 @@ func init() {
 		ID: "s2s", Name: "S2 (snappy frame)", Impl: "klauspost/compress", Format: FmtSnappy,
 		Module: kpCompress, Kinds: bothKinds, Conc: corpus.KindFile, Levels: s2Levels,
 		Windows: pow2s(4<<10, 64<<10), // snappy frames cap blocks at 64KB
+		// WriterSnappyCompat's clamp of the 1MB default, which no sweep size equals.
+		DefWindow: fixedWindow(64<<10 - 8),
 		New: func(lvl int, o Opts) (Encoder, error) {
 			return newS2Writer(lvl, o, s2.WriterSnappyCompat()), nil
 		},

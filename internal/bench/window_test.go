@@ -72,6 +72,15 @@ func TestExpand(t *testing.T) {
 		}
 	}
 
+	// minlz's default block is 2M, so 2M is the default row whether or not the
+	// sweep also names default.
+	for _, ws := range [][]int{{0, 1 << 20, 2 << 20}, {1 << 20, 2 << 20}} {
+		got := windows(Config{Windows: ws}.Expand(vs, 0), "minlz")
+		if slices.Sort(got); !slices.Equal(got, []int{0, 1 << 20}) {
+			t.Errorf("sweep %v: minlz got %v, want the default and 1M", ws, got)
+		}
+	}
+
 	if got := (Config{}).Expand(vs, 0); len(got) != len(vs) {
 		t.Errorf("an unset sweep should mean the default alone, got %d variants", len(got))
 	}

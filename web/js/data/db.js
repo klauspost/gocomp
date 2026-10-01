@@ -1,7 +1,7 @@
 // In-memory database: ingest, scope resolution and querying. Pure data — this
 // module never touches the DOM and never fetches anything itself.
 
-import { levelWord, windowName } from '../format.js';
+import { levelWord, windowLabel } from '../format.js';
 import { METRICS, paretoFront, ratio, speed } from './metrics.js';
 
 export class QueryError extends Error {}
@@ -34,15 +34,21 @@ export async function openDB(loader) {
   // level number: lz4-0 and snappy-0 are level 0 and compress perfectly well.
   const classes = new Map();
   const codecClasses = new Map();
+  // The size window 0 stands for at each level: minlz's default is 2M, so it
+  // is what the 2M chip shows of minlz. The database never holds both, since
+  // a sweep size equal to the default is stored as the default.
+  const defWindows = new Map();
   for (const c of index.codecs) {
     const cs = new Set();
     for (const l of c.encode?.levels ?? []) {
       classes.set(`${c.id}/${l.n}`, l.class || 'regular');
       cs.add(l.class || 'regular');
+      if (l.window) defWindows.set(`${c.id}/${l.n}`, l.window);
     }
     codecClasses.set(c.id, cs);
   }
   const classOf = (codec, level) => classes.get(`${codec}/${level}`) || 'regular';
+  const defSizes = new Set(defWindows.values());
 
   // The filters that choose which runs to read. Corpus kind is not among them
   // because it partitions everything below it: narrowing it by the corpus
@@ -85,6 +91,9 @@ export async function openDB(loader) {
       rows.push({
         ...base, op,
         codec: r.codec, level: r.level ?? null, threads: r.threads, window: r.window,
+        // The window in bytes, the default resolved; 0 where the codec's is
+        // fixed. A decode row's window is its source's.
+        size: r.window || defWindows.get(op === 'c' ? `${r.codec}/${r.level}` : `${r.srcCodec}/${r.srcLevel}`) || 0,
         levelName: levelOf(r.codec, r.level ?? null),
         src: r.src || null, srcCodec: r.srcCodec || null, srcLevel: r.srcLevel ?? null,
         // "minlz--1" is a storage key, not a label. The decode source is named
@@ -160,10 +169,12 @@ export async function openDB(loader) {
       // reported that src_threads differed when only the 16-thread run had a
       // row in view. It is also a run file fetched for nothing.
       // Windows follow the same rule: most runs hold only the default, and a
-      // run without the selected window has nothing to put on screen.
+      // run without the selected window has nothing to put on screen. Default
+      // rows count for every size that is some codec's default.
       const runs = scoped(s, null).filter((r) => (!s?.threads?.length
         || !r.threads?.length || r.threads.some((n) => s.threads.includes(n)))
-        && (!s?.windows?.length || r.windows.some((w) => s.windows.includes(w))));
+        && (!s?.windows?.length || r.windows.some((w) => s.windows.includes(w)
+          || (w === 0 && s.windows.some((x) => defSizes.has(x))))));
 
       const warnings = [];
       const note = (code, field, vals) => {
@@ -297,7 +308,7 @@ function runQuery(all, q, db) {
     has(q.gos, r.go) &&
     (!q.bench || r.bench === q.bench) &&
     has(q.threads, r.threads) &&
-    has(q.windows, r.window) &&
+    (has(q.windows, r.window) || q.windows.includes(r.size)) &&
     has(q.codecs, r.codec) &&
     has(q.libs, r.lib) &&
     has(q.variants, r.variant) &&
@@ -310,6 +321,10 @@ function runQuery(all, q, db) {
   // below the UI, so no hand-edited URL or future card can bypass it.
   const kinds = new Set(rows.map((r) => r.kind));
   if (kinds.size > 1) throw new QueryError('MIXED_CORPUS_KIND');
+
+  // Chosen by size alone, a default row is that size: with only 2M picked,
+  // minlz's default is a 2M row like s2's, not a series of its own.
+  if (q.windows?.length && !q.windows.includes(0)) rows = rows.map((r) => (r.window ? r : { ...r, window: r.size }));
 
   if (q.op === 'd') rows = applySrcPolicy(rows, q);
 
@@ -351,10 +366,18 @@ function runQuery(all, q, db) {
 
   const pointKey = q.pointBy ?? ['level'];
   const ent = q.entityBy ?? q.seriesBy[0];
+  // The legend names an entity across all of its series, so a default window
+  // is sized from every row the entity covers.
+  const entRows = new Map();
+  for (const r of rows) {
+    const k = String(r[ent]);
+    if (!entRows.has(k)) entRows.set(k, []);
+    entRows.get(k).push(r);
+  }
   const series = [...groups.values()].map((g) => {
     g.points.sort((a, b) => cmpBy(a, b, pointKey));
     if (q.metric) paretoFront(g.points, q.metric, 'ratio');
-    g.parts = q.seriesBy.map((d) => dimLabel(d, g.dims[d], db, g.sample));
+    g.parts = q.seriesBy.map((d) => dimLabel(d, g.dims[d], db, g.sample, g.points));
     g.label = g.parts.join(' · ');
     // The label drawn on the chart leaves the default window unsaid: it is
     // what a line is unless told otherwise, and at every line end it buries
@@ -364,7 +387,7 @@ function runQuery(all, q, db) {
     // The legend keys colour to the entity, so it names the entity alone --
     // every slice of one codec shares that colour, and spelling out which
     // slice happened to be built first would be arbitrary.
-    g.entityLabel = dimLabel(ent, g.dims[ent] ?? g.entity, db);
+    g.entityLabel = dimLabel(ent, g.dims[ent] ?? g.entity, db, null, entRows.get(g.entity));
     return g;
   });
   // A numeric dimension sorts by value: by label, "1M window" lands before
@@ -436,13 +459,18 @@ function cmpBy(a, b, keys) {
   return 0;
 }
 
-function dimLabel(d, v, db, row) {
+function dimLabel(d, v, db, row, points) {
   if (d === 'codec') return db.codecs.get(v)?.id || v;
   if (d === 'machine') return db.machines.get(v)?.label || v;
   if (d === 'corpus') return db.corpora.get(v)?.name || v;
   if (d === 'threads') return `${v} thread${v === 1 ? '' : 's'}`;
   if (d === 'bench') return `bench v${v}`;
-  if (d === 'window') return v ? `${windowName(v)} window` : 'default window';
+  if (d === 'window') {
+    // A default series names its size only when all of it shares one: zstd's
+    // default is 4M at its fastest level and 8M above.
+    const sizes = new Set(points?.map((p) => p.size));
+    return windowLabel({ window: v, size: sizes.size === 1 ? [...sizes][0] : 0 });
+  }
   if (d === 'variant') return variantLabel(v);
   if (d === 'level') return row?.levelName || String(v);
   return String(v);
