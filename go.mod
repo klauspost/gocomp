@@ -16,9 +16,9 @@ require (
 	github.com/golang/snappy v1.0.0
 	github.com/klauspost/compress v1.20.1
 	github.com/klauspost/cpuid/v2 v2.4.0
-	github.com/klauspost/pgzip v1.2.6
+	github.com/klauspost/pgzip v1.2.7
 	github.com/klauspost/stdgozstd v0.0.0-20260722174150-eb4821197265
-	github.com/minio/minlz v1.2.0
+	github.com/minio/minlz v1.2.1
 	github.com/pbnjay/memory v0.0.0-20210728143218-7b4eea64cf58
 	github.com/pierrec/lz4/v4 v4.1.30
 	github.com/ulikunitz/xz v0.5.17
