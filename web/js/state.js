@@ -15,10 +15,10 @@ export const DEFAULTS = {
   v: 1,
   kind: 'file',
   corpora: [],   // [] means "all of this kind"
-  machines: [],
+  machines: null, // null means "the data's pick" (domains().picks); [] is all
   gos: [],
   bench: null,   // null means "newest"
-  threads: [],
+  threads: null,
   // The default window alone, unlike every other list here where empty means
   // all: a window sweep is a deliberate experiment, and mixing its sizes into
   // the headline charts would put one codec on screen several times.
@@ -138,6 +138,10 @@ export function encode(state) {
 //
 // It is also the repair for a hand-edited URL, which is why it never throws:
 // an unknown value is dropped, not an error.
+//
+// A selection that loses every value falls back to its default, not to all:
+// 32 threads picked on one corpus would otherwise open the next corpus at
+// every thread count at once.
 export function reconcile(state, d) {
   const out = { ...state };
   if (!d.kinds.includes(out.kind)) out.kind = d.kinds[0] || 'file';
@@ -146,8 +150,13 @@ export function reconcile(state, d) {
     ['threads', d.threads], ['windows', d.windows], ['codecs', d.codecs], ['libs', d.libs],
     ['variants', d.variants],
   ]) {
-    out[field] = (out[field] || []).filter((v) => valid.includes(v));
+    const was = out[field];
+    if (was == null) continue;
+    out[field] = was.filter((v) => valid.includes(v));
+    if (was.length && !out[field].length) out[field] = DEFAULTS[field]?.filter((v) => valid.includes(v)) ?? null;
   }
+  out.machines ??= d.picks.machines;
+  out.threads ??= d.picks.threads;
   // Checked against the fixed set, not the scope: a class the scope lacks
   // selects nothing, and dropping it would lose the choice on the way back.
   out.levelClasses = (out.levelClasses || []).filter((c) => LEVEL_CLASSES.includes(c));

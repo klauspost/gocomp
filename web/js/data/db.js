@@ -138,6 +138,7 @@ export async function openDB(loader) {
     // Pass no state for the unconstrained set.
     domains(s) {
       const all = scoped(s, null);
+      const threads = uniq(all.flatMap((r) => r.threads)).sort((a, b) => a - b);
       return {
         kinds: uniq(index.runs.map((r) => r.kind)),
         corpora: uniq(scoped(s, 'corpora').map((r) => r.corpus)),
@@ -146,8 +147,16 @@ export async function openDB(loader) {
         benches: uniq(scoped(s, 'bench').map((r) => r.bench)),
         variants: vfields.length ? uniq(scoped(s, 'variants').map(variantOf)) : [],
         goamd64: uniq(all.map((r) => r.goamd64 || '')).filter(Boolean),
-        threads: uniq(all.flatMap((r) => r.threads)).sort((a, b) => a - b),
+        threads,
         windows: uniq(all.flatMap((r) => r.windows)).sort((a, b) => a - b),
+        // What an unset filter becomes. Mixing CPUs or thread counts splits
+        // every line and raises the banner, so the default is one of each:
+        // the CPU with the most measurements, and one thread -- the codec
+        // alone -- unless the slice has none, then the busiest thread count.
+        picks: {
+          machines: most(scoped(s, 'machines'), (r) => [r.machine]),
+          threads: threads.includes(1) ? [1] : most(all, (r) => r.threads),
+        },
         codecs: uniq(all.flatMap((r) => r.codecs)),
         libs: uniq(all.flatMap(libsOf)),
         ops: ['c', 'd'].filter((op) => all.some((r) => (op === 'c' ? r.n_encode : r.n_decode) > 0)),
@@ -253,6 +262,19 @@ function verOf(lib) {
 
 function uniq(a) {
   return [...new Set(a)].sort();
+}
+
+// most returns the key with the most measurements, as a one-value selection.
+// The index counts rows per run, not per key, so a run's rows are split evenly
+// over the keys it holds.
+function most(runs, keysOf) {
+  const n = new Map();
+  for (const r of runs) {
+    const ks = keysOf(r);
+    for (const k of ks) n.set(k, (n.get(k) || 0) + (r.n_encode + r.n_decode) / ks.length);
+  }
+  const best = [...n].sort((a, b) => b[1] - a[1])[0];
+  return best ? [best[0]] : [];
 }
 
 // The value is what the URL carries and what rows are keyed on; this is how it

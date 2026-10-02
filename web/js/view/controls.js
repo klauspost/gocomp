@@ -65,12 +65,13 @@ export function createControls(host, db, onChange) {
         { v: 'd', label: 'Decompress' },
       ], state.op, (v) => onChange({ op: v })));
 
-      // Comparing windows under the default-only filter would draw one series,
-      // so choosing it opens the filter to every window at the same time.
-      const onlyDefault = state.windows.length === 1 && state.windows[0] === 0;
+      // Comparing along a filter its default holds to one value -- the default
+      // window, the picked CPU or thread count -- would draw one series, so
+      // choosing it opens that filter at the same time.
+      const opens = { window: 'windows', machine: 'machines', threads: 'threads' };
       add(single('Compare by', ['codec', 'go', 'corpus', 'machine', 'threads', 'lib', 'window'],
         state.compareBy, (v) => onChange({
-          compareBy: v, ...(v === 'window' && onlyDefault ? { windows: [] } : {}),
+          compareBy: v, ...(state[opens[v]]?.length === 1 ? { [opens[v]]: [] } : {}),
         }), (v) => ({
           codec: 'Codec', go: 'Go version', corpus: 'Corpus',
           machine: 'CPU', threads: 'Threads', lib: 'Library version', window: 'Window size',

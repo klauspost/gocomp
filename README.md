@@ -326,6 +326,12 @@ size; `Compare by → Window size` draws one series per window, best read with a
 single codec selected. A default row shows the size it stands for — `minlz`'s
 as 2M — and that size's chip selects it too.
 
+**One CPU and one thread count are shown by default**, since mixing either
+splits every line. The CPU is the one with the most measurements; threads is 1
+wherever single-threaded results exist, otherwise the count with the most. A
+selection the next corpus does not have falls back to these, not to all, and
+`Compare by` CPU or Threads opens its filter.
+
 The filter row describes what the data holds, not what the schema allows. A
 control with one option is not shown, and the options cascade: narrowing to one
 Go version drops the codecs only the other one ever ran — including any that

@@ -28,23 +28,22 @@ async function main() {
     return;
   }
 
-  // Open on one corpus at the widest thread count that corpus actually has: a
-  // Pareto line only reads as a level sweep when the rest of the slice is held
-  // still, and the thread domain is per-corpus, not global.
+  // Open on one corpus: a Pareto line only reads as a level sweep when the
+  // rest of the slice is held still. Threads and CPU are held by their own
+  // defaults, which reconcile picks per corpus.
   const seeded = decode(location.hash, db.domains());
   if (!location.hash) {
     const d = db.domains(seeded);
     if (d.corpora.length) seeded.corpora = [d.corpora[0]];
-    const have = db.index.runs
-      .filter((r) => r.kind === seeded.kind && seeded.corpora.includes(r.corpus))
-      .flatMap((r) => r.threads);
-    if (have.length) seeded.threads = [Math.max(...have)];
   }
   const store = createStore(seeded);
+  // What render kept of the stored emphasis. A toggle starts from it, so an
+  // entity that left the screen does not hold its slot past the next click.
+  let kept = DEFAULTS.emphasis;
   // Everything a card can change goes through the store, which is what keeps
   // the URL a faithful description of what is on screen.
   const ctx = {
-    onToggleEntity: (id) => store.set({ emphasis: emphasise(store.get().emphasis, id) }),
+    onToggleEntity: (id) => store.set({ emphasis: emphasise(kept, id) }),
     onSort: (cardId, sort) => store.set({ sorts: withSort(store.get(), cardId, sort) }),
     onTable: (cardId, open) => store.set({ tables: withTable(store.get(), cardId, open) }),
     sortOf,
@@ -124,10 +123,14 @@ async function main() {
       throw err;
     }
 
-    // Seed the emphasis with what is in scope, so the first view is not all grey.
+    // An emphasised entity that is not drawn has no legend entry to click it
+    // off with, so it gives up its slot; the survivors keep theirs, and their
+    // colours. Then seed with what is in scope, so the view is not all grey.
     const entities = [...new Set([results.encode, results.decode].filter(Boolean)
       .flatMap((r) => r.series.map((s) => s.entity)))];
-    if (!state.emphasis.some(Boolean) && entities.length) {
+    kept = state.emphasis.map((id) => (entities.includes(id) ? id : null));
+    state = { ...state, emphasis: kept };
+    if (!kept.some(Boolean) && entities.length) {
       const seed = ['zskp', 's2', 'gzkp', 'lz4', 'minlz', 'br', 'stdzstd', 'snappy']
         .filter((x) => entities.includes(x));
       const pick = [...seed, ...entities.filter((x) => !seed.includes(x))].slice(0, SLOTS);

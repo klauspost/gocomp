@@ -233,8 +233,11 @@ button:hover { background: var(--wash); color: var(--text-primary); }
 
 .grid { display: grid; gap: 14px; }
 
+/* min-width: a grid item never shrinks below its content, and Chart.js pins
+   the canvas at its last width in px, so a chart could grow but not shrink. */
 figure.card {
   margin: 0;
+  min-width: 0;
   background: var(--surface-1);
   border-radius: var(--r-lg);
   padding: 18px 20px 20px;
