@@ -20,11 +20,11 @@ async function main() {
     db = await openDB(createLoader());
   } catch (err) {
     fatal(`Could not load the database: ${err.message}. `
-      + 'Run "compress-site run" to produce web/data, then "compress-site serve".');
+      + 'Run "gocomp run" to produce web/data, then "gocomp serve".');
     return;
   }
   if (!db.index.runs.length) {
-    fatal('No benchmark runs recorded yet. Run "compress-site run" to populate web/data.');
+    fatal('No benchmark runs recorded yet. Run "gocomp run" to populate web/data.');
     return;
   }
 

@@ -2,7 +2,7 @@ package codec
 
 import (
 	"github.com/golang/snappy"
-	"github.com/klauspost/compress-site/internal/corpus"
+	"github.com/klauspost/gocomp/internal/corpus"
 )
 
 const snappyMod = "github.com/golang/snappy"

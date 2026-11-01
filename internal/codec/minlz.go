@@ -3,7 +3,7 @@ package codec
 import (
 	"io"
 
-	"github.com/klauspost/compress-site/internal/corpus"
+	"github.com/klauspost/gocomp/internal/corpus"
 	"github.com/minio/minlz"
 )
 

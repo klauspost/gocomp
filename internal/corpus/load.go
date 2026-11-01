@@ -27,7 +27,7 @@ func Load(ctx context.Context, c *Cache, cp Corpus, prog ProgressFn) (*Data, err
 		if cp.Remote == "" {
 			return nil, fmt.Errorf("corpus %s is not present: %s", cp.ID, cp.Note)
 		}
-		return nil, fmt.Errorf("corpus %s is not cached; run: compress-site corpus fetch %s", cp.ID, cp.ID)
+		return nil, fmt.Errorf("corpus %s is not cached; run: gocomp corpus fetch %s", cp.ID, cp.ID)
 	}
 
 	var (

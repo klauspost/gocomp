@@ -9,12 +9,12 @@ import (
 	"strconv"
 	"text/tabwriter"
 
-	"github.com/klauspost/compress-site/internal/corpus"
+	"github.com/klauspost/gocomp/internal/corpus"
 )
 
 func cmdCorpus(args []string) error {
 	if len(args) == 0 {
-		return fmt.Errorf("usage: compress-site corpus list|fetch|verify|rm|path [ids...]")
+		return fmt.Errorf("usage: gocomp corpus list|fetch|verify|rm|path [ids...]")
 	}
 	fs := newFlags("corpus " + args[0])
 	cacheDir := fs.String("cache", "", "corpus cache directory (default testdata, or $"+corpus.EnvCache+")")

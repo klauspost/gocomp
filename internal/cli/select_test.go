@@ -4,7 +4,7 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/klauspost/compress-site/internal/corpus"
+	"github.com/klauspost/gocomp/internal/corpus"
 )
 
 func TestParseLevels(t *testing.T) {

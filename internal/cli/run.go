@@ -13,12 +13,12 @@ import (
 	"text/tabwriter"
 	"time"
 
-	"github.com/klauspost/compress-site/internal/bench"
-	"github.com/klauspost/compress-site/internal/codec"
-	"github.com/klauspost/compress-site/internal/corpus"
-	"github.com/klauspost/compress-site/internal/db"
-	"github.com/klauspost/compress-site/internal/preset"
-	"github.com/klauspost/compress-site/internal/sysinfo"
+	"github.com/klauspost/gocomp/internal/bench"
+	"github.com/klauspost/gocomp/internal/codec"
+	"github.com/klauspost/gocomp/internal/corpus"
+	"github.com/klauspost/gocomp/internal/db"
+	"github.com/klauspost/gocomp/internal/preset"
+	"github.com/klauspost/gocomp/internal/sysinfo"
 )
 
 type runOpts struct {

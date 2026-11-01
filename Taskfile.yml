@@ -5,7 +5,7 @@ version: "3"
 # linter version is pinned in go.mod like any other dependency.
 
 vars:
-  BIN: compress-site{{if eq OS "windows"}}.exe{{end}}
+  BIN: gocomp{{if eq OS "windows"}}.exe{{end}}
 
 tasks:
   default:
@@ -13,7 +13,7 @@ tasks:
       - task --list-all
 
   build:
-    desc: Build the compress-site binary
+    desc: Build the gocomp binary
     cmds:
       - go build -o {{.BIN}} .
 
@@ -87,4 +87,4 @@ tasks:
   clean:
     desc: Remove build artifacts
     cmds:
-      - rm -rf compress-site compress-site.exe cs.exe dist/
+      - rm -rf gocomp gocomp.exe cs.exe dist/

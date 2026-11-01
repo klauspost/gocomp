@@ -5,9 +5,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/klauspost/compress-site/internal/bench"
-	"github.com/klauspost/compress-site/internal/codec"
-	"github.com/klauspost/compress-site/internal/corpus"
+	"github.com/klauspost/gocomp/internal/bench"
+	"github.com/klauspost/gocomp/internal/codec"
+	"github.com/klauspost/gocomp/internal/corpus"
 )
 
 // codecSel is one requested encoder, optionally pinned to specific levels.
@@ -95,7 +95,7 @@ func variantsFor(sels []codecSel, mode levelMode, kind corpus.Kind, slow bool) (
 		for _, s := range sels {
 			e, ok := codec.LookupEnc(s.id)
 			if !ok {
-				return nil, fmt.Errorf("unknown codec %q (try: compress-site list codecs)", s.id)
+				return nil, fmt.Errorf("unknown codec %q (try: gocomp list codecs)", s.id)
 			}
 			if !seen[e.ID] {
 				seen[e.ID] = true

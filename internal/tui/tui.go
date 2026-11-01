@@ -1,7 +1,7 @@
 // Package tui is the interactive front end for selecting and running benchmarks.
 //
 // It is for exploration. Numbers you intend to publish should come from
-// "compress-site run": a terminal redrawing during a measurement is noise the
+// "gocomp run": a terminal redrawing during a measurement is noise the
 // batch path does not have.
 package tui
 
@@ -13,11 +13,11 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/klauspost/compress-site/internal/bench"
-	"github.com/klauspost/compress-site/internal/codec"
-	"github.com/klauspost/compress-site/internal/corpus"
-	"github.com/klauspost/compress-site/internal/preset"
-	"github.com/klauspost/compress-site/internal/sysinfo"
+	"github.com/klauspost/gocomp/internal/bench"
+	"github.com/klauspost/gocomp/internal/codec"
+	"github.com/klauspost/gocomp/internal/corpus"
+	"github.com/klauspost/gocomp/internal/preset"
+	"github.com/klauspost/gocomp/internal/sysinfo"
 )
 
 // Options configures where the TUI reads and writes.

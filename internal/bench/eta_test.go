@@ -6,9 +6,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/klauspost/compress-site/internal/codec"
-	"github.com/klauspost/compress-site/internal/corpus"
-	"github.com/klauspost/compress-site/internal/db"
+	"github.com/klauspost/gocomp/internal/codec"
+	"github.com/klauspost/gocomp/internal/corpus"
+	"github.com/klauspost/gocomp/internal/db"
 	"github.com/zeebo/xxh3"
 )
 

@@ -1,8 +1,8 @@
 package cli
 
 import (
-	"github.com/klauspost/compress-site/internal/preset"
-	"github.com/klauspost/compress-site/internal/tui"
+	"github.com/klauspost/gocomp/internal/preset"
+	"github.com/klauspost/gocomp/internal/tui"
 )
 
 func cmdTUI(args []string) error {

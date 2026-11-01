@@ -1,13 +1,13 @@
-# compress-site
+# gocomp
 
 Benchmarks Go compressors and decompressors purely in memory, and maintains the
 JSON database behind the static comparison site in [`web/`](web).
 
 ```
-go tool task build                 # or: go build -o compress-site .
-./compress-site                    # interactive selection
-./compress-site run                # small + medium corpora, every codec
-./compress-site serve              # view the results at http://localhost:8080/
+go tool task build                 # or: go build -o gocomp .
+./gocomp                           # interactive selection
+./gocomp run                       # small + medium corpora, every codec
+./gocomp serve                     # view the results at http://localhost:8080/
 ```
 
 Everything is driven by [Task](https://taskfile.dev), declared as a `tool` in
@@ -21,7 +21,7 @@ difference produces separate rows instead of contaminated ones. Nothing here
 needs acting on; it needs knowing.
 
 - **`GOAMD64`.** A `v1` binary on a `v4` machine is 20-40% slower on some
-  codecs. `compress-site version` shows both the level the binary was built for
+  codecs. `gocomp version` shows both the level the binary was built for
   and the level the CPU supports. Build with `GOAMD64=v4 go build` if you want
   the faster one.
 - **The Go toolchain is pinned** to `go1.27.1` in `go.mod`. The Go version is a
@@ -36,21 +36,21 @@ hypervisor.
 
 ## Corpora
 
-`compress-site corpus list` shows the catalog with its state:
+`gocomp corpus list` shows the catalog with its state:
 
 | state | meaning |
 |---|---|
 | `adopted` | an existing plain file or directory in the cache root is used as-is |
 | `cached` | downloaded by this tool, and extracted where the format needs it |
 | `generated` | synthesised locally, never downloaded (`rand2gb`) |
-| `missing` | run `compress-site corpus fetch <id>` |
+| `missing` | run `gocomp corpus fetch <id>` |
 | `manual` | not hosted; place the file in the cache root yourself — no corpus needs this any more |
 
 The cache root defaults to `./testdata`, and `-cache` or `$COMPRESS_SITE_CACHE`
 overrides it. **If you already have these files, point the cache at them**:
 
 ```
-./compress-site corpus list -cache /path/to/your/corpora
+./gocomp corpus list -cache /path/to/your/corpora
 ```
 
 Every corpus entry lists the plain filenames it will accept, so a directory that
@@ -92,35 +92,35 @@ source. The tool refuses a corpus needing more than 60% of physical memory;
 ## Running
 
 ```
-compress-site run       run benchmarks and merge them into the JSON database
-compress-site tui       interactive selection (the default with no arguments)
-compress-site corpus    list | fetch <id|tier|all> | verify | rm | path
-compress-site validate  round-trip integrity check with xxh3; writes nothing
-compress-site list      codecs | corpora | runs | presets
-compress-site serve     serve web/ over HTTP so the site loads as ES modules
-compress-site version   tool, Go, library and environment information
+gocomp run       run benchmarks and merge them into the JSON database
+gocomp tui       interactive selection (the default with no arguments)
+gocomp corpus    list | fetch <id|tier|all> | verify | rm | path
+gocomp validate  round-trip integrity check with xxh3; writes nothing
+gocomp list      codecs | corpora | runs | presets
+gocomp serve     serve web/ over HTTP so the site loads as ES modules
+gocomp version   tool, Go, library and environment information
 ```
 
 Useful invocations:
 
 ```
 # Everything, at every thread count, including the slow codecs.
-compress-site run -corpus=all -cpu=sweep -slow
+gocomp run -corpus=all -cpu=sweep -slow
 
 # One corpus, two codecs, single- and 16-thread.
-compress-site run -corpus=enwik9 -codec=zskp,s2 -cpu=1,16
+gocomp run -corpus=enwik9 -codec=zskp,s2 -cpu=1,16
 
 # Level sweeps with an explicit list per codec.
-compress-site run -codec="zskp:1-4,s2,gzkp:1,5,9"
+gocomp run -codec="zskp:1-4,s2,gzkp:1,5,9"
 
 # Window and block sizes, next to each codec's default.
-compress-site run -codec=zskp,s2,minlz -window=default,64K,1M,8M
+gocomp run -codec=zskp,s2,minlz -window=default,64K,1M,8M
 
 # Check that everything round-trips, write nothing.
-compress-site validate -corpus=gofiles -codec=all
+gocomp validate -corpus=gofiles -codec=all
 
 # Run a saved selection unattended.
-compress-site run -preset quick
+gocomp run -preset quick
 ```
 
 `-codec` items are comma separated; an item with a colon starts a new codec and a
@@ -170,7 +170,7 @@ smallest runs. A size equal to the codec's default *is* the default: `2M` on
 
 gzip and deflate (fixed 32K), snappy, bzip2 (its level *is* the block size),
 `br2` (no window option) and the block-API codecs have no window to vary.
-`compress-site run -dry-run` lists the sizes per codec.
+`gocomp run -dry-run` lists the sizes per codec.
 
 Large windows cost memory the RAM guard does not count: `zskp` with concurrent
 blocks keeps a window per worker, so 512M at 32 threads is 16 GB.
@@ -186,10 +186,10 @@ command line runs them, so the suite you assembled interactively is the suite
 that runs unattended:
 
 ```
-compress-site list presets                 # what is saved
-compress-site run -preset quick            # run it, no TUI
-compress-site run -preset quick -corpus=enwik9   # the flag wins over the file
-compress-site validate -preset quick
+gocomp list presets                 # what is saved
+gocomp run -preset quick            # run it, no TUI
+gocomp run -preset quick -corpus=enwik9   # the flag wins over the file
+gocomp validate -preset quick
 ```
 
 In the TUI, `p` opens the preset browser from any selection screen: `enter`
@@ -272,8 +272,8 @@ hashes) and resolved through an import map.
 ES modules do not load from `file://`, so serve it:
 
 ```
-compress-site serve                 # opens a browser at http://localhost:8080/
-compress-site serve -open=false     # just listen
+gocomp serve                 # opens a browser at http://localhost:8080/
+gocomp serve -open=false     # just listen
 ```
 
 Up to eight codecs are highlighted at a time; the rest stay as grey context and
@@ -390,6 +390,6 @@ codec parallelises — so run it locally before trusting a new registration.
 - Single-file and many-file corpora are separate: the first uses streaming APIs,
   the second block APIs with instance reuse, and they are never mixed in a chart.
 
-`compress-site list codecs` shows, per codec and direction, which corpus kinds
+`gocomp list codecs` shows, per codec and direction, which corpus kinds
 actually parallelise. For the others the thread count is recorded but changes
 nothing in the codec itself.

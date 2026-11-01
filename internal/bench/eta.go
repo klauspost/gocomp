@@ -4,9 +4,9 @@ import (
 	"slices"
 	"time"
 
-	"github.com/klauspost/compress-site/internal/codec"
-	"github.com/klauspost/compress-site/internal/corpus"
-	"github.com/klauspost/compress-site/internal/db"
+	"github.com/klauspost/gocomp/internal/codec"
+	"github.com/klauspost/gocomp/internal/corpus"
+	"github.com/klauspost/gocomp/internal/db"
 )
 
 // Key names a measurement the same way on every corpus. src is the encoder

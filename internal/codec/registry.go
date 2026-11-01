@@ -5,7 +5,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/klauspost/compress-site/internal/corpus"
+	"github.com/klauspost/gocomp/internal/corpus"
 )
 
 var (

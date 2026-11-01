@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/klauspost/compress-site/internal/corpus"
+	"github.com/klauspost/gocomp/internal/corpus"
 )
 
 // testData is semi-compressible: repeated structure with incompressible noise,

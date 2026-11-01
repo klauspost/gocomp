@@ -3,7 +3,7 @@ package codec
 import (
 	"strconv"
 
-	"github.com/klauspost/compress-site/internal/corpus"
+	"github.com/klauspost/gocomp/internal/corpus"
 	"github.com/pierrec/lz4/v4"
 )
 

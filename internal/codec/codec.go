@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/klauspost/compress-site/internal/corpus"
+	"github.com/klauspost/gocomp/internal/corpus"
 )
 
 // Format identifies the wire format. Decoders can decode any encoder sharing it.

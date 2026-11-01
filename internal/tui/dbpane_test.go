@@ -5,8 +5,8 @@ import (
 	"testing"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/klauspost/compress-site/internal/db"
-	"github.com/klauspost/compress-site/internal/sysinfo"
+	"github.com/klauspost/gocomp/internal/db"
+	"github.com/klauspost/gocomp/internal/sysinfo"
 )
 
 // seedDB stores runs alpha and beta, each with a zskp encode row and a

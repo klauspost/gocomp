@@ -6,8 +6,8 @@ import (
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/klauspost/compress-site/internal/bench"
-	"github.com/klauspost/compress-site/internal/preset"
+	"github.com/klauspost/gocomp/internal/bench"
+	"github.com/klauspost/gocomp/internal/preset"
 )
 
 // pane is the preset browser. It is a modal rather than a tab so the 1-2-3

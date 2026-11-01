@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/klauspost/compress-site/internal/preset"
+	"github.com/klauspost/gocomp/internal/preset"
 )
 
 func savedPreset(t *testing.T) string {

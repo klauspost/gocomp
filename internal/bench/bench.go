@@ -5,8 +5,8 @@ import (
 	"math"
 	"time"
 
-	"github.com/klauspost/compress-site/internal/codec"
-	"github.com/klauspost/compress-site/internal/corpus"
+	"github.com/klauspost/gocomp/internal/codec"
+	"github.com/klauspost/gocomp/internal/corpus"
 )
 
 // Version is the measurement methodology version. Bump it whenever a change

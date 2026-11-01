@@ -1,4 +1,4 @@
-// Command compress-site benchmarks Go compressors and maintains the JSON
+// Command gocomp benchmarks Go compressors and maintains the JSON
 // database behind the static comparison site in web/.
 package main
 
@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/klauspost/compress-site/internal/cli"
+	"github.com/klauspost/gocomp/internal/cli"
 )
 
 func main() {

@@ -5,8 +5,8 @@ import (
 	"io"
 	"strconv"
 
-	"github.com/klauspost/compress-site/internal/corpus"
 	gzkp "github.com/klauspost/compress/gzip"
+	"github.com/klauspost/gocomp/internal/corpus"
 	pgz "github.com/klauspost/pgzip"
 )
 

@@ -3,8 +3,8 @@ package codec
 import (
 	"io"
 
-	"github.com/klauspost/compress-site/internal/corpus"
 	"github.com/klauspost/compress/s2"
+	"github.com/klauspost/gocomp/internal/corpus"
 )
 
 var (

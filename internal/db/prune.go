@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"slices"
 
-	"github.com/klauspost/compress-site/internal/codec"
+	"github.com/klauspost/gocomp/internal/codec"
 )
 
 // Filter names the rows Prune deletes. Every field adds to what matches, so an

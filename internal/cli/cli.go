@@ -46,18 +46,18 @@ func Main(args []string) error {
 }
 
 func usage() {
-	fmt.Fprintln(os.Stderr, "compress-site <command> [flags]")
+	fmt.Fprintln(os.Stderr, "gocomp <command> [flags]")
 	fmt.Fprintln(os.Stderr)
 	for _, c := range commands {
 		fmt.Fprintf(os.Stderr, "  %-9s %s\n", c.name, c.desc)
 	}
-	fmt.Fprintln(os.Stderr, "\nRun 'compress-site <command> -h' for the flags of a command.")
+	fmt.Fprintln(os.Stderr, "\nRun 'gocomp <command> -h' for the flags of a command.")
 }
 
 func newFlags(name string) *flag.FlagSet {
 	fs := flag.NewFlagSet(name, flag.ExitOnError)
 	fs.Usage = func() {
-		fmt.Fprintf(os.Stderr, "compress-site %s [flags]\n\n", name)
+		fmt.Fprintf(os.Stderr, "gocomp %s [flags]\n\n", name)
 		fs.PrintDefaults()
 	}
 	return fs

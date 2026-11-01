@@ -3,8 +3,8 @@ package codec
 import (
 	"strconv"
 
-	"github.com/klauspost/compress-site/internal/corpus"
 	"github.com/klauspost/compress/zstd"
+	"github.com/klauspost/gocomp/internal/corpus"
 	stdzstd "github.com/klauspost/stdgozstd"
 )
 

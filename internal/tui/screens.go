@@ -7,8 +7,8 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/klauspost/compress-site/internal/bench"
-	"github.com/klauspost/compress-site/internal/corpus"
+	"github.com/klauspost/gocomp/internal/bench"
+	"github.com/klauspost/gocomp/internal/corpus"
 	"github.com/pbnjay/memory"
 )
 

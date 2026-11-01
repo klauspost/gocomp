@@ -10,7 +10,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/klauspost/compress-site/internal/sysinfo"
+	"github.com/klauspost/gocomp/internal/sysinfo"
 	"github.com/zeebo/xxh3"
 )
 

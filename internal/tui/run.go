@@ -13,11 +13,11 @@ import (
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/klauspost/compress-site/internal/bench"
-	"github.com/klauspost/compress-site/internal/corpus"
-	"github.com/klauspost/compress-site/internal/db"
-	"github.com/klauspost/compress-site/internal/preset"
-	"github.com/klauspost/compress-site/internal/sysinfo"
+	"github.com/klauspost/gocomp/internal/bench"
+	"github.com/klauspost/gocomp/internal/corpus"
+	"github.com/klauspost/gocomp/internal/db"
+	"github.com/klauspost/gocomp/internal/preset"
+	"github.com/klauspost/gocomp/internal/sysinfo"
 )
 
 type tickMsg time.Time
@@ -623,7 +623,7 @@ func (m *Model) doneView() string {
 		}
 	}
 	fmt.Fprintf(&b, "\n  database: %s\n", m.opts.Out)
-	fmt.Fprintf(&b, "  view it with: compress-site serve\n")
+	fmt.Fprintf(&b, "  view it with: gocomp serve\n")
 	return b.String()
 }
 
@@ -631,7 +631,7 @@ func (m *Model) doneView() string {
 
 // The between-sessions autosave is a preset in every respect except that it
 // lives in the cache rather than the repo, so there is one format to
-// understand and "compress-site run -preset <cache>/tui-state.json" replays
+// understand and "gocomp run -preset <cache>/tui-state.json" replays
 // the last interactive selection exactly.
 func (m *Model) statePath() string { return filepath.Join(m.cacheDir, "tui-state.json") }
 

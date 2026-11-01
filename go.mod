@@ -1,4 +1,4 @@
-module github.com/klauspost/compress-site
+module github.com/klauspost/gocomp
 
 go 1.26.0
 

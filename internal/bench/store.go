@@ -3,9 +3,9 @@ package bench
 import (
 	"strconv"
 
-	"github.com/klauspost/compress-site/internal/corpus"
-	"github.com/klauspost/compress-site/internal/db"
-	"github.com/klauspost/compress-site/internal/sysinfo"
+	"github.com/klauspost/gocomp/internal/corpus"
+	"github.com/klauspost/gocomp/internal/db"
+	"github.com/klauspost/gocomp/internal/sysinfo"
 )
 
 // CorpusMeta is what a run records about the data it measured. It is captured

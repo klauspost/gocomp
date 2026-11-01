@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/klauspost/compress-site/internal/preset"
+	"github.com/klauspost/gocomp/internal/preset"
 )
 
 func keys(t *testing.T, m *Model, ss ...string) {

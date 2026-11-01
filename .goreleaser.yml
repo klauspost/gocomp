@@ -1,10 +1,10 @@
 version: 2
 
-project_name: compress-site
+project_name: gocomp
 
 builds:
   - main: .
-    binary: compress-site
+    binary: gocomp
     env: [CGO_ENABLED=0]
     flags: [-trimpath]
     ldflags: [-s -w]

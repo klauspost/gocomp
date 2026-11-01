@@ -8,7 +8,7 @@ import (
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/klauspost/compress-site/internal/bench"
+	"github.com/klauspost/gocomp/internal/bench"
 )
 
 // newTestModel builds a model over a temp cache holding a small stacktrace.txt,

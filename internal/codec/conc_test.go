@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/klauspost/compress-site/internal/corpus"
+	"github.com/klauspost/gocomp/internal/corpus"
 )
 
 // concProbeSize has to clear zstd's job size before WithConcurrentBlocks

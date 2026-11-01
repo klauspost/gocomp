@@ -6,8 +6,8 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/klauspost/compress-site/internal/codec"
-	"github.com/klauspost/compress-site/internal/corpus"
+	"github.com/klauspost/gocomp/internal/codec"
+	"github.com/klauspost/gocomp/internal/corpus"
 )
 
 // Event reports progress. Sends are non-blocking, so a slow consumer can never

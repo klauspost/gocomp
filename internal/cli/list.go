@@ -11,17 +11,17 @@ import (
 	"strings"
 	"text/tabwriter"
 
-	"github.com/klauspost/compress-site/internal/bench"
-	"github.com/klauspost/compress-site/internal/codec"
-	"github.com/klauspost/compress-site/internal/corpus"
-	"github.com/klauspost/compress-site/internal/db"
-	"github.com/klauspost/compress-site/internal/preset"
-	"github.com/klauspost/compress-site/internal/sysinfo"
+	"github.com/klauspost/gocomp/internal/bench"
+	"github.com/klauspost/gocomp/internal/codec"
+	"github.com/klauspost/gocomp/internal/corpus"
+	"github.com/klauspost/gocomp/internal/db"
+	"github.com/klauspost/gocomp/internal/preset"
+	"github.com/klauspost/gocomp/internal/sysinfo"
 )
 
 func cmdList(args []string) error {
 	if len(args) == 0 {
-		return fmt.Errorf("usage: compress-site list codecs|corpora|runs|presets")
+		return fmt.Errorf("usage: gocomp list codecs|corpora|runs|presets")
 	}
 	fs := newFlags("list " + args[0])
 	asJSON := fs.Bool("json", false, "emit JSON")

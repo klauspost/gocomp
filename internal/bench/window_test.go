@@ -4,7 +4,7 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/klauspost/compress-site/internal/codec"
+	"github.com/klauspost/gocomp/internal/codec"
 )
 
 func TestParseWindows(t *testing.T) {

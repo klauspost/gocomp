@@ -132,7 +132,7 @@ func Load(dir, ref string) (Preset, error) {
 	}
 	p, err := readFile(path(dir, ref))
 	if os.IsNotExist(err) {
-		return Preset{}, fmt.Errorf("no preset %q in %s (try: compress-site list presets)", ref, dir)
+		return Preset{}, fmt.Errorf("no preset %q in %s (try: gocomp list presets)", ref, dir)
 	}
 	return p, err
 }

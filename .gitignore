@@ -1,7 +1,9 @@
 # Corpus cache: tens of gigabytes of downloaded test data.
 /testdata/
 
-# Built binaries.
+# Built binaries. compress-site is the binary's old name.
+/gocomp
+/gocomp.exe
 /compress-site
 /compress-site.exe
 /cs.exe

@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/klauspost/compress-site/internal/db"
+	"github.com/klauspost/gocomp/internal/db"
 )
 
 // dbPane deletes from the database: whole runs, or the rows of the ticked runs

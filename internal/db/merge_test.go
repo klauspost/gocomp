@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/klauspost/compress-site/internal/sysinfo"
+	"github.com/klauspost/gocomp/internal/sysinfo"
 )
 
 func runFixture(lib string, ns int64, verified int) *Run {
