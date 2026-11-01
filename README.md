@@ -393,3 +393,7 @@ codec parallelises — so run it locally before trusting a new registration.
 `gocomp list codecs` shows, per codec and direction, which corpus kinds
 actually parallelise. For the others the thread count is recorded but changes
 nothing in the codec itself.
+
+## License
+
+Apache 2.0, see [LICENSE](LICENSE).
