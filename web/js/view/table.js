@@ -5,7 +5,7 @@
 import { colorsFor } from './theme.js';
 import { el } from './chart.js';
 
-export function renderTable(host, rows, { columns, sort, onRow, onSort, emphasis = [] }) {
+export function renderTable(host, rows, { columns, sort, onRow, onSort, emphasis = [], spare = false }) {
   host.replaceChildren();
   if (!rows.length) {
     const p = el('div', 'empty');
@@ -29,7 +29,7 @@ export function renderTable(host, rows, { columns, sort, onRow, onSort, emphasis
       // Sort lives in the URL, so re-render goes through state rather than
       // mutating this table in place.
       if (onSort) onSort(next);
-      else renderTable(host, rows, { columns, sort: next, onRow, emphasis });
+      else renderTable(host, rows, { columns, sort: next, onRow, emphasis, spare });
     });
     hr.append(th);
   }
@@ -54,7 +54,7 @@ export function renderTable(host, rows, { columns, sort, onRow, onSort, emphasis
       if (c.ident) {
         // Identity is a coloured dot beside text, never coloured text.
         const box = el('span', 'ident');
-        const col = colorsFor(r[c.entity ?? 'codec'], emphasis);
+        const col = colorsFor(r[c.entity ?? 'codec'], emphasis, spare);
         const dot = el('span', `dot ${col.shape}`);
         dot.style.background = col.emph ? col.fill : 'transparent';
         dot.style.boxShadow = `inset 0 0 0 2px ${col.emph ? col.fill : col.ring}`;

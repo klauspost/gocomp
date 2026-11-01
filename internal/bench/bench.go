@@ -63,6 +63,9 @@ type Config struct {
 	AllDecoders bool
 	Encode      bool
 	Decode      bool
+	// Pin runs n threads on n logical CPUs, one per core across the cache
+	// groups first, when the CPU topology is known.
+	Pin bool
 }
 
 // DefaultConfig is the starting point for both the CLI and the TUI.
@@ -70,26 +73,30 @@ func DefaultConfig(numCPU int) Config {
 	return Config{
 		Threads: []int{numCPU}, SrcThreads: numCPU,
 		Passes: 3, MinWall: 2 * time.Second, MaxPasses: 25, MaxJob: 5 * time.Minute,
-		Windows: []int{0}, Encode: true, Decode: true,
+		Windows: []int{0}, Encode: true, Decode: true, Pin: true,
 	}
 }
 
 // Result is one completed measurement.
 type Result struct {
-	Op        Op
-	Codec     string // encoder id, or decoder id for OpDecode
-	Src       string // OpDecode: the encoder variant that produced the input
-	Level     int
-	Window    int // OpDecode: the window the source was encoded with
-	Threads   int
-	Module    string
-	SrcModule string
-	In, Out   int64
-	Best      time.Duration
-	Passes    int
-	SD        float64 // relative standard deviation
-	Verified  int     // 1 verified, 0 mismatch, -1 not checked
-	Err       string
+	Op      Op
+	Codec   string // encoder id, or decoder id for OpDecode
+	Src     string // OpDecode: the encoder variant that produced the input
+	Level   int
+	Window  int // OpDecode: the window the source was encoded with
+	Threads int
+	// SrcThreads is the thread count Src was encoded at, for OpDecode, or
+	// 0 where Src's bytes do not depend on it.
+	SrcThreads int
+	Module     string
+	SrcModule  string
+	In, Out    int64
+	Best       time.Duration
+	Passes     int
+	SD         float64 // relative standard deviation
+	Verified   int     // 1 verified, 0 mismatch, -1 not checked
+	Pin        int     // 1 pinned by Config.Pin, 0 placed by the OS
+	Err        string
 }
 
 // MBps is throughput in MB/s (SI, 10^6 bytes) over the meaningful side of the

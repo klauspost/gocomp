@@ -9,6 +9,10 @@ export class QueryError extends Error {}
 // Level classes in display order; the registry's names for them.
 export const LEVEL_CLASSES = ['regular', 'uncompressed', 'special'];
 
+// The library filter's entry for the newest version of each measurement. A
+// real entry is always module@version, so it cannot collide with one.
+export const LATEST = 'latest';
+
 export async function openDB(loader) {
   const index = await loader.index();
   const rows = []; // flat, denormalised; one entry per measurement
@@ -57,7 +61,8 @@ export async function openDB(loader) {
   const SCOPE = {
     corpora: (r, s) => has(s.corpora, r.corpus),
     machines: (r, s) => has(s.machines, r.machine),
-    gos: (r, s) => has(s.gos, r.go),
+    // Which Go is newest is decided per measurement, so LATEST needs every run.
+    gos: (r, s) => has(s.gos, r.go) || s.gos.includes(LATEST),
     bench: (r, s) => !s.bench || r.bench === s.bench,
     variants: (r, s) => has(s.variants, variantOf(r)),
   };
@@ -98,7 +103,10 @@ export async function openDB(loader) {
         src: r.src || null, srcCodec: r.srcCodec || null, srcLevel: r.srcLevel ?? null,
         // "minlz--1" is a storage key, not a label. The decode source is named
         // the same way an encode row is, so the two read alike.
-        srcLabel: r.src ? `${r.srcCodec} ${levelOf(r.srcCodec, r.srcLevel ?? null)}`.trimEnd() : null,
+        srcLabel: r.src ? `${r.srcCodec} ${levelOf(r.srcCodec, r.srcLevel ?? null)}${r.srcthreads ? ` @${r.srcthreads}t` : ''}`.trimEnd() : null,
+        // Set only where the source's bytes depend on the threads it was
+        // encoded at (zstd's concurrent blocks); zero merges everywhere else.
+        srcThreads: r.srcthreads || 0,
         lib: libs[r.lib] || '', libVer: verOf(libs[r.lib]),
         // The library that built the bytes being decoded. Not displayed, but
         // it is half of the decode row's identity: one unchanged stdlib
@@ -167,8 +175,7 @@ export async function openDB(loader) {
       };
     },
 
-    // resolveScope is synchronous and index-only: which run files a state needs
-    // and what is questionable about combining them.
+    // resolveScope is synchronous and index-only: which run files a state needs.
     resolveScope(s) {
       // Threads stays out of SCOPE because it must not narrow the corpus or
       // machine lists -- it selects rows inside a run. But a run whose sweep
@@ -184,7 +191,13 @@ export async function openDB(loader) {
         || !r.threads?.length || r.threads.some((n) => s.threads.includes(n)))
         && (!s?.windows?.length || r.windows.some((w) => s.windows.includes(w)
           || (w === 0 && s.windows.some((x) => defSizes.has(x))))));
+      return { runs };
+    },
 
+    // warnings says what is questionable about combining runs. It is asked
+    // about the runs with a row on screen, not the runs in scope: a LATEST
+    // filter reads every run and may keep nothing of an older one.
+    warnings(runs) {
       const warnings = [];
       const note = (code, field, vals) => {
         if (vals.length > 1) {
@@ -213,7 +226,7 @@ export async function openDB(loader) {
         if (f === 'goamd64' || (f === 'corpus_hash' && manyCorpora)) continue;
         note('MIXED_VARIANT', f, uniq(runs.map((r) => r.variant[f] ?? '(unset)')));
       }
-      return { runs, warnings };
+      return warnings;
     },
 
     needsFetch: (runs) => runs.some((r) => !ingested.has(r.id)),
@@ -258,6 +271,11 @@ function verOf(lib) {
   if (!lib) return '';
   const i = lib.lastIndexOf('@');
   return i < 0 ? '' : lib.slice(i + 1);
+}
+
+function moduleOf(lib) {
+  const i = lib.lastIndexOf('@');
+  return i < 0 ? lib : lib.slice(0, i);
 }
 
 function uniq(a) {
@@ -314,9 +332,10 @@ function variantFields(runs) {
 
 // The environment a measurement was taken in. Two of these in one series is
 // two lines under one label, which the reader has no way to tell apart -- the
-// banner says the runs differ but the chart does not show where. They are not
-// dropped the way a superseded library version is: a second CPU or Go version
-// is another result, not the same one measured twice.
+// banner says the runs differ but the chart does not show where. A second CPU
+// or Go version is another result, not the same one measured twice; only the
+// Go filter's LATEST drops an older Go, and only where a newer one measured
+// the same point.
 const ENV_SPLIT = ['machine', 'go', 'bench', 'variant'];
 
 function runQuery(all, q, db) {
@@ -327,12 +346,10 @@ function runQuery(all, q, db) {
     r.op === q.op &&
     has(q.corpora, r.corpus) &&
     has(q.machines, r.machine) &&
-    has(q.gos, r.go) &&
     (!q.bench || r.bench === q.bench) &&
     has(q.threads, r.threads) &&
     (has(q.windows, r.window) || q.windows.includes(r.size)) &&
     has(q.codecs, r.codec) &&
-    has(q.libs, r.lib) &&
     has(q.variants, r.variant) &&
     // Not has(): nothing selected shows nothing, since every class is an
     // explicit on/off choice rather than a narrowing filter.
@@ -350,25 +367,47 @@ function runQuery(all, q, db) {
 
   if (q.op === 'd') rows = applySrcPolicy(rows, q);
 
-  // One codec measured against two versions of its library draws the same
-  // curve twice, identical ratio and slightly different speed, one on top of
-  // the other. Unless library version is what the reader asked to compare,
-  // only the newest survives.
-  if (!q.seriesBy.includes('lib') && q.entityBy !== 'lib') rows = newestLib(rows);
+  // LATEST keeps the newest version of each measurement, not only the newest
+  // release, so a point never re-run on it still shows. Versions ticked beside
+  // it are added on top; nothing ticked is every version. The library and Go
+  // filters work alike. With both on LATEST, the newest Go is chosen per
+  // library module rather than per version, so the standard library -- whose
+  // version is the Go version -- keeps only its newest Go, like any other
+  // library keeps only its newest release.
+  const libs = q.libs ?? [];
+  const gos = q.gos ?? [];
+  const byVer = (a, b) => cmpVer(a.libVer, b.libVer) || cmpVer(a.srcLibVer, b.srcLibVer);
+  const lib = libs.includes(LATEST) ? newest(rows, (r) => r.go, byVer) : null;
+  const go = gos.includes(LATEST)
+    ? newest(rows, (r) => (lib ? moduleOf(r.lib) : r.lib), (a, b) => cmpVer(a.go, b.go) || byVer(a, b))
+    : null;
+  rows = rows.filter((r) => (!libs.length || libs.includes(r.lib) || lib?.has(r))
+    && (!gos.length || gos.includes(r.go) || go?.has(r)));
 
   // A series line only means something within one corpus at one thread count,
   // measured the same way. Whichever of those actually vary in the result join
   // the series key, so a line never connects unrelated slices; entityBy keeps
   // the colour on the codec.
   // ENV_SPLIT is appended to whatever the caller asked for rather than being
-  // one of the defaults: a line through two CPUs, two Go versions or two
-  // src_threads settings is never meaningful, whatever else the card plots.
-  // Nor is one through two windows -- a level curve that steps between block
-  // sizes is two settings drawn as one.
+  // one of the defaults: a line through two CPUs or two Go versions is never
+  // meaningful, whatever else the card plots. Nor is one through two windows
+  // -- a level curve that steps between block sizes is two settings drawn as
+  // one -- or through two inputs a decoder read.
   const seriesBy = [...q.seriesBy];
-  for (const d of [...(q.autoSplit ?? ['corpus', 'threads']), 'window', ...ENV_SPLIT]) {
+  for (const d of [...(q.autoSplit ?? ['corpus', 'threads']), 'window', 'srcThreads', ...ENV_SPLIT]) {
     if (seriesBy.includes(d)) continue;
-    if (new Set(rows.map((r) => r[d])).size > 1) seriesBy.push(d);
+    // A source thread count of 0 means the source does not have one, so it
+    // never needs telling apart from zstd's.
+    if (new Set(rows.map((r) => r[d]).filter((v) => d !== 'srcThreads' || v)).size > 1) seriesBy.push(d);
+  }
+  // Past LATEST a codec can hold one point at several versions, and each
+  // version is then its own line. Under LATEST alone its points may still come
+  // from different versions, but each point only once, so the line stays whole.
+  // Counted per codec: across codecs the versions always differ.
+  const latestOnly = libs.length === 1 && libs[0] === LATEST;
+  if (!latestOnly && !seriesBy.includes('lib')
+    && new Set(rows.map((r) => `${r.codec}@${r.libVer}`)).size > new Set(rows.map((r) => r.codec)).size) {
+    seriesBy.push('libVer');
   }
   q = { ...q, seriesBy };
 
@@ -400,11 +439,13 @@ function runQuery(all, q, db) {
     g.points.sort((a, b) => cmpBy(a, b, pointKey));
     if (q.metric) paretoFront(g.points, q.metric, 'ratio');
     g.parts = q.seriesBy.map((d) => dimLabel(d, g.dims[d], db, g.sample, g.points));
-    g.label = g.parts.join(' · ');
+    // A part can be empty: a series with no source thread count, beside one
+    // that has it, has nothing to say about it.
+    g.label = g.parts.filter(Boolean).join(' · ');
     // The label drawn on the chart leaves the default window unsaid: it is
     // what a line is unless told otherwise, and at every line end it buries
     // the part that names the line. The hover keeps the full label.
-    const drawn = g.parts.filter((_, i) => q.seriesBy[i] !== 'window' || g.dims.window);
+    const drawn = g.parts.filter((p, i) => p && (q.seriesBy[i] !== 'window' || g.dims.window));
     g.endLabel = drawn.length ? drawn.join(' · ') : 'default';
     // The legend keys colour to the entity, so it names the entity alone --
     // every slice of one codec shares that colour, and spelling out which
@@ -425,22 +466,21 @@ function runQuery(all, q, db) {
   return { q, series, rows };
 }
 
-// newestLib keeps the newest-library row of each measurement. The key is the
-// database's own row-merge key with the library columns taken out, because
-// rows that collide on it were kept apart for the library alone; anything
-// differing in any other way is left untouched. Keyed within a run, so a
-// second run is never emptied out by a newer library in the first.
-function newestLib(rows) {
+// newest keeps the row that cmp ranks highest among rows measuring the same
+// thing. The key is the database's own row-merge key with the Go version and
+// the library taken out, and part(r) putting back whichever of them is not
+// being chosen between; anything differing in any other way is left untouched.
+// Where the library decides, the source's library breaks the tie, which is what
+// chooses between two encoders' output for one unchanged decoder.
+function newest(rows, part, cmp) {
   const best = new Map();
   for (const r of rows) {
-    const k = [r.runId, r.op, r.codec, r.level, r.window, r.threads, r.src].join('|');
+    const k = [r.corpus, r.machine, r.bench, r.variant, part(r),
+      r.op, r.codec, r.level, r.window, r.threads, r.src, r.srcThreads].join('|');
     const cur = best.get(k);
-    // The codec's own library decides. The source's breaks the tie, which is
-    // what chooses between two encoders' output for one unchanged decoder.
-    if (!cur || (cmpVer(r.libVer, cur.libVer) || cmpVer(r.srcLibVer, cur.srcLibVer)) > 0) best.set(k, r);
+    if (!cur || cmp(r, cur) > 0) best.set(k, r);
   }
-  const keep = new Set(best.values());
-  return rows.filter((r) => keep.has(r));
+  return new Set(best.values());
 }
 
 // cmpVer orders on the numbers in a version string, so v1.9.0 sorts below
@@ -486,7 +526,11 @@ function dimLabel(d, v, db, row, points) {
   if (d === 'machine') return db.machines.get(v)?.label || v;
   if (d === 'corpus') return db.corpora.get(v)?.name || v;
   if (d === 'threads') return `${v} thread${v === 1 ? '' : 's'}`;
+  if (d === 'srcThreads') return v ? `source encoded at ${v} thread${v === 1 ? '' : 's'}` : '';
   if (d === 'bench') return `bench v${v}`;
+  // The standard library's version is the Go version, which says it already.
+  // A directory replace records no version; the line still needs a name.
+  if (d === 'libVer') return v === row?.go ? '' : v || 'unknown version';
   if (d === 'window') {
     // A default series names its size only when all of it shares one: zstd's
     // default is 4M at its fastest level and 8M above.

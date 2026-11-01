@@ -10,7 +10,7 @@ import (
 func runFixture(lib string, ns int64, verified int) *Run {
 	r := &Run{
 		ID: "test", Corpus: "demo", Kind: "file", Bench: "1",
-		CorpusHash: "abc", SrcThreads: 8, MinPasses: 3,
+		CorpusHash: "abc", MinPasses: 3,
 		Env: sysinfo.Env{
 			Go: "go1.26.1", GOOS: "linux", GOARCH: "amd64", GOAMD64: "v3",
 			NumCPU: 32, GOGC: 100,
@@ -23,7 +23,7 @@ func runFixture(lib string, ns int64, verified int) *Run {
 		In: 1000, Out: 400, NS: ns, Passes: 3, Verified: verified,
 	}}
 	r.Decode = []DecRow{{
-		Codec: "zskp", Src: "zskp-2", Lib: i, SrcLib: i, Threads: 8,
+		Codec: "zskp", Src: "zskp-2", Lib: i, SrcLib: i, SrcThreads: 8, Threads: 8,
 		In: 400, Out: 1000, NS: ns / 2, Passes: 3, Verified: verified,
 	}}
 	return r
@@ -104,7 +104,6 @@ func TestIncompatibleEnvGetsItsOwnRun(t *testing.T) {
 	}{
 		{"goamd64", func(r *Run) { r.Env.GOAMD64 = "v1" }},
 		{"corpus hash", func(r *Run) { r.CorpusHash = "different" }},
-		{"src threads", func(r *Run) { r.SrcThreads = 1 }},
 		{"build tags", func(r *Run) { r.Env.Tags = "withasm" }},
 		// A taskset-limited run has the same CPU brand, so only NumCPU catches it.
 		{"numcpu", func(r *Run) { r.Env.NumCPU = 4 }},
@@ -173,7 +172,7 @@ func TestVariantReachesTheIndex(t *testing.T) {
 		t.Fatal(err)
 	}
 	bad := runFixture("v1.0.0", 900, 1)
-	bad.SrcThreads = 1
+	bad.Env.GOGC = 10
 	if _, err := Merge(dir, bad, false); err != nil {
 		t.Fatal(err)
 	}
@@ -183,13 +182,61 @@ func TestVariantReachesTheIndex(t *testing.T) {
 	}
 	seen := map[string]string{}
 	for _, s := range ix.Runs {
-		seen[s.ID] = s.Variant["src_threads"]
+		seen[s.ID] = s.Variant["gogc"]
 		if s.Variant["goarm64"] != "" {
 			t.Errorf("%s: empty gated fields must not be indexed: %v", s.ID, s.Variant)
 		}
 	}
-	if seen["test"] != "8" || seen[bad.ID] != "1" {
-		t.Errorf("src_threads did not reach the index: %v", seen)
+	if seen["test"] != "100" || seen[bad.ID] != "10" {
+		t.Errorf("gogc did not reach the index: %v", seen)
+	}
+}
+
+// The thread count a decode input was encoded at is part of the decode row,
+// not the run: it must not split the encode rows that never see it.
+func TestSrcThreadsSplitsOnlyDecodeRows(t *testing.T) {
+	dir := t.TempDir()
+	if _, err := Merge(dir, runFixture("v1.0.0", 1000, 1), false); err != nil {
+		t.Fatal(err)
+	}
+	r := runFixture("v1.0.0", 900, 1)
+	r.Decode[0].SrcThreads, r.Decode[0].In = 1, 410
+	res, err := Merge(dir, r, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if r.ID != "test" || len(res.Warnings) != 0 {
+		t.Fatalf("stored as %s with warnings %v, want a plain merge into test", r.ID, res.Warnings)
+	}
+	got, _ := LoadRun(dir, "demo", "test")
+	if len(got.Encode) != 1 || got.Encode[0].NS != 900 {
+		t.Errorf("encode rows did not merge: %+v", got.Encode)
+	}
+	if len(got.Decode) != 2 || got.Decode[0].SrcThreads != 1 || got.Decode[1].SrcThreads != 8 {
+		t.Errorf("decode rows did not keep one per source thread count: %+v", got.Decode)
+	}
+}
+
+// A decode input that changed size under an unchanged library was produced by
+// other code -- a local replace that moved -- so the minimum across both would
+// mix two builds. Same rule as an encode row whose output changed.
+func TestMergeDecodeInputChangeTakesNewRow(t *testing.T) {
+	dir := t.TempDir()
+	if _, err := Merge(dir, runFixture("v1.0.0", 1000, 1), false); err != nil {
+		t.Fatal(err)
+	}
+	r := runFixture("v1.0.0", 4000, -1)
+	r.Decode[0].In = 410
+	res, err := Merge(dir, r, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(res.Warnings) != 1 {
+		t.Errorf("warnings = %v, want one for the changed input", res.Warnings)
+	}
+	got, _ := LoadRun(dir, "demo", "test")
+	if d := got.Decode[0]; d.In != 410 || d.NS != 2000 || d.Passes != 6 {
+		t.Errorf("decode row = %+v, want the new input's row with passes accumulated", d)
 	}
 }
 

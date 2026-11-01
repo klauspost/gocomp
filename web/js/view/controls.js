@@ -1,7 +1,7 @@
 // The single filter row. Every chart, table and stat below re-renders against
 // the same slice, so the numbers always agree.
 
-import { variantLabel } from '../data/db.js';
+import { LATEST, variantLabel } from '../data/db.js';
 import { windowName } from '../format.js';
 import { el } from './chart.js';
 
@@ -30,13 +30,12 @@ export function createControls(host, db, onChange) {
       ].filter((o) => d.kinds.includes(o.v)), state.kind,
       (v) => onChange({ kind: v, corpora: [], codecs: [] })));
 
-      add(some(d.corpora) && multi('Corpus', d.corpora, state.corpora,
-        (v) => onChange({ corpora: v }), (id) => db.corpora.get(id)?.name || id));
+      add(some(d.corpora) && single('Corpus', ['', ...d.corpora], state.corpora[0] ?? '',
+        (v) => onChange({ corpora: v ? [v] : [] }),
+        (id) => (id === '' ? 'all' : db.corpora.get(id)?.name || id)));
 
       add(some(d.machines) && multi('CPU', d.machines, state.machines,
         (v) => onChange({ machines: v }), (id) => db.machines.get(id)?.label || id));
-
-      add(some(d.gos) && multi('Go version', d.gos, state.gos, (v) => onChange({ gos: v })));
 
       add(some(d.benches) && single('Bench version', ['', ...d.benches], state.bench ?? '',
         (v) => onChange({ bench: v || null }), (v) => (v === '' ? 'newest' : v)));
@@ -66,9 +65,11 @@ export function createControls(host, db, onChange) {
       ], state.op, (v) => onChange({ op: v })));
 
       // Comparing along a filter its default holds to one value -- the default
-      // window, the picked CPU or thread count -- would draw one series, so
-      // choosing it opens that filter at the same time.
-      const opens = { window: 'windows', machine: 'machines', threads: 'threads' };
+      // window, the picked CPU or thread count, the latest library or Go --
+      // would draw one series, so choosing it opens that filter at the same time.
+      const opens = {
+        window: 'windows', machine: 'machines', threads: 'threads', lib: 'libs', go: 'gos',
+      };
       add(single('Compare by', ['codec', 'go', 'corpus', 'machine', 'threads', 'lib', 'window'],
         state.compareBy, (v) => onChange({
           compareBy: v, ...(state[opens[v]]?.length === 1 ? { [opens[v]]: [] } : {}),
@@ -98,10 +99,12 @@ export function createControls(host, db, onChange) {
             : 'every encoder variant')));
       }
 
-      add(some(d.libs) && multi('Library version', d.libs, state.libs,
+      add(some(d.libs) && multi('Library version', [LATEST, ...d.libs], state.libs,
         (v) => onChange({ libs: v }), shortLib));
 
       add(some(d.codecs) && multi('Codec', d.codecs, state.codecs, (v) => onChange({ codecs: v })));
+
+      add(some(d.gos) && multi('Go version', [LATEST, ...d.gos], state.gos, (v) => onChange({ gos: v })));
     },
   };
 }
@@ -109,6 +112,7 @@ export function createControls(host, db, onChange) {
 const some = (values) => values.length > 1;
 
 function shortLib(l) {
+  if (l === LATEST) return l;
   const at = l.lastIndexOf('@');
   const mod = l.slice(0, at);
   return `${mod.split('/').pop()} ${l.slice(at + 1)}`;

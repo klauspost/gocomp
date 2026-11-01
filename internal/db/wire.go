@@ -11,8 +11,8 @@ import (
 // smaller than repeated object keys, and a clean line diff in git. "cols" is
 // written so a reader can assert the order rather than hard-code it.
 var (
-	encCols = []string{"codec", "level", "window", "threads", "lib", "in", "out", "ns", "passes", "sd", "v"}
-	decCols = []string{"codec", "src", "window", "srclib", "threads", "lib", "in", "out", "ns", "passes", "sd", "v"}
+	encCols = []string{"codec", "level", "window", "threads", "lib", "in", "out", "ns", "passes", "sd", "v", "pin"}
+	decCols = []string{"codec", "src", "window", "srclib", "srcthreads", "threads", "lib", "in", "out", "ns", "passes", "sd", "v", "pin"}
 )
 
 type table struct {
@@ -29,11 +29,11 @@ type runWire struct {
 func round3(f float64) float64 { return math.Round(f*1000) / 1000 }
 
 func (r EncRow) values() []any {
-	return []any{r.Codec, r.Level, r.Window, r.Threads, r.Lib, r.In, r.Out, r.NS, r.Passes, round3(r.SD), r.Verified}
+	return []any{r.Codec, r.Level, r.Window, r.Threads, r.Lib, r.In, r.Out, r.NS, r.Passes, round3(r.SD), r.Verified, r.Pin}
 }
 
 func (r DecRow) values() []any {
-	return []any{r.Codec, r.Src, r.Window, r.SrcLib, r.Threads, r.Lib, r.In, r.Out, r.NS, r.Passes, round3(r.SD), r.Verified}
+	return []any{r.Codec, r.Src, r.Window, r.SrcLib, r.SrcThreads, r.Threads, r.Lib, r.In, r.Out, r.NS, r.Passes, round3(r.SD), r.Verified, r.Pin}
 }
 
 func encodeRun(r *Run) ([]byte, error) {
@@ -126,6 +126,14 @@ func (r *rowReader) verified() int {
 	return r.num("v")
 }
 
+// pin defaults to "not recorded" for rows written before the field existed.
+func (r *rowReader) pin() int {
+	if _, ok := r.idx["pin"]; !ok {
+		return -1
+	}
+	return r.num("pin")
+}
+
 func (r *rowReader) get(name string, dst any) {
 	i, ok := r.idx[name]
 	if !ok || i >= len(r.vals) {
@@ -151,7 +159,7 @@ func decodeEncRows(t table) ([]EncRow, error) {
 		out = append(out, EncRow{
 			Codec: r.str("codec"), Level: r.num("level"), Window: r.num("window"), Threads: r.num("threads"),
 			Lib: r.num("lib"), In: r.i64("in"), Out: r.i64("out"), NS: r.i64("ns"),
-			Passes: r.num("passes"), SD: r.f64("sd"), Verified: r.verified(),
+			Passes: r.num("passes"), SD: r.f64("sd"), Verified: r.verified(), Pin: r.pin(),
 		})
 		if r.err != nil {
 			return nil, fmt.Errorf("row %d: %w", i, r.err)
@@ -171,9 +179,9 @@ func decodeDecRows(t table) ([]DecRow, error) {
 		r := &rowReader{vals: vals, idx: idx}
 		out = append(out, DecRow{
 			Codec: r.str("codec"), Src: r.str("src"), Window: r.num("window"), SrcLib: r.num("srclib"),
-			Threads: r.num("threads"), Lib: r.num("lib"),
+			SrcThreads: r.num("srcthreads"), Threads: r.num("threads"), Lib: r.num("lib"),
 			In: r.i64("in"), Out: r.i64("out"), NS: r.i64("ns"),
-			Passes: r.num("passes"), SD: r.f64("sd"), Verified: r.verified(),
+			Passes: r.num("passes"), SD: r.f64("sd"), Verified: r.verified(), Pin: r.pin(),
 		})
 		if r.err != nil {
 			return nil, fmt.Errorf("row %d: %w", i, r.err)

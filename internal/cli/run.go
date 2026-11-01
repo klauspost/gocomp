@@ -37,6 +37,7 @@ type runOpts struct {
 	slow     bool
 	collapse bool
 	validate bool
+	pin      bool
 	newRun   bool
 	force    bool
 	dryRun   bool
@@ -64,6 +65,7 @@ func (o *runOpts) bind(fs *flag.FlagSet) {
 	fs.BoolVar(&o.slow, "slow", false, "include codecs and levels marked slow (xz, brotli 10-11)")
 	fs.BoolVar(&o.collapse, "collapse", false, "run codecs that declare no concurrency at one thread value only")
 	fs.BoolVar(&o.validate, "validate", false, "xxh3 round-trip check for every encoder variant")
+	fs.BoolVar(&o.pin, "pin", true, "run n threads on n CPUs, one per core across the cache groups first, when the CPU topology is known (windows, linux)")
 	fs.BoolVar(&o.newRun, "new-run", false, "store as a separate run instead of merging")
 	fs.BoolVar(&o.force, "force", false, "ignore the memory guard")
 	fs.BoolVar(&o.dryRun, "dry-run", false, "print the plan and estimated memory, then exit")
@@ -295,7 +297,7 @@ func (o runOpts) config() (bench.Config, error) {
 	}
 	cfg.Passes, cfg.MinWall, cfg.MaxPasses = o.passes, o.minWall, o.maxPass
 	cfg.MaxJob = o.maxJob
-	cfg.Validate, cfg.Collapse = o.validate, o.collapse
+	cfg.Validate, cfg.Collapse, cfg.Pin = o.validate, o.collapse, o.pin
 	switch o.decoders {
 	case "selected":
 	case "all":

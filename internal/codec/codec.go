@@ -16,28 +16,30 @@ import (
 type Format string
 
 const (
-	FmtGzip      Format = "gzip"
-	FmtDeflate   Format = "deflate"
-	FmtZstd      Format = "zstd"
-	FmtS2        Format = "s2"
-	FmtS2Block   Format = "s2-block"
-	FmtSnappy    Format = "snappy"
-	FmtSnappyBlk Format = "snappy-block"
-	FmtMinLZ     Format = "minlz"
-	FmtMinLZBlk  Format = "minlz-block"
-	FmtLZ4       Format = "lz4"
-	FmtBrotli    Format = "brotli"
-	FmtXZ        Format = "xz"
-	FmtLZMA2     Format = "lzma2"
-	FmtBzip2     Format = "bzip2"
+	FmtGzip         Format = "gzip"
+	FmtDeflate      Format = "deflate"
+	FmtZstd         Format = "zstd"
+	FmtS2           Format = "s2"
+	FmtS2Block      Format = "s2-block"
+	FmtSnappy       Format = "snappy"
+	FmtSnappyBlk    Format = "snappy-block"
+	FmtMinLZ        Format = "minlz"
+	FmtMinLZBlk     Format = "minlz-block"
+	FmtMinLZSIMD    Format = "minlz-simd"
+	FmtMinLZSIMDBlk Format = "minlz-simd-block"
+	FmtLZ4          Format = "lz4"
+	FmtBrotli       Format = "brotli"
+	FmtXZ           Format = "xz"
+	FmtLZMA2        Format = "lzma2"
+	FmtBzip2        Format = "bzip2"
 )
 
 // FormatName is the display label for a format.
 var FormatName = map[Format]string{
 	FmtGzip: "gzip", FmtDeflate: "deflate", FmtZstd: "Zstandard",
 	FmtS2: "S2", FmtS2Block: "S2 block", FmtSnappy: "Snappy", FmtSnappyBlk: "Snappy block",
-	FmtMinLZ: "MinLZ", FmtMinLZBlk: "MinLZ block", FmtLZ4: "LZ4",
-	FmtBrotli: "Brotli", FmtXZ: "xz", FmtLZMA2: "LZMA2", FmtBzip2: "bzip2",
+	FmtMinLZ: "MinLZ", FmtMinLZBlk: "MinLZ block", FmtMinLZSIMD: "MinLZ SIMD", FmtMinLZSIMDBlk: "MinLZ SIMD block",
+	FmtLZ4: "LZ4", FmtBrotli: "Brotli", FmtXZ: "xz", FmtLZMA2: "LZMA2", FmtBzip2: "bzip2",
 }
 
 // Opts are fixed for the duration of one measurement.
@@ -127,6 +129,10 @@ type Enc struct {
 	// Conc are the corpus kinds where Opts.Threads actually parallelises work.
 	// Zero means single-threaded.
 	Conc corpus.Kind
+	// ThreadsVaryOutput is set when the bytes, not just the speed, depend on
+	// Opts.Threads where Conc applies. Only then is the thread count a decode
+	// input was encoded at part of what a decode row measured.
+	ThreadsVaryOutput bool
 
 	Levels []Level
 	Slow   bool // whole encoder is opt-in

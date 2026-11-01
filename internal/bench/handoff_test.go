@@ -107,6 +107,10 @@ func TestDecodeFallsBackOutsideTheSourceGroup(t *testing.T) {
 			t.Errorf("%s: encoded again = %v, want %v", v.Label(), got, want)
 		}
 	}
+	srcOf := map[string]codec.Enc{}
+	for _, v := range vs {
+		srcOf[v.ID()] = v.Enc
+	}
 	var dec int
 	for _, r := range res {
 		if r.Err != "" {
@@ -114,6 +118,15 @@ func TestDecodeFallsBackOutsideTheSourceGroup(t *testing.T) {
 		}
 		if r.Op == OpDecode {
 			dec++
+			// Only zskp's bytes move with the thread count, so only its
+			// decodes name the count their input was encoded at.
+			want := 0
+			if srcOf[r.Src].ThreadsVaryOutput {
+				want = cfg.SrcThreads
+			}
+			if r.SrcThreads != want {
+				t.Errorf("%s <- %s: SrcThreads = %d, want %d", r.Codec, r.Src, r.SrcThreads, want)
+			}
 		}
 	}
 	if _, want := Plan(cfg, data.Kind, vs); dec != want {

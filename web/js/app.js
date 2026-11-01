@@ -10,7 +10,7 @@ import {
 import { barsCard, paretoCard, provenanceCard, threadsCard } from './view/cards.js';
 import { createControls } from './view/controls.js';
 import { el } from './view/chart.js';
-import { SLOTS, initTheme, refreshTokens } from './view/theme.js';
+import { initTheme, refreshTokens } from './view/theme.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -40,10 +40,13 @@ async function main() {
   // What render kept of the stored emphasis. A toggle starts from it, so an
   // entity that left the screen does not hold its slot past the next click.
   let kept = DEFAULTS.emphasis;
+  // The slots everything in scope is drawn in while nothing is picked.
+  let all = DEFAULTS.emphasis;
   // Everything a card can change goes through the store, which is what keeps
   // the URL a faithful description of what is on screen.
   const ctx = {
-    onToggleEntity: (id) => store.set({ emphasis: emphasise(kept, id) }),
+    onToggleEntity: (id) => store.set({ emphasis: emphasise(kept, id, all.indexOf(id)) }),
+    onClearEntities: () => store.set({ emphasis: DEFAULTS.emphasis }),
     onSort: (cardId, sort) => store.set({ sorts: withSort(store.get(), cardId, sort) }),
     onTable: (cardId, open) => store.set({ tables: withTable(store.get(), cardId, open) }),
     sortOf,
@@ -100,8 +103,8 @@ async function main() {
     controls.render(state);
 
     const scope = db.resolveScope(state);
-    banner(scope.warnings, scope.runs.length);
     if (!scope.runs.length) {
+      banner([], 0);
       for (const c of cards) c.root.style.display = 'none';
       $('subtitle').textContent = 'no runs match the current filters';
       return;
@@ -123,42 +126,66 @@ async function main() {
       throw err;
     }
 
+    // The runs that put a row on screen. LATEST reads every run and may keep
+    // nothing of an older Go's, and a run that is not drawn has nothing to warn
+    // about or account for.
+    const drawn = new Set([results.encode, results.decode, results.scaling].filter(Boolean)
+      .flatMap((r) => r.rows.map((x) => x.runId)));
+    const shown = { ...scope, runs: scope.runs.filter((r) => drawn.has(r.id)) };
+    banner(db.warnings(shown.runs), shown.runs.length);
+
     // An emphasised entity that is not drawn has no legend entry to click it
     // off with, so it gives up its slot; the survivors keep theirs, and their
-    // colours. Then seed with what is in scope, so the view is not all grey.
+    // colours. Nothing picked draws everything in scope in colour, up to the
+    // palette's cap, without making that a pick: the URL keeps saying none.
     const entities = [...new Set([results.encode, results.decode].filter(Boolean)
       .flatMap((r) => r.series.map((s) => s.entity)))];
     kept = state.emphasis.map((id) => (entities.includes(id) ? id : null));
-    state = { ...state, emphasis: kept };
-    if (!kept.some(Boolean) && entities.length) {
-      const seed = ['zskp', 's2', 'gzkp', 'lz4', 'minlz', 'br', 'stdzstd', 'snappy']
-        .filter((x) => entities.includes(x));
-      const pick = [...seed, ...entities.filter((x) => !seed.includes(x))].slice(0, SLOTS);
-      state = { ...state, emphasis: Array.from({ length: SLOTS }, (_, i) => pick[i] ?? null) };
-    }
+    const seed = ['zskp', 's2', 'gzkp', 'lz4', 'minlz', 'br', 'stdzstd', 'snappy']
+      .filter((x) => entities.includes(x));
+    // What stays in scope keeps its slot, so narrowing a filter does not
+    // repaint the survivors; newcomers fill the free slots in preferred order.
+    const stay = all.map((id) => (entities.includes(id) ? id : null));
+    const order = [...seed, ...entities.filter((x) => !seed.includes(x))].filter((x) => !stay.includes(x));
+    all = stay.map((id) => id ?? order.shift() ?? null);
+    const picked = kept.some(Boolean);
+    const hash = encode({ ...state, emphasis: kept });
+    state = { ...state, emphasis: picked ? kept : all, picked, entityCount: entities.length };
 
     for (const c of cards) {
-      c.update(results, state, scope);
+      c.update(results, state, shown);
       c.setLoading(false);
     }
 
     $('subtitle').textContent =
       `${state.kind === 'dir' ? 'Many-file corpora' : 'Single-file corpora'} · `
-      + `${scope.runs.length} run${scope.runs.length === 1 ? '' : 's'} · ${db.rowCount().toLocaleString()} measurements loaded`;
+      + `${shown.runs.length} run${shown.runs.length === 1 ? '' : 's'} · ${db.rowCount().toLocaleString()} measurements loaded`;
 
     applyingHash = true;
-    history.replaceState(null, '', `#${encode(state)}`);
+    history.replaceState(null, '', `#${hash}`);
     queueMicrotask(() => { applyingHash = false; });
   }
 
+  // A dismissal is of what the banner said, so a different difference shows
+  // again. It lasts the page, not the link: a shared view still warns.
+  const dismissed = new Set();
   function banner(warnings, runCount) {
     const host = $('banner');
     host.replaceChildren();
-    if (!warnings.length) return;
+    const said = warnings.map((w) => w.text).join('\n');
+    if (!warnings.length || dismissed.has(said)) return;
     const p = el('div');
+    const close = el('button', 'dismiss');
+    close.type = 'button';
+    close.textContent = '×';
+    close.setAttribute('aria-label', 'Dismiss this warning');
+    close.addEventListener('click', () => {
+      dismissed.add(said);
+      host.replaceChildren();
+    });
     const strong = el('strong');
     strong.textContent = `Comparing ${runCount} runs that are not directly comparable: `;
-    p.append(strong);
+    p.append(close, strong);
     const ul = el('ul');
     for (const w of warnings) {
       const li = el('li');

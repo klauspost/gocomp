@@ -2,7 +2,7 @@
 // shareable. Theme is deliberately absent: a shared link must not force the
 // recipient's colour scheme.
 
-import { LEVEL_CLASSES } from './data/db.js';
+import { LATEST, LEVEL_CLASSES } from './data/db.js';
 import { SLOTS } from './view/theme.js';
 
 // fitSlots pads or trims to the current cap. Links shared before the cap grew
@@ -16,7 +16,10 @@ export const DEFAULTS = {
   kind: 'file',
   corpora: [],   // [] means "all of this kind"
   machines: null, // null means "the data's pick" (domains().picks); [] is all
-  gos: [],
+  // The newest Go each measurement was taken on, as libs below. New Go
+  // releases arrive to measure the standard library, and an older one should
+  // not double every line once a newer one has measured the same point.
+  gos: [LATEST],
   bench: null,   // null means "newest"
   threads: null,
   // The default window alone, unlike every other list here where empty means
@@ -27,7 +30,9 @@ export const DEFAULTS = {
   compareBy: 'codec',
   codecs: [],
   levels: [],
-  libs: [],
+  // The newest version of each measurement. Another version only matters when
+  // it is what is being compared, and then [] (all) is one click away.
+  libs: [LATEST],
   variants: [], // build/measurement settings that kept two runs in separate files
   // Regular levels only by default. An uncompressed level tops the throughput
   // axis and wins the ranking outright, which buries every codec that
@@ -62,17 +67,19 @@ export function createStore(initial) {
   };
 }
 
-// emphasise toggles an entity in the fixed-length slot array. Once every slot
-// is taken the next pick evicts the oldest and takes its freed slot, so
-// survivors never move -- and never change colour.
-export function emphasise(emphasis, id) {
+// emphasise toggles an entity in the fixed-length slot array. A pick takes
+// `slot`, the colour it is drawn in while nothing is picked, when that is
+// free, so highlighting it does not repaint it. Once every slot is taken the
+// next pick evicts the oldest and takes its freed slot, so survivors never
+// move -- and never change colour.
+export function emphasise(emphasis, id, slot = -1) {
   const next = fitSlots(emphasis);
   const at = next.indexOf(id);
   if (at >= 0) {
     next[at] = null;
     return next;
   }
-  const free = next.indexOf(null);
+  const free = slot >= 0 && next[slot] == null ? slot : next.indexOf(null);
   if (free >= 0) {
     next[free] = id;
     return next;
@@ -146,8 +153,8 @@ export function reconcile(state, d) {
   const out = { ...state };
   if (!d.kinds.includes(out.kind)) out.kind = d.kinds[0] || 'file';
   for (const [field, valid] of [
-    ['corpora', d.corpora], ['machines', d.machines], ['gos', d.gos],
-    ['threads', d.threads], ['windows', d.windows], ['codecs', d.codecs], ['libs', d.libs],
+    ['corpora', d.corpora], ['machines', d.machines], ['gos', [LATEST, ...d.gos]],
+    ['threads', d.threads], ['windows', d.windows], ['codecs', d.codecs], ['libs', [LATEST, ...d.libs]],
     ['variants', d.variants],
   ]) {
     const was = out[field];
@@ -188,5 +195,8 @@ export function decode(hash, domains) {
     }
   }
   out.emphasis = fitSlots(out.emphasis);
+  // The corpus control picks one or all; a link from when it picked several
+  // keeps its first, so the dropdown shows what is drawn.
+  out.corpora = out.corpora.slice(0, 1);
   return domains ? reconcile(out, domains) : out;
 }

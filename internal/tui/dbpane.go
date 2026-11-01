@@ -134,6 +134,7 @@ func (m *Model) dbKey(msg tea.KeyMsg) tea.Cmd {
 		// Ticks do not survive the reload: rows shift underneath them, and a
 		// leftover tick would aim the next delete somewhere else.
 		note, err := do()
+		m.hist = nil // even a failed delete may have written some runs
 		if err == nil {
 			var q *dbPane
 			if q, err = loadDB(m.opts.Out); err == nil {

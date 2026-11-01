@@ -339,7 +339,14 @@ were ticked — and hides Decompress entirely if nothing in the slice was
 decoded. Corpus kind and corpus are exempt from being narrowed by the filters
 below them, so picking one corpus can never delete the route to another. Lists
 are collapsed checkbox groups with a `clear` beside the label; nothing ticked
-means no filter, which is why the summary reads `all`.
+means no filter, which is why the summary reads `all`. Go version and library
+version start on `latest`: the newest Go, and the newest library, each
+measurement was taken with. A point never re-measured on a newer one keeps its
+older one. The standard library's version is the Go version, so measuring it
+on a new Go release replaces the old one in the default view. Clearing either
+filter draws every version as its own line, and comparing by either opens it.
+The warning about runs that are not directly comparable counts only runs with
+something on screen, and can be dismissed.
 
 The whole filter state lives in the URL hash, so copying the address bar shares
 the exact view — corpus, CPU, Go version, threads, windows, operation, codecs, levels,

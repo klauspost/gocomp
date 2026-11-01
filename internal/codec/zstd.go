@@ -22,7 +22,9 @@ func init() {
 		// EncodeAll, used for the per-file path, is single-goroutine; only the
 		// stream path with concurrent blocks parallelises.
 		Conc: corpus.KindFile, Levels: zstdLevels,
-		Windows: pow2s(zstd.MinWindowSize, zstd.MaxWindowSize),
+		// WithConcurrentBlocks below changes the frames written.
+		ThreadsVaryOutput: true,
+		Windows:           pow2s(zstd.MinWindowSize, zstd.MaxWindowSize),
 		DefWindow: func(lvl int) int {
 			if lvl == int(zstd.SpeedFastest) {
 				return 4 << 20

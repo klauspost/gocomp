@@ -15,7 +15,7 @@ import (
 )
 
 // Schema is bumped when the on-disk shape changes incompatibly.
-const Schema = 2
+const Schema = 3
 
 // IndexFile is the manifest the site always fetches.
 const IndexFile = "index.json"
@@ -32,23 +32,29 @@ type EncRow struct {
 	Passes   int
 	SD       float64 // relative stddev; recorded, not displayed
 	Verified int     // 1 verified, 0 failed, -1 not checked
+	Pin      int     // 1 pinned to one logical CPU per core first, 0 placed by the OS, -1 not recorded; not displayed
 }
 
 // DecRow is one decompression measurement. Codec is the decoder; Src names the
 // encoder variant that produced the input, because the encoder's settings move
 // decode speed as much as the decoder does.
 type DecRow struct {
-	Codec    string
-	Src      string // "<encoder>-<level>"
-	Window   int    // the window Src was encoded with
-	SrcLib   int
-	Threads  int
-	Lib      int
-	In, Out  int64
-	NS       int64
-	Passes   int
-	SD       float64
-	Verified int
+	Codec  string
+	Src    string // "<encoder>-<level>"
+	Window int    // the window Src was encoded with
+	SrcLib int
+	// SrcThreads is the thread count Src was encoded at, 0 where its bytes do
+	// not depend on it. It lives here rather than on the run because it moves
+	// only these rows: gating the run on it split every encode row as well.
+	SrcThreads int
+	Threads    int
+	Lib        int
+	In, Out    int64
+	NS         int64
+	Passes     int
+	SD         float64
+	Verified   int
+	Pin        int
 }
 
 // RunError records a measurement that could not complete.
@@ -71,7 +77,6 @@ type Run struct {
 	CorpusFiles int          `json:"corpus_files"`
 	CorpusHash  string       `json:"corpus_hash"`
 	Bench       string       `json:"bench"`
-	SrcThreads  int          `json:"src_threads"`
 	MinPasses   int          `json:"min_passes"`
 	Merges      int          `json:"merges"`
 	Created     string       `json:"created"`

@@ -27,6 +27,10 @@
      dash and a direct label. A 2.3:1 grey was below even the non-text
      contrast minimum, so "the rest" was unreadable rather than recessive. */
   --dim-mark: #0b0b0b;
+  /* What is left over when there are more series than slots and nothing is
+     picked. Unlike --dim-mark it is not context to read against a pick, so it
+     recedes: 3.5:1 here, 4.85:1 on dark, still above the 3:1 mark minimum. */
+  --spare-mark: #898781;
   --border: rgba(11, 11, 11, 0.09);
   --wash: rgba(11, 11, 11, 0.045);
   --fill: #14130f;      /* selected chip: neutral, so it cannot read as data */
@@ -43,6 +47,19 @@
   --series-6: #08a28f;
   --series-7: #940395;
   --series-8: #8c63aa;
+  /* 9-16 are the same hex in both modes: inside both lightness bands and
+     >= 3:1 on both surfaces. They do NOT clear the all-pairs floors that 1-8
+     do (worst normal-vision dE 8.8 against 15, CVD 4.7 against 6), so slots
+     past 8 lean on their marker shape and dash to stay apart. See SLOTS in
+     view/theme.js. */
+  --series-9: #fc3c90;
+  --series-10: #c60084;
+  --series-11: #a84e00;
+  --series-12: #a236c6;
+  --series-13: #b47eba;
+  --series-14: #f05a60;
+  --series-15: #ae6072;
+  --series-16: #72964e;
 
   --status-warning: #fab219;
   --status-critical: #d03b3b;
@@ -68,6 +85,7 @@
     --grid: #2c2c2a;
     --axis: #383835;
     --dim-mark: #ffffff; /* the page's ink again, 17.4:1 on the dark surface */
+    --spare-mark: #898781;
     --border: rgba(255, 255, 255, 0.09);
     --wash: rgba(255, 255, 255, 0.06);
     --fill: #f2f0ec;
@@ -86,6 +104,14 @@
     --series-6: #08a28f;
     --series-7: #cd4fcc;
     --series-8: #80579d;
+    --series-9: #fc3c90;
+    --series-10: #c60084;
+    --series-11: #a84e00;
+    --series-12: #a236c6;
+    --series-13: #b47eba;
+    --series-14: #f05a60;
+    --series-15: #ae6072;
+    --series-16: #72964e;
   }
 }
 
@@ -101,6 +127,7 @@
   --grid: #2c2c2a;
   --axis: #383835;
   --dim-mark: #ffffff; /* the page's ink again, 17.4:1 on the dark surface */
+  --spare-mark: #898781;
   --border: rgba(255, 255, 255, 0.09);
   --wash: rgba(255, 255, 255, 0.06);
   --fill: #f2f0ec;
@@ -119,4 +146,12 @@
   --series-6: #08a28f;
   --series-7: #cd4fcc;
   --series-8: #80579d;
+  --series-9: #fc3c90;
+  --series-10: #c60084;
+  --series-11: #a84e00;
+  --series-12: #a236c6;
+  --series-13: #b47eba;
+  --series-14: #f05a60;
+  --series-15: #ae6072;
+  --series-16: #72964e;
 }

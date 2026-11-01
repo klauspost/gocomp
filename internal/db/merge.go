@@ -22,12 +22,13 @@ type encKey struct {
 }
 
 type decKey struct {
-	codec   string
-	src     string
-	window  int
-	threads int
-	lib     string
-	srcLib  string
+	codec      string
+	src        string
+	window     int
+	srcThreads int
+	threads    int
+	lib        string
+	srcLib     string
 }
 
 // lib is bounds-checked because the index comes from a file on disk.
@@ -43,13 +44,14 @@ func (r *Run) encKey(x EncRow) encKey {
 }
 
 func (r *Run) decKey(x DecRow) decKey {
-	return decKey{x.Codec, x.Src, x.Window, x.Threads, r.lib(x.Lib), r.lib(x.SrcLib)}
+	return decKey{x.Codec, x.Src, x.Window, x.SrcThreads, x.Threads, r.lib(x.Lib), r.lib(x.SrcLib)}
 }
 
 // gated is the environment the numbers depend on but the run ID deliberately
 // excludes. Two runs that disagree on any of it are not comparable, so they are
 // kept in separate files instead of averaging into each other. Corpus, CPU, Go
-// version and bench version are absent because they are already in the ID.
+// version and bench version are absent because they are already in the ID;
+// the decode source's thread count because it is keyed on the rows it moves.
 func gated(r *Run) [][2]string {
 	return [][2]string{
 		{"goos", r.Env.GOOS},
@@ -60,7 +62,6 @@ func gated(r *Run) [][2]string {
 		{"goexperiment", r.Env.Experiment},
 		{"cgo", strconv.FormatBool(r.Env.CGO)},
 		{"corpus_hash", r.CorpusHash},
-		{"src_threads", strconv.Itoa(r.SrcThreads)},
 		{"numcpu", strconv.Itoa(r.Env.NumCPU)},
 		{"gogc", strconv.Itoa(r.Env.GOGC)},
 		{"gomemlimit", strconv.FormatInt(r.Env.GOMemLimit, 10)},
@@ -220,6 +221,16 @@ func Merge(dir string, r *Run, newRun bool) (MergeResult, error) {
 			continue
 		}
 		cur := &merged.Decode[i]
+		if cur.In != x.In {
+			res.Warnings = append(res.Warnings, fmt.Sprintf(
+				"%s decoding %s window %d threads %d: input size changed %d -> %d with no library change; taking the new row",
+				x.Codec, x.Src, x.Window, x.Threads, cur.In, x.In))
+			passes := cur.Passes
+			*cur = x
+			cur.Passes += passes
+			res.Improved++
+			continue
+		}
 		passes, verified := cur.Passes+x.Passes, max(cur.Verified, x.Verified)
 		if x.NS < cur.NS {
 			*cur = x
@@ -276,6 +287,9 @@ func sortRows(r *Run) {
 		}
 		if a.Window != b.Window {
 			return a.Window < b.Window
+		}
+		if a.SrcThreads != b.SrcThreads {
+			return a.SrcThreads < b.SrcThreads
 		}
 		if a.Threads != b.Threads {
 			return a.Threads < b.Threads

@@ -56,12 +56,12 @@ function panel(label) {
 function legend(host, entities, state, onToggle) {
   host.replaceChildren();
   for (const e of entities) {
-    const c = colorsFor(e.id, state.emphasis);
+    const c = colorsFor(e.id, state.emphasis, !state.picked);
     const b = el('button');
     b.type = 'button';
-    b.setAttribute('aria-pressed', String(c.emph));
+    b.setAttribute('aria-pressed', String(state.picked && c.emph));
     const key = el('span', `key ${c.shape}`);
-    key.style.background = c.emph ? c.stroke : tokens().dim;
+    key.style.background = c.stroke;
     const txt = document.createTextNode(e.label);
     b.append(key, txt);
     b.addEventListener('click', () => onToggle(e.id));
@@ -69,7 +69,9 @@ function legend(host, entities, state, onToggle) {
   }
   const hint = el('span', 'hint');
   const n = state.emphasis.filter(Boolean).length;
-  hint.textContent = `${n}/${SLOTS} highlighted — the rest stay as context`;
+  if (state.picked) hint.textContent = `${n}/${SLOTS} highlighted — the rest stay as context`;
+  else if (n < state.entityCount) hint.textContent = `the first ${n} of ${state.entityCount} in colour, the palette's limit — click one to highlight it`;
+  else hint.textContent = 'all shown — click one to highlight it';
   host.append(hint);
 }
 
@@ -81,7 +83,7 @@ function legend(host, entities, state, onToggle) {
 // The one sentence that tells a reader what a click does, in the legend's
 // vocabulary rather than a second one. It has to appear in both states or the
 // way back out is never discoverable.
-const clickHint = (emph) => (emph ? 'highlighted — click to clear' : 'click to highlight');
+const clickHint = (emph, state) => (state.picked && emph ? 'highlighted — click to clear' : 'click to highlight');
 
 // clickToToggle makes marks clickable using the chart's own configured hit
 // test, so what you can hover is exactly what you can click. The entity rides
@@ -123,7 +125,7 @@ function baseLabel(r) {
 // so the tooltip is where the rest of the measurement lives: how fast, how
 // small, and how small compared with what. Whichever measure the bars are
 // sorted by, the other numbers are the ones a reader is about to want.
-function describeBar(r, emph) {
+function describeBar(r, hint) {
   // For an encode row `in` is the original and `out` the compressed bytes;
   // decoding feeds the compressed side in and gets the original back out.
   const [plain, comp] = r.op === 'd' ? [r.out, r.in] : [r.in, r.out];
@@ -140,7 +142,7 @@ function describeBar(r, emph) {
     ],
     note: `${r.threads} thread${r.threads === 1 ? '' : 's'} · best of ${r.passes}`
       + `${r.size ? ` · ${fmt.windowLabel(r)}` : ''}`
-      + ` · ${r.go} · ${r.libVer || 'unknown library'} · ${clickHint(emph)}`,
+      + ` · ${r.go} · ${r.libVer || 'unknown library'} · ${hint}`,
   };
 }
 
@@ -155,6 +157,11 @@ export function paretoCard(ctx) {
   // so the title had to turn round with the chart.
   const c = card('Throughput against ratio',
     'up and to the right is better · each line is one codec across its levels');
+  const clear = el('button');
+  clear.type = 'button';
+  clear.textContent = 'Deselect all';
+  clear.addEventListener('click', ctx.onClearEntities);
+  c.spacer.after(clear);
   const panels = el('div', 'panels');
   const pc = panel('Compression');
   const pd = panel('Decompression');
@@ -170,14 +177,15 @@ export function paretoCard(ctx) {
     const t = tokens();
     const datasets = [];
     for (const s of res.series) {
-      const col = colorsFor(s.entity, state.emphasis);
+      const col = colorsFor(s.entity, state.emphasis, !state.picked);
       datasets.push({
         label: s.label,
         __label: s.label,
         __endLabel: s.endLabel,
         __emph: col.emph,
+        __hint: clickHint(col.emph, state),
         __entity: s.entity,
-        __markColor: col.emph ? col.stroke : t.dim,
+        __markColor: col.stroke,
         __points: s.points,
         // Speed is the vertical axis: it is the measurement being compared,
         // and a reader scanning a column of codecs at one ratio is the
@@ -250,7 +258,7 @@ export function paretoCard(ctx) {
       r.src ? `decoding ${r.srcLabel}` : null,
       r.size ? fmt.windowLabel(r) : null,
       `${r.threads} thread${r.threads === 1 ? '' : 's'} · best of ${r.passes}`,
-      clickHint(ds.__emph),
+      ds.__hint,
     ].filter(Boolean).join(' · ');
     return { head, rows, note };
   }
@@ -305,6 +313,7 @@ export function paretoCard(ctx) {
 
       const entities = entitiesOf(results);
       legend(leg, entities, state, onToggleEntity);
+      clear.disabled = !state.picked;
 
       const rows = [results.encode, results.decode].filter(Boolean)
         .flatMap((r) => r.series.flatMap((s) => s.points));
@@ -314,6 +323,7 @@ export function paretoCard(ctx) {
         sort: ctx.sortOf(state, 'pareto', { key: 'ratio', dir: -1 }),
         onSort: (s) => ctx.onSort('pareto', s),
         emphasis: state.emphasis,
+        spare: !state.picked,
         onRow: (r) => onToggleEntity(r[results.dim] ?? r.codec),
       });
     },
@@ -407,10 +417,11 @@ export function barsCard(ctx) {
         [varies((r) => r.threads), (r) => `${r.threads}t`],
         [varies((r) => r.window), (r) => `w${fmt.windowName(r.size)}`],
         [varies((r) => r.go), (r) => r.go],
-        [varies((r) => r.libVer), (r) => r.libVer],
+        // The standard library's version is the Go version; it says it once.
+        [varies((r) => r.libVer), (r) => (r.libVer === r.go ? '' : r.libVer)],
       ].filter(([on]) => on);
       const barLabel = (r) => [baseLabel(r),
-        ...extra.map(([, get]) => get(r))].join(' · ');
+        ...extra.map(([, get]) => get(r))].filter(Boolean).join(' · ');
 
       // The box grows with the data instead of holding 24 bars in a fixed 340
       // px: too little room and Chart.js quietly drops tick labels, leaving a
@@ -418,7 +429,7 @@ export function barsCard(ctx) {
       // 24px bar plus the 2px surface gap.
       p.canvas.parentElement.style.height = `${top.length * 26 + 52}px`;
 
-      const barCols = top.map((x) => colorsFor(x.entity, state.emphasis));
+      const barCols = top.map((x) => colorsFor(x.entity, state.emphasis, !state.picked));
       const cfg = {
         type: 'bar',
         data: {
@@ -435,7 +446,7 @@ export function barsCard(ctx) {
             // important thing on the chart -- the same trade the lines make
             // by dropping to 1px.
             backgroundColor: barCols.map((c) => (c.emph ? c.fill : 'transparent')),
-            borderColor: barCols.map((c) => (c.emph ? c.fill : t.dim)),
+            borderColor: barCols.map((c) => (c.emph ? c.fill : c.ring)),
             borderWidth: barCols.map((c) => (c.emph ? 0 : 1)),
             borderRadius: 4,
             borderSkipped: 'start', // rounded data-end, square at the baseline
@@ -449,7 +460,7 @@ export function barsCard(ctx) {
             tooltip: {
               enabled: false,
               external: tooltipFor(p.tip,
-                (ds, dp) => describeBar(ds.__points[dp.dataIndex], barCols[dp.dataIndex]?.emph)),
+                (ds, dp) => describeBar(ds.__points[dp.dataIndex], clickHint(barCols[dp.dataIndex]?.emph, state))),
             },
           },
           scales: {
@@ -474,6 +485,7 @@ export function barsCard(ctx) {
         sort: ctx.sortOf(state, 'bars', { key: m.id === 'dspeed' ? 'cspeed' : m.id, dir: -1 }),
         onSort: (s) => ctx.onSort('bars', s),
         emphasis: state.emphasis,
+        spare: !state.picked,
         onRow: (r) => onToggleEntity(r[results.dim] ?? r.codec),
       });
     },
@@ -524,7 +536,7 @@ export function threadsCard(db, ctx) {
         }
         const base = byThread.get(threads[0]);
         if (!base) continue;
-        const col = colorsFor(s.entity, state.emphasis);
+        const col = colorsFor(s.entity, state.emphasis, !state.picked);
         const pts = threads.map((n) => {
           const r = byThread.get(n);
           return r ? r[metric] / base[metric] : null;
@@ -542,7 +554,7 @@ export function threadsCard(db, ctx) {
           __endLabel: s.endLabel,
           __emph: col.emph,
           __entity: s.entity,
-          __markColor: col.emph ? col.stroke : t.dim,
+          __markColor: col.stroke,
           __threads: threads,
           data: pts,
           borderColor: col.stroke,
@@ -573,7 +585,7 @@ export function threadsCard(db, ctx) {
               external: tooltipFor(p.tip, (ds, dp) => ({
                 head: `${ds.__label} at ${ds.__threads[dp.dataIndex]} threads`,
                 rows: [{ value: `${(dp.raw ?? 0).toFixed(2)}×`, name: 'vs 1 thread' }],
-                note: clickHint(ds.__emph),
+                note: clickHint(ds.__emph, state),
               })),
             },
           },
@@ -602,6 +614,7 @@ export function threadsCard(db, ctx) {
         sort: ctx.sortOf(state, 'threads', { key: 'threads', dir: 1 }),
         onSort: (s) => ctx.onSort('threads', s),
         emphasis: state.emphasis,
+        spare: !state.picked,
         onRow: (r) => onToggleEntity(r[results.dim] ?? r.codec),
       });
     },

@@ -111,6 +111,9 @@ type Model struct {
 	pane *pane   // the preset browser, nil unless open
 	dbp  *dbPane // the database cleanup, nil unless open
 	run  *runState
+	// hist prices the estimates. nil until read, and again whenever the
+	// database changes under it.
+	hist bench.History
 }
 
 // Run starts the interactive program.
@@ -332,10 +335,32 @@ func (m *Model) variants(kind corpus.Kind) []bench.Variant {
 	return out
 }
 
+func (m *Model) variantsByKind() map[corpus.Kind][]bench.Variant {
+	v := map[corpus.Kind][]bench.Variant{}
+	for _, k := range []corpus.Kind{corpus.KindFile, corpus.KindDir} {
+		v[k] = m.variants(k)
+	}
+	return v
+}
+
+// history reads the database once and keeps it until something changes it:
+// the footer prices the selection on every keypress.
+func (m *Model) history() bench.History {
+	if m.hist == nil {
+		m.hist = bench.LoadHistory(m.opts.Out)
+	}
+	return m.hist
+}
+
 func (m *Model) footer() string {
 	cps, enc, dec, peak := m.selection()
-	line := fmt.Sprintf("%d corpora · %d encode + %d decode measurements · peak ~%s of %s",
-		len(cps), enc, dec, human(peak), human(int64(totalMem())))
+	line := fmt.Sprintf("%d corpora · %d encode + %d decode measurements", len(cps), enc, dec)
+	// The run screen redraws while it measures, and has an estimate of its own.
+	if m.scr != scrRun && enc+dec > 0 {
+		_, total, unknown := bench.NewETA(m.cfg, m.history(), cps, m.variantsByKind()).Left()
+		line += estimate(total, unknown, "to run")
+	}
+	line += fmt.Sprintf(" · peak ~%s of %s", human(peak), human(int64(totalMem())))
 	st := dimStyle
 	if peak > int64(totalMem())/5*3 {
 		st = errStyle
@@ -345,7 +370,7 @@ func (m *Model) footer() string {
 		scrCorpus:  "space select · t tier · a all · d download · p presets · D database · tab next",
 		scrCodecs:  "space codec · enter levels · 1-4 quick picks · S slow · p presets · D database · tab next",
 		scrOptions: "up/down field · enter edit · space toggle · p presets · D database · R run",
-		scrRun:     "ctrl+c cancel",
+		scrRun:     m.runHelp(),
 		scrDone:    "r run the same selection again · e edit it · p presets · D database · q quit",
 	}[m.scr]
 	switch {

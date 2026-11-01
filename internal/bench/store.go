@@ -41,7 +41,6 @@ func ToRun(meta CorpusMeta, results []Result, cfg Config, env sysinfo.Env, libs 
 		CorpusFiles: meta.Files,
 		CorpusHash:  meta.Hash,
 		Bench:       Version,
-		SrcThreads:  cfg.SrcThreads,
 		MinPasses:   cfg.Passes,
 		Tool:        sysinfo.ToolInfo(),
 		Env:         env,
@@ -59,14 +58,14 @@ func ToRun(meta CorpusMeta, results []Result, cfg Config, env sysinfo.Env, libs 
 			run.Encode = append(run.Encode, db.EncRow{
 				Codec: r.Codec, Level: r.Level, Window: r.Window, Threads: r.Threads, Lib: lib,
 				In: r.In, Out: r.Out, NS: int64(r.Best), Passes: r.Passes,
-				SD: r.SD, Verified: r.Verified,
+				SD: r.SD, Verified: r.Verified, Pin: r.Pin,
 			})
 		case OpDecode:
 			run.Decode = append(run.Decode, db.DecRow{
 				Codec: r.Codec, Src: r.Src, Window: r.Window, Threads: r.Threads, Lib: lib,
-				SrcLib: run.LibIndex(r.SrcModule, libs[r.SrcModule]),
-				In:     r.In, Out: r.Out, NS: int64(r.Best), Passes: r.Passes,
-				SD: r.SD, Verified: r.Verified,
+				SrcLib: run.LibIndex(r.SrcModule, libs[r.SrcModule]), SrcThreads: r.SrcThreads,
+				In: r.In, Out: r.Out, NS: int64(r.Best), Passes: r.Passes,
+				SD: r.SD, Verified: r.Verified, Pin: r.Pin,
 			})
 		}
 	}

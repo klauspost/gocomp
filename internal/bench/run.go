@@ -26,6 +26,8 @@ type Event struct {
 	Done   int
 	Total  int
 	Result *Result
+	Target int // pass: how many passes the measurement will get in all
+	Key    Key // job: the measurement whose pass starts now; zero for untimed work
 	Msg    string
 }
 
@@ -35,11 +37,14 @@ type Engine struct {
 	Data     *corpus.Data
 	Variants []Variant
 	Events   chan<- Event
+	Pause    *Pause
 
 	results []Result
 	done    int
 	total   int
 	decoded []bool // by variant index: decode already ran off the encode output
+	pinned  []int  // pinOrder while pinning
+	pin     int    // Result.Pin of the current thread count
 }
 
 func (e *Engine) emit(ev Event) {
@@ -63,6 +68,12 @@ func (e *Engine) Run(ctx context.Context) ([]Result, error) {
 
 	prev := runtime.GOMAXPROCS(0)
 	defer runtime.GOMAXPROCS(prev)
+	if e.Cfg.Pin {
+		// pinOrder holds every CPU the process was allowed, so pinning to all of it restores the affinity.
+		if e.pinned = pinOrder(); e.pinned != nil {
+			defer setAffinity(e.pinned)
+		}
+	}
 
 	if e.Cfg.Encode {
 		if err := e.runEncode(ctx); err != nil {
@@ -99,12 +110,12 @@ type encJob struct {
 // compressFor would produce for v: the one at SrcThreads, or -- for a codec that
 // declares no concurrency, and so encodes the same bytes at any thread count --
 // the last group it runs in, when SrcThreads is not among them.
-func (e *Engine) sourceGroup(v Variant) (int, bool) {
-	conc := v.Enc.Concurrent(e.Data.Kind)
-	ts := e.Cfg.ThreadsFor(conc)
+func (c Config) sourceGroup(v Variant, kind corpus.Kind) (int, bool) {
+	conc := v.Enc.Concurrent(kind)
+	ts := c.ThreadsFor(conc)
 	switch {
-	case containsInt(ts, e.Cfg.SrcThreads):
-		return e.Cfg.SrcThreads, true
+	case containsInt(ts, c.SrcThreads):
+		return c.SrcThreads, true
 	case !conc && len(ts) > 0:
 		return ts[len(ts)-1], true
 	}
@@ -129,7 +140,7 @@ func (e *Engine) runEncode(ctx context.Context) error {
 			}
 			// A directory's output is overwritten file by file, so the whole
 			// compressed corpus never exists during an encode pass.
-			g, ok := e.sourceGroup(v)
+			g, ok := e.Cfg.sourceGroup(v, kind)
 			src := e.Cfg.Decode && kind == corpus.KindFile && ok && g == t &&
 				len(e.Cfg.DecodersOf(v, kind, e.Variants)) > 0
 			jobs = append(jobs, &encJob{v: v, vi: vi, enc: enc, source: src})
@@ -138,7 +149,7 @@ func (e *Engine) runEncode(ctx context.Context) error {
 			continue
 		}
 
-		runtime.GOMAXPROCS(t)
+		e.setThreads(t)
 		bound := 0
 		for _, j := range jobs {
 			n := e.Data.Max
@@ -151,13 +162,13 @@ func (e *Engine) runEncode(ctx context.Context) error {
 
 		st, err := e.roundRobin(ctx, len(jobs), func(i int) (time.Duration, error) {
 			j := jobs[i]
-			e.emit(Event{Kind: "job", Phase: "encode", Label: j.v.Label(), Msg: threadLabel(t)})
+			e.emit(Event{Kind: "job", Phase: "encode", Label: j.v.Label(), Msg: threadLabel(t), Key: j.v.encKey(t)})
 			d, out, n, err := e.encodeOnce(j.enc, &dst)
 			j.out, j.last = n, out
 			return d, err
 		}, func(i int, a agg) {
 			r := e.encResult(jobs[i], t, a)
-			e.emit(Event{Kind: "pass", Result: &r})
+			e.emit(Event{Kind: "pass", Result: &r, Target: a.target})
 		}, func(i int) {
 			// Its last pass has just landed, and the next job's pass would
 			// overwrite it: decoding it now, straight out of the encode buffer,
@@ -174,7 +185,7 @@ func (e *Engine) runEncode(ctx context.Context) error {
 			_ = e.decodeSource(ctx, j.v, comp) // cancellation surfaces at the next pass
 			comp.release()
 			j.last = nil
-			runtime.GOMAXPROCS(t) // each decode job set its own
+			e.setThreads(t) // each decode job set its own
 			e.emit(Event{Kind: "phase", Phase: "encode"})
 		})
 		for i, j := range jobs {
@@ -205,9 +216,9 @@ func (e *Engine) encodeOnce(enc codec.Encoder, dst *[]byte) (time.Duration, []by
 	d := e.Data
 	if d.Kind == corpus.KindFile {
 		runtime.GC()
-		start := time.Now()
+		start := now()
 		out, err := enc.Encode(*dst, d.File)
-		el := time.Since(start)
+		el := now() - start
 		if err != nil {
 			return 0, nil, 0, err
 		}
@@ -216,7 +227,7 @@ func (e *Engine) encodeOnce(enc codec.Encoder, dst *[]byte) (time.Duration, []by
 	}
 	var n int64
 	runtime.GC()
-	start := time.Now()
+	start := now()
 	for i := range d.Files {
 		out, err := enc.Encode(*dst, d.Files[i].Data)
 		if err != nil {
@@ -225,7 +236,7 @@ func (e *Engine) encodeOnce(enc codec.Encoder, dst *[]byte) (time.Duration, []by
 		n += int64(len(out))
 		keep(dst, out)
 	}
-	return time.Since(start), nil, n, nil
+	return now() - start, nil, n, nil
 }
 
 type decJob struct {
@@ -247,7 +258,7 @@ func (e *Engine) runDecode(ctx context.Context) error {
 		if len(decs) == 0 || e.decoded[vi] {
 			continue
 		}
-		if err := ctx.Err(); err != nil {
+		if err := e.Pause.Wait(ctx); err != nil {
 			return err
 		}
 		if !phased {
@@ -256,7 +267,7 @@ func (e *Engine) runDecode(ctx context.Context) error {
 		}
 
 		e.emit(Event{Kind: "job", Phase: "decode", Label: v.Label(), Msg: "preparing input"})
-		runtime.GOMAXPROCS(e.Cfg.SrcThreads)
+		e.setThreads(e.Cfg.SrcThreads)
 		comp, err := e.compressFor(v)
 		if err != nil {
 			e.fail(OpDecode, "", v.ID(), v.Level.N, v.Window, e.Cfg.SrcThreads, v.Enc.Module, err)
@@ -308,21 +319,21 @@ func (e *Engine) decodeSource(ctx context.Context, v Variant, comp *compressed) 
 	dst := make([]byte, 0, e.Data.Max+64<<10)
 	st, err := e.roundRobin(ctx, len(jobs), func(i int) (time.Duration, error) {
 		j := jobs[i]
-		runtime.GOMAXPROCS(j.t)
-		e.emit(Event{Kind: "job", Phase: "decode", Label: j.dec.ID + " <- " + v.Label(), Msg: threadLabel(j.t)})
+		e.setThreads(j.t)
+		e.emit(Event{Kind: "job", Phase: "decode", Label: j.dec.ID + " <- " + v.Label(), Msg: threadLabel(j.t), Key: v.decKey(j.dec.ID, j.t)})
 		d, n, err := e.decodeOnce(j.inst, comp, &dst)
 		j.out = n
 		return d, err
 	}, func(i int, a agg) {
-		r := decResult(jobs[i], v, comp, a)
-		e.emit(Event{Kind: "pass", Result: &r})
+		r := e.decResult(jobs[i], v, comp, a)
+		e.emit(Event{Kind: "pass", Result: &r, Target: a.target})
 	}, nil)
 	for i, j := range jobs {
 		switch a := st[i]; {
 		case a.err != nil:
 			e.fail(OpDecode, j.dec.ID, v.ID(), v.Level.N, v.Window, j.t, j.dec.Module, a.err)
 		case a.n > 0:
-			e.record(decResult(j, v, comp, a))
+			e.record(e.decResult(j, v, comp, a))
 		}
 		j.inst.Release()
 	}
@@ -332,9 +343,9 @@ func (e *Engine) decodeSource(ctx context.Context, v Variant, comp *compressed) 
 func (e *Engine) decodeOnce(dec codec.Decoder, c *compressed, dst *[]byte) (time.Duration, int64, error) {
 	if e.Data.Kind == corpus.KindFile {
 		runtime.GC()
-		start := time.Now()
+		start := now()
 		out, err := dec.Decode(*dst, c.file)
-		el := time.Since(start)
+		el := now() - start
 		if err != nil {
 			return 0, 0, err
 		}
@@ -343,7 +354,7 @@ func (e *Engine) decodeOnce(dec codec.Decoder, c *compressed, dst *[]byte) (time
 	}
 	var n int64
 	runtime.GC()
-	start := time.Now()
+	start := now()
 	for i := range c.files {
 		out, err := dec.Decode(*dst, c.files[i])
 		if err != nil {
@@ -352,7 +363,7 @@ func (e *Engine) decodeOnce(dec codec.Decoder, c *compressed, dst *[]byte) (time
 		n += int64(len(out))
 		keep(dst, out)
 	}
-	return time.Since(start), n, nil
+	return now() - start, n, nil
 }
 
 // roundRobin runs every job once, then repeats the ones that want more passes.
@@ -410,7 +421,7 @@ func (e *Engine) roundRobin(ctx context.Context, n int, run func(int) (time.Dura
 	}
 
 	for i := range n {
-		if err := ctx.Err(); err != nil {
+		if err := e.Pause.Wait(ctx); err != nil {
 			return st, err
 		}
 		d, err := run(i)
@@ -431,7 +442,7 @@ func (e *Engine) roundRobin(ctx context.Context, n int, run func(int) (time.Dura
 			if st[i].err != nil || st[i].n >= st[i].target {
 				continue
 			}
-			if err := ctx.Err(); err != nil {
+			if err := e.Pause.Wait(ctx); err != nil {
 				return st, err
 			}
 			d, err := run(i)
@@ -474,17 +485,24 @@ func (e *Engine) encResult(j *encJob, t int, a agg) Result {
 	return Result{
 		Op: OpEncode, Codec: j.v.Enc.ID, Level: j.v.Level.N, Window: j.v.Window, Threads: t,
 		Module: j.v.Enc.Module, In: e.Data.Total, Out: j.out,
-		Best: a.best, Passes: a.n, SD: a.relSD(), Verified: -1,
+		Best: a.best, Passes: a.n, SD: a.relSD(), Verified: -1, Pin: e.pin,
 	}
 }
 
-func decResult(j *decJob, v Variant, c *compressed, a agg) Result {
-	return Result{
+func (e *Engine) decResult(j *decJob, v Variant, c *compressed, a agg) Result {
+	r := Result{
 		Op: OpDecode, Codec: j.dec.ID, Src: v.ID(), Level: v.Level.N, Window: v.Window, Threads: j.t,
 		Module: j.dec.Module, SrcModule: v.Enc.Module,
 		In: c.total, Out: j.out,
-		Best: a.best, Passes: a.n, SD: a.relSD(), Verified: c.verified,
+		Best: a.best, Passes: a.n, SD: a.relSD(), Verified: c.verified, Pin: e.pin,
 	}
+	// sourceGroup and compressFor both encode a concurrent source at
+	// SrcThreads. Recording it for any other encoder would split one
+	// measurement in two, which is what gating it on the whole run did.
+	if v.Enc.ThreadsVaryOutput && v.Enc.Concurrent(e.Data.Kind) {
+		r.SrcThreads = e.Cfg.SrcThreads
+	}
+	return r
 }
 
 func (e *Engine) record(r Result) {
@@ -498,5 +516,6 @@ func (e *Engine) fail(op Op, id, src string, level, window, t int, module string
 		Module: module, Err: err.Error(), Verified: -1,
 	}
 	e.results = append(e.results, r)
-	e.emit(Event{Kind: "warn", Msg: fmt.Sprintf("%s %s: %v", op, id, err)})
+	// The Result names the measurement, so an estimate can stop waiting for it.
+	e.emit(Event{Kind: "warn", Msg: fmt.Sprintf("%s %s: %v", op, id, err), Result: &r})
 }

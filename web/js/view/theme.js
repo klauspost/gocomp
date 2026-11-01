@@ -10,6 +10,7 @@ const CHROME = {
   textSecondary: '--text-secondary',
   textMuted: '--text-muted',
   dim: '--dim-mark',
+  spare: '--spare-mark',
 };
 
 let T = null;
@@ -22,19 +23,25 @@ export function readTokens(root = document.documentElement) {
   return t;
 }
 
-// SLOTS is the colour-distinct cap for an all-pairs form -- every pair on
-// screen at once, which is what a scatter puts there. Eight is where this
-// palette stops clearing the CVD target in *dark* mode, which is the binding
-// one; light reaches eleven. Raising it means re-running
-// scripts/validate_palette.js with --pairs all in both modes and finding steps
-// that still clear the floors. If it does not pass, the cap does not move.
-export const SLOTS = 8;
+// SLOTS is how many series get a colour of their own. Slots 1-8 clear the
+// all-pairs floors a scatter needs in both modes (worst CVD dE 8.1, worst
+// normal-vision dE 15.1 light / 15.6 dark). 9-16 were added on request with
+// the floors knowingly broken: no 16 colours in the lightness band can clear
+// them. They are the greedy farthest-point picks, each maximising its worst
+// separation from everything before it under normal, protan and deutan
+// vision, which bottoms out at normal 8.8 and CVD 4.7 (#ae6072 against slot 2
+// and slot 9). Past slot 8 the marker shape and dash carry identity where hue
+// cannot, which is why every slot has its own.
+export const SLOTS = 16;
 
 // Secondary encoding, one per slot: colour alone is never allowed to carry
 // identity, and at eight slots it certainly cannot. `style` is the Chart.js
 // pointStyle, `css` names the matching swatch class, and the two triangles are
 // told apart by rotation rather than by reaching for rectRounded, which is
 // indistinguishable from a circle at this size.
+// Slots 9-16 reuse the filled shapes hollow, then turn the triangle sideways
+// and stand a line up, since Chart.js has no further shapes that stay
+// distinct at marker size.
 const MARKS = [
   { style: 'circle', css: 'circle' },
   { style: 'rect', css: 'square' },
@@ -44,8 +51,19 @@ const MARKS = [
   { style: 'cross', css: 'plus' },
   { style: 'triangle', css: 'triangleDown', rotation: 180 },
   { style: 'star', css: 'star' },
+  { style: 'circle', css: 'circleOpen', hollow: true },
+  { style: 'rect', css: 'squareOpen', hollow: true },
+  { style: 'triangle', css: 'triangleOpen', hollow: true },
+  { style: 'rectRot', css: 'diamondOpen', hollow: true },
+  { style: 'triangle', css: 'triangleRight', rotation: 90 },
+  { style: 'triangle', css: 'triangleLeft', rotation: 270 },
+  { style: 'triangle', css: 'triangleDownOpen', rotation: 180, hollow: true },
+  { style: 'line', css: 'bar', rotation: 90 },
 ];
-const DASHES = [[], [6, 3], [2, 3], [9, 3, 2, 3], [1, 3], [12, 4], [4, 2, 1, 2, 1, 2], [3, 3, 9, 3]];
+const DASHES = [
+  [], [6, 3], [2, 3], [9, 3, 2, 3], [1, 3], [12, 4], [4, 2, 1, 2, 1, 2], [3, 3, 9, 3],
+  [10, 2], [4, 4], [1, 5], [7, 2, 1, 2, 1, 2], [2, 2], [5, 2, 1, 2], [8, 5], [1, 2, 1, 2, 6, 3],
+];
 
 // Chart.js builds cross, crossRot, star, line and dash as *unclosed* paths, so
 // ctx.fill() paints nothing and ctx.stroke() is the entire mark. Handing those
@@ -64,13 +82,15 @@ export function refreshTokens() {
 
 // colorsFor takes an entity id and nothing else: there is no index-based API to
 // reach for, so a filter that changes the series count cannot repaint the
-// survivors. The slot is the position in the emphasis array.
-export function colorsFor(entityId, emphasis) {
+// survivors. The slot is the position in the emphasis array. spare says an
+// entity without a slot is overflow rather than context, so it recedes.
+export function colorsFor(entityId, emphasis, spare = false) {
   const t = tokens();
   const slot = emphasis.indexOf(entityId);
   if (slot < 0) {
+    const ink = spare ? t.spare : t.dim;
     return {
-      stroke: t.dim, fill: t.surface, ring: t.dim, emph: false,
+      stroke: ink, fill: t.surface, ring: ink, emph: false,
       shape: 'circle', pointStyle: 'circle', rotation: 0, dash: [], open: false,
     };
   }
@@ -79,7 +99,7 @@ export function colorsFor(entityId, emphasis) {
   return {
     stroke: c, fill: c, ring: t.surface, emph: true, slot,
     shape: m.css, pointStyle: m.style, rotation: m.rotation ?? 0,
-    dash: DASHES[slot], open: OPEN.has(m.style),
+    dash: DASHES[slot], open: OPEN.has(m.style) || !!m.hollow,
   };
 }
 

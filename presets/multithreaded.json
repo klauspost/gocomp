@@ -3,6 +3,7 @@
     "enwik9",
     "parking-citations",
     "reddit",
+    "silesia",
     "apache-log",
     "cockroach-log",
     "github-ranks",
@@ -12,7 +13,8 @@
     "10gb-tar",
     "consensus-db",
     "github-june",
-    "rawstudio"
+    "rawstudio",
+    "sofia-air"
   ],
   "codecs": {
     "lz4": [
@@ -31,6 +33,15 @@
       1,
       2,
       3
+    ],
+    "mzsimd": [
+      4,
+      5,
+      6,
+      7,
+      260,
+      261,
+      262
     ],
     "pgzip": [
       -2,
@@ -56,6 +67,9 @@
       2,
       3
     ],
+    "snappy": [
+      0
+    ],
     "zskp": [
       1,
       2,
@@ -80,5 +94,6 @@
     "2M",
     "4M",
     "8M"
-  ]
+  ],
+  "collapse": true
 }

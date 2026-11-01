@@ -281,6 +281,28 @@ func TestDefWindows(t *testing.T) {
 	}
 }
 
+// TestThreadsVaryOutput holds the declaration to the library. A concurrent
+// encoder that wrongly leaves it unset folds two different decode inputs into
+// one row; one that wrongly sets it splits one measurement in two.
+func TestThreadsVaryOutput(t *testing.T) {
+	src := realisticData(16 << 20)
+	for _, e := range Encoders() {
+		if e.Slow || !e.Concurrent(corpus.KindFile) {
+			continue
+		}
+		t.Run(e.ID, func(t *testing.T) {
+			t.Parallel()
+			lvl := defaultLevelOf(e)
+			a, b := encode(t, e, lvl, Opts{Kind: corpus.KindFile, Threads: 1}, src),
+				encode(t, e, lvl, Opts{Kind: corpus.KindFile, Threads: 4}, src)
+			if differ := !bytes.Equal(a, b); differ != e.ThreadsVaryOutput {
+				t.Errorf("1 and 4 threads differ = %v (%d vs %d bytes), ThreadsVaryOutput = %v",
+					differ, len(a), len(b), e.ThreadsVaryOutput)
+			}
+		})
+	}
+}
+
 func encode(t *testing.T, e Enc, level int, o Opts, src []byte) []byte {
 	t.Helper()
 	enc, err := e.New(level, o)

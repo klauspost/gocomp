@@ -19,6 +19,8 @@ var (
 	errStyle   = lipgloss.NewStyle().Foreground(lipgloss.Color("203"))
 	okStyle    = lipgloss.NewStyle().Foreground(lipgloss.Color("78"))
 	cursorLine = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("15"))
+	pauseStyle = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("0")).Background(lipgloss.Color("214"))
+	pauseOff   = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("214"))
 )
 
 func totalMem() uint64 { return memory.TotalMemory() }

@@ -7,6 +7,8 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"slices"
+	"strconv"
 	"strings"
 	"time"
 
@@ -38,6 +40,7 @@ type runDoneMsg struct {
 
 type runState struct {
 	cancel   context.CancelFunc
+	pause    *bench.Pause // nil for a download, which has no pass to stop between
 	events   chan bench.Event
 	doneCh   chan runDoneMsg
 	started  time.Time
@@ -49,24 +52,30 @@ type runState struct {
 	phase    string
 	done     int
 	total    int
-	live     []string
+	live     []liveRow
 	log      []string
 	results  int
 	warnings int
 	finished bool
 	summary  string
 	err      error
+	eta      *bench.ETA    // nil for a download
+	etaAt    time.Duration // run time when the estimate last changed; -1 while a corpus loads
+	pass     bench.Key     // the measurement whose pass is running; zero while nothing timed is
+	passAt   time.Duration // run time that pass started
 }
 
 // since is how long the run has taken: counting while it runs, frozen once it
 // is over. The Done screen called time.Since directly, so the summary of a
 // finished run went on climbing -- every repaint, whatever caused it, reported
-// a longer benchmark than the one that actually ran.
+// a longer benchmark than the one that actually ran. Time spent paused is not
+// benchmark time either.
 func (r *runState) since() time.Duration {
 	if r.finished {
 		return r.elapsed
 	}
-	return time.Since(r.started)
+	_, held := r.pause.Held()
+	return time.Since(r.started) - held
 }
 
 // job is everything the worker needs, snapshotted by value. The worker reads
@@ -86,13 +95,9 @@ type job struct {
 // newJob transfers ownership of the cache to the worker; m.cache is nil until
 // the run reports back.
 func (m *Model) newJob(st *runState, cps []corpus.Corpus) job {
-	v := map[corpus.Kind][]bench.Variant{}
-	for _, k := range []corpus.Kind{corpus.KindFile, corpus.KindDir} {
-		v[k] = m.variants(k)
-	}
 	j := job{
 		st: st, out: m.opts.Out, cfg: m.cfg, env: m.env, libs: m.libs,
-		cache: m.cache, corpora: cps, variants: v,
+		cache: m.cache, corpora: cps, variants: m.variantsByKind(),
 	}
 	m.cache = nil
 	return j
@@ -117,15 +122,21 @@ func (m *Model) startRun() tea.Cmd {
 	m.save()
 	m.scr = scrRun
 	st := &runState{
+		pause:   &bench.Pause{},
 		events:  make(chan bench.Event, 1024),
 		doneCh:  make(chan runDoneMsg, 1),
 		started: time.Now(),
 		total:   enc + dec,
 		phase:   "starting",
+		etaAt:   -1,
 	}
 	m.run = st
 	ctx := m.newCtx()
-	go execute(ctx, m.newJob(st, cps))
+	j := m.newJob(st, cps)
+	// Read afresh, and before the worker starts merging into the same database.
+	m.hist = bench.LoadHistory(j.out)
+	st.eta = bench.NewETA(j.cfg, m.hist, j.corpora, j.variants)
+	go execute(ctx, j)
 	return tea.Batch(waitFor(st.events), waitDone(st.doneCh), tickCmd())
 }
 
@@ -149,11 +160,17 @@ func (m *Model) onEvent(ev bench.Event) tea.Cmd {
 	if ev.Corpus != "" {
 		r.corpus = ev.Corpus
 	}
+	if r.eta != nil {
+		r.eta.Observe(ev)
+	}
 	switch ev.Kind {
 	case "corpus":
 		// Done and Total count corpora here, so they must not reach the
 		// measurement progress below.
 		r.corpusAt, r.corpusOf = ev.Done, ev.Total
+		// Loading is not in the estimate, so the countdown waits for the engine.
+		r.etaAt = -1
+		r.live = nil // nothing of the last corpus is still running
 		return waitFor(r.events)
 	case "phase":
 		r.phase = ev.Phase
@@ -162,21 +179,35 @@ func (m *Model) onEvent(ev bench.Event) tea.Cmd {
 		if ev.Msg != "" {
 			r.label += "  " + ev.Msg
 		}
+		r.pass, r.passAt = ev.Key, r.since()
 	case "pass":
 		// A group's results only land when the whole group is done, which on a
 		// large corpus is minutes of an empty screen. These are the same lines,
 		// provisional.
 		if ev.Result != nil {
-			r.live = ring(r.live, formatResult(*ev.Result), liveRows)
+			l := formatResult(*ev.Result, ev.Target)
+			if n := ev.Target - ev.Result.Passes; n > 0 {
+				l += fmt.Sprintf(" · %d more ≈ %s", n, approx(time.Duration(n)*ev.Result.Best))
+			}
+			r.live = setLive(r.live, ev.Result.Key(), l)
 		}
 	case "result":
 		r.results++
 		if ev.Result != nil {
-			r.log = appendLog(r.log, formatResult(*ev.Result))
+			r.live = setLive(r.live, ev.Result.Key(), "")
+			r.log = appendLog(r.log, formatResult(*ev.Result, 0))
 		}
 	case "warn":
 		r.warnings++
+		if ev.Result != nil {
+			r.live = setLive(r.live, ev.Result.Key(), "")
+		}
 		r.log = appendLog(r.log, errStyle.Render("! "+ev.Msg))
+	}
+	// Fetch and load report as jobs too, and so do passes about to start, none
+	// of which moves the estimate.
+	if ev.Kind != "job" {
+		r.etaAt = r.since()
 	}
 	if ev.Total > 0 {
 		r.done, r.total = ev.Done, ev.Total
@@ -188,17 +219,35 @@ func (m *Model) onEvent(ev bench.Event) tea.Cmd {
 // cycles through the whole group, so a handful is enough to keep it moving.
 const liveRows = 5
 
+// liveRow is a measurement still running, as of its latest pass.
+type liveRow struct {
+	key  bench.Key
+	line string
+}
+
+// setLive keeps one row per measurement, the latest pass last. An empty line
+// drops it: a row left behind once its measurement finished read as one still
+// running.
+func setLive(rows []liveRow, k bench.Key, line string) []liveRow {
+	rows = slices.DeleteFunc(rows, func(r liveRow) bool { return r.key == k })
+	if line == "" {
+		return rows
+	}
+	return ring(rows, liveRow{k, line}, liveRows)
+}
+
 func appendLog(log []string, line string) []string { return ring(log, line, 200) }
 
-func ring(s []string, line string, n int) []string {
-	s = append(s, line)
+func ring[T any](s []T, v T, n int) []T {
+	s = append(s, v)
 	if len(s) > n {
 		s = s[len(s)-n:]
 	}
 	return s
 }
 
-func formatResult(r bench.Result) string {
+// formatResult shows the passes out of target, for a measurement still running.
+func formatResult(r bench.Result, target int) string {
 	if r.Err != "" {
 		return errStyle.Render(fmt.Sprintf("! %s %s: %s", r.Op, r.Codec, r.Err))
 	}
@@ -210,8 +259,78 @@ func formatResult(r bench.Result) string {
 	if r.Window > 0 {
 		win = " w" + bench.WindowName(r.Window)
 	}
-	return fmt.Sprintf("%s %-9s %3d %-12s t%-3d %8.2f MB/s  %.3f:1  n=%d%s",
-		r.Op, r.Codec, r.Level, src, r.Threads, r.MBps(), r.Ratio(), r.Passes, win)
+	n := strconv.Itoa(r.Passes)
+	if target > 0 {
+		n += "/" + strconv.Itoa(target)
+	}
+	return fmt.Sprintf("%s %-9s %3d %-12s t%-3d %8.2f MB/s  %.3f:1  n=%s%s",
+		r.Op, r.Codec, r.Level, src, r.Threads, r.MBps(), r.Ratio(), n, win)
+}
+
+// left renders the estimate for the current corpus and for the whole run.
+// Between events it counts down by the run time since the last one, so a pass
+// that takes minutes does not freeze it.
+func (r *runState) left() (cur, total string) {
+	if r.eta == nil {
+		return "", ""
+	}
+	c, all, unknown := r.eta.Left()
+	if r.etaAt >= 0 {
+		gone := r.since() - r.etaAt
+		c, all = max(c-gone, 0), max(all-gone, 0)
+	}
+	total = estimate(all, unknown, "left")
+	if unknown > 0 && all == 0 {
+		return "", total
+	}
+	return ", ~" + approx(c) + " left", total
+}
+
+// passLeft counts down the pass running now. One that outruns its estimate
+// shows how long it has taken instead, rather than sitting at zero. Passes
+// under a second would only flicker.
+func (r *runState) passLeft() string {
+	if r.eta == nil {
+		return ""
+	}
+	d, ok := r.eta.Pass(r.pass)
+	if !ok || d < time.Second {
+		return ""
+	}
+	gone := r.since() - r.passAt
+	if gone > d {
+		return fmt.Sprintf(" · %s, expected ~%s", approx(gone), approx(d))
+	}
+	return " · ~" + approx(d-gone) + " left"
+}
+
+// estimate renders a total that leaves out the measurements nothing is known
+// about, which makes it a floor while there are any.
+func estimate(d time.Duration, unknown int, what string) string {
+	switch {
+	case unknown > 0 && d == 0:
+		return " · no history to estimate from"
+	case unknown > 0:
+		return fmt.Sprintf(" · ≥%s %s, %d without history", approx(d), what, unknown)
+	}
+	return " · ~" + approx(d) + " " + what
+}
+
+// approx is a duration to the precision an estimate deserves.
+func approx(d time.Duration) string {
+	switch {
+	case d >= time.Hour:
+		d = d.Round(time.Minute)
+	case d >= 10*time.Second:
+		d = d.Round(time.Second)
+	default:
+		d = d.Round(100 * time.Millisecond)
+	}
+	s := d.String()
+	if strings.HasSuffix(s, "m0s") {
+		s = s[:len(s)-2]
+	}
+	return s
 }
 
 // execute runs the benchmark and merges each corpus as it completes, so a
@@ -232,7 +351,7 @@ func execute(ctx context.Context, j job) {
 		}
 	}
 	for i, cp := range todo {
-		if ctx.Err() != nil {
+		if j.st.pause.Wait(ctx) != nil {
 			break
 		}
 		// Not the usual non-blocking send: this is the heading for the whole
@@ -255,7 +374,7 @@ func execute(ctx context.Context, j job) {
 
 		// Windows past the largest input are trimmed here, the first point at
 		// which that size is known.
-		eng := &bench.Engine{Cfg: j.cfg, Data: data, Variants: j.cfg.Expand(variants, data.Max), Events: j.st.events}
+		eng := &bench.Engine{Cfg: j.cfg, Data: data, Variants: j.cfg.Expand(variants, data.Max), Events: j.st.events, Pause: j.st.pause}
 		results, runErr := eng.Run(ctx)
 		// meta is the last use of data, so the corpus is unreachable from here
 		// on and this GC hands its memory back before the next one is loaded.
@@ -348,9 +467,45 @@ func (m *Model) runKey(msg tea.KeyMsg) tea.Cmd {
 		if m.run != nil && m.run.finished {
 			return tea.Quit
 		}
+		if m.run != nil {
+			// Cancelling releases the hold; left set, the badge would claim a
+			// pause is still pending while the run winds down.
+			m.run.pause.Set(false)
+		}
 		m.note = "cancelling; finished corpora are still written"
+	case "p", " ":
+		if m.run != nil && !m.run.finished {
+			m.run.pause.Set(!m.run.pause.Paused())
+		}
 	}
 	return nil
+}
+
+func (m *Model) runHelp() string {
+	switch {
+	case m.run == nil || m.run.pause == nil:
+		return "ctrl+c cancel"
+	case m.run.pause.Paused():
+		return "p resume · ctrl+c cancel"
+	}
+	return "p pause · ctrl+c cancel"
+}
+
+// pauseBadge only blinks once the worker has actually stopped. Until then a
+// pass is still running -- minutes, on a large corpus -- and "PAUSED" over a
+// pinned CPU would be a lie.
+func (r *runState) pauseBadge() string {
+	if !r.pause.Paused() {
+		return ""
+	}
+	if held, _ := r.pause.Held(); !held {
+		return "  " + pauseStyle.Render(" pausing after this pass… ")
+	}
+	st := pauseStyle
+	if time.Now().UnixMilli()/500%2 == 1 {
+		st = pauseOff // same width, so the line does not jump
+	}
+	return "  " + st.Render(" ❚❚ PAUSED ")
 }
 
 func (m *Model) finishRun(msg runDoneMsg) {
@@ -363,8 +518,9 @@ func (m *Model) finishRun(msg runDoneMsg) {
 	// Stop the clock before the guard. A superseded run is never shown, but
 	// leaving it marked as still running means anything that later reads it
 	// gets a duration that grows.
+	msg.st.elapsed = msg.st.since()
 	msg.st.finished = true
-	msg.st.elapsed = time.Since(msg.st.started)
+	m.hist = nil // the run merged into it, superseded or not
 	if m.run == nil || msg.st != m.run {
 		return // a cancelled run that finished late
 	}
@@ -412,23 +568,24 @@ func (m *Model) runView() string {
 	bar := "[" + strings.Repeat("=", filled) + strings.Repeat(" ", width-filled) + "]"
 
 	var b strings.Builder
-	fmt.Fprintf(&b, "  %s %3.0f%%  %d/%d  %s elapsed\n", bar, pct*100, r.done, r.total,
-		r.since().Round(time.Second))
+	cur, total := r.left()
+	fmt.Fprintf(&b, "  %s %3.0f%%  %d/%d  %s elapsed%s%s\n", bar, pct*100, r.done, r.total,
+		r.since().Round(time.Second), total, r.pauseBadge())
 	head := r.phase
 	if r.corpus != "" {
 		c := r.corpus
 		if r.corpusOf > 1 {
-			c += fmt.Sprintf(" (%d/%d)", r.corpusAt, r.corpusOf)
+			c += fmt.Sprintf(" (%d/%d%s)", r.corpusAt, r.corpusOf, cur)
 		}
 		head = c + " · " + r.phase
 	}
-	fmt.Fprintf(&b, "  %s: %s\n", head, r.label)
+	fmt.Fprintf(&b, "  %s: %s%s\n", head, r.label, r.passLeft())
 
 	used := 3
 	if len(r.live) > 0 {
 		b.WriteString("\n  " + dimStyle.Render("in progress, best so far") + "\n")
 		for _, l := range r.live {
-			b.WriteString("    " + dimStyle.Render(l) + "\n")
+			b.WriteString("    " + dimStyle.Render(l.line) + "\n")
 		}
 		used += len(r.live) + 2
 	}

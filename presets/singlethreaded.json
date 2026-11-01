@@ -3,6 +3,7 @@
     "enwik9",
     "parking-citations",
     "reddit",
+    "silesia",
     "apache-log",
     "cockroach-log",
     "github-ranks",
@@ -78,6 +79,15 @@
       2,
       3
     ],
+    "mzsimd": [
+      4,
+      5,
+      6,
+      7,
+      260,
+      261,
+      262
+    ],
     "s2": [
       0,
       1,
@@ -103,5 +113,13 @@
   "passes": 3,
   "min_wall": "2s",
   "max_passes": 25,
-  "max_job": "5m0s"
+  "max_job": "5m0s",
+  "windows": [
+    "default",
+    "512K",
+    "1M",
+    "2M",
+    "4M",
+    "8M"
+  ]
 }
