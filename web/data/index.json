@@ -1,6 +1,6 @@
 {
  "schema": 3,
- "generated": "2026-11-01T17:24:03Z",
+ "generated": "2026-11-01T20:04:57Z",
  "formats": [
   {
    "id": "brotli",
@@ -1836,11 +1836,11 @@
     "goos": "windows",
     "numcpu": "32"
    },
-   "n_encode": 572,
-   "n_decode": 716,
-   "merges": 27,
+   "n_encode": 573,
+   "n_decode": 717,
+   "merges": 28,
    "created": "2026-09-23T18:47:02Z",
-   "updated": "2026-10-30T17:34:58Z"
+   "updated": "2026-11-01T18:22:16Z"
   },
   {
    "id": "279midoswyzse",
@@ -2318,11 +2318,11 @@
     "goos": "windows",
     "numcpu": "32"
    },
-   "n_encode": 568,
-   "n_decode": 641,
-   "merges": 17,
+   "n_encode": 569,
+   "n_decode": 642,
+   "merges": 18,
    "created": "2026-09-23T20:03:09Z",
-   "updated": "2026-10-30T17:38:44Z"
+   "updated": "2026-11-01T19:06:24Z"
   },
   {
    "id": "2wf8aucf2e0yy",
@@ -2714,11 +2714,11 @@
     "goos": "windows",
     "numcpu": "32"
    },
-   "n_encode": 500,
-   "n_decode": 641,
-   "merges": 17,
+   "n_encode": 501,
+   "n_decode": 642,
+   "merges": 18,
    "created": "2026-09-23T20:29:38Z",
-   "updated": "2026-10-31T16:37:03Z"
+   "updated": "2026-11-01T19:25:07Z"
   },
   {
    "id": "1yc3fcmtobxif",
@@ -3623,11 +3623,11 @@
     "goos": "windows",
     "numcpu": "32"
    },
-   "n_encode": 471,
-   "n_decode": 599,
-   "merges": 15,
+   "n_encode": 472,
+   "n_decode": 600,
+   "merges": 16,
    "created": "2026-09-24T08:41:15Z",
-   "updated": "2026-10-31T16:43:32Z"
+   "updated": "2026-11-01T20:04:57Z"
   },
   {
    "id": "2wja8uxhdkrii",
