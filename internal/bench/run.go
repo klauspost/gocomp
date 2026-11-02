@@ -71,7 +71,11 @@ func (e *Engine) Run(ctx context.Context) ([]Result, error) {
 	if e.Cfg.Pin {
 		// pinOrder holds every CPU the process was allowed, so pinning to all of it restores the affinity.
 		if e.pinned = pinOrder(); e.pinned != nil {
-			defer setAffinity(e.pinned)
+			defer func() {
+				if err := setAffinity(e.pinned); err != nil {
+					e.emit(Event{Kind: "warn", Msg: "affinity restore: " + err.Error()})
+				}
+			}()
 		}
 	}
 

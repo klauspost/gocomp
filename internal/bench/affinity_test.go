@@ -53,7 +53,11 @@ func TestPinOrder(t *testing.T) {
 			t.Fatalf("not a permutation of 0..%d: %v", len(order)-1, order)
 		}
 	}
-	defer setAffinity(order)
+	t.Cleanup(func() {
+		if err := setAffinity(order); err != nil {
+			t.Error(err)
+		}
+	})
 	n := max(len(order)/2, 1)
 	if err := setAffinity(order[:n]); err != nil {
 		t.Fatal(err)
