@@ -8,7 +8,7 @@ go 1.26.0
 toolchain go1.27.1
 
 require (
-	github.com/andybalholm/brotli v1.2.4
+	github.com/andybalholm/brotli v1.2.7
 	github.com/bodgit/sevenzip v1.6.5
 	github.com/charmbracelet/bubbletea v1.3.10
 	github.com/charmbracelet/lipgloss v1.1.0
