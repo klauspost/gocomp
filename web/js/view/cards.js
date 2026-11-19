@@ -1,7 +1,7 @@
 // The chart cards. Every card exposes the same shape:
 //   { root, update(results, state), retheme(), setLoading(bool) }
 
-import { METRICS, fmtRatio } from '../data/metrics.js';
+import { METRICS, fmtRatio, paretoFronts } from '../data/metrics.js';
 import { entitiesOf } from '../queries.js';
 import * as fmt from '../format.js';
 import { axis, createChart, el, tooltipFor } from './chart.js';
@@ -155,8 +155,8 @@ export function paretoCard(ctx) {
   const onToggleEntity = ctx.onToggleEntity;
   // "A against B" puts A on the vertical: throughput is the vertical axis now,
   // so the title had to turn round with the chart.
-  const c = card('Throughput against ratio',
-    'up and to the right is better · each line is one codec across its levels');
+  const sub = 'up and to the right is better · each line is one codec across its levels';
+  const c = card('Throughput against ratio', sub);
   const clear = el('button');
   clear.type = 'button';
   clear.textContent = 'Deselect all';
@@ -172,8 +172,9 @@ export function paretoCard(ctx) {
 
   let charts = { c: null, d: null };
   let last = null;
+  let onFront = new Set();
 
-  function build(p, res, state, metricId) {
+  function build(p, res, state, metricId, fronts) {
     const t = tokens();
     const datasets = [];
     for (const s of res.series) {
@@ -213,6 +214,27 @@ export function paretoCard(ctx) {
     }
     // Emphasised last: they draw on top and win hover ties.
     datasets.sort((a, b) => Number(a.__emph) - Number(b.__emph));
+
+    // Stepped, because a straight segment between two frontier points would
+    // promise a setting nobody measured. Drawn behind everything, so each
+    // codec mark sits inside its ring.
+    for (const f of fronts) {
+      datasets.push({
+        __inert: true,
+        data: f.map((r) => ({ x: r.ratio, y: r[metricId] })),
+        showLine: true,
+        stepped: 'after',
+        borderColor: t.frontier,
+        borderWidth: 8,
+        borderJoinStyle: 'round',
+        borderCapStyle: 'round',
+        pointRadius: 10,
+        pointBorderWidth: 1.5,
+        pointBorderColor: t.textSecondary,
+        pointBackgroundColor: 'transparent',
+        order: 2,
+      });
+    }
 
     const m = METRICS[metricId];
     const cfg = {
@@ -255,6 +277,7 @@ export function paretoCard(ctx) {
     ];
     const head = r.levelName ? `${ds.__label} · ${r.levelName}` : ds.__label;
     const note = [
+      onFront.has(r) ? 'on the Pareto frontier' : null,
       r.src ? `decoding ${r.srcLabel}` : null,
       r.size ? fmt.windowLabel(r) : null,
       `${r.threads} thread${r.threads === 1 ? '' : 's'} · best of ${r.passes}`,
@@ -263,13 +286,13 @@ export function paretoCard(ctx) {
     return { head, rows, note };
   }
 
-  function drawPanel(p, chartKey, res, state, metricId) {
+  function drawPanel(p, chartKey, res, state, metricId, fronts) {
     if (!res || !res.series.length) {
       p.root.style.display = 'none';
       return;
     }
     p.root.style.display = '';
-    const cfg = build(p, res, state, metricId);
+    const cfg = build(p, res, state, metricId, fronts);
     if (charts[chartKey]) {
       charts[chartKey].data.datasets = cfg.data.datasets;
       charts[chartKey].options = cfg.options;
@@ -301,8 +324,13 @@ export function paretoCard(ctx) {
         .flatMap((r) => r.series.flatMap((s) => s.points.map((p) => p.ratio)));
       const { min: xmin, max: xmax } = niceRange(all);
 
-      drawPanel(pc, 'c', results.encode, state, 'cspeed');
-      drawPanel(pd, 'd', results.decode, state, 'dspeed');
+      c.sub.textContent = state.frontier ? `${sub} · ringed points are the Pareto frontier` : sub;
+      const frontsOf = (res, metricId) => (state.frontier && res ? paretoFronts(res.rows, 'ratio', metricId) : []);
+      const fronts = { c: frontsOf(results.encode, 'cspeed'), d: frontsOf(results.decode, 'dspeed') };
+      onFront = new Set([...fronts.c, ...fronts.d].flat());
+
+      drawPanel(pc, 'c', results.encode, state, 'cspeed', fronts.c);
+      drawPanel(pd, 'd', results.decode, state, 'dspeed', fronts.d);
       for (const k of ['c', 'd']) {
         if (charts[k]) {
           charts[k].options.scales.x.min = xmin;
@@ -316,11 +344,21 @@ export function paretoCard(ctx) {
       clear.disabled = !state.picked;
 
       const rows = [results.encode, results.decode].filter(Boolean)
-        .flatMap((r) => r.series.flatMap((s) => s.points));
+        .flatMap((r) => r.series.flatMap((s) => s.points))
+        .map((r) => (state.frontier ? { ...r, frontier: Number(onFront.has(r)) } : r));
+      const columns = measurementColumns(results.dim);
+      if (state.frontier) {
+        // Numeric, so the first click on the header puts the frontier on top.
+        columns.splice(columns.findIndex((col) => col.key === 'cspeed') + 1, 0,
+          { key: 'frontier', label: 'Frontier', num: true, get: (r) => (r.frontier ? 'yes' : 'no') });
+      }
+      // A link sorted by the frontier can arrive with the frontier off.
+      const byRatio = { key: 'ratio', dir: -1 };
+      const sort = ctx.sortOf(state, 'pareto', byRatio);
       twin.setOpen((state.tables || []).includes('pareto'));
       renderTable(twin.body, rows, {
-        columns: measurementColumns(results.dim),
-        sort: ctx.sortOf(state, 'pareto', { key: 'ratio', dir: -1 }),
+        columns,
+        sort: columns.some((col) => col.key === sort.key) ? sort : byRatio,
         onSort: (s) => ctx.onSort('pareto', s),
         emphasis: state.emphasis,
         spare: !state.picked,

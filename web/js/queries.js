@@ -45,10 +45,10 @@ export function buildQueries(db, state) {
   const out = {};
 
   if (state.op !== 'd') {
-    out.encode = db.query({ ...b, ...sh, op: 'c', metric: 'cspeed' });
+    out.encode = db.query({ ...b, ...sh, op: 'c' });
   }
   if (state.op !== 'c') {
-    out.decode = db.query({ ...b, ...sh, op: 'd', metric: 'dspeed' });
+    out.decode = db.query({ ...b, ...sh, op: 'd' });
   }
 
   // Thread scaling plots threads along X, so threads must stay out of the
@@ -61,7 +61,6 @@ export function buildQueries(db, state) {
     entityBy: sh.entityBy,
     pointBy: ['threads'],
     autoSplit: ['corpus', 'level'],
-    metric: scalingOp === 'd' ? 'dspeed' : 'cspeed',
   });
   out.scalingOp = scalingOp;
   out.dim = sh.entityBy;

@@ -26,7 +26,9 @@ Interaction.modes.nearestWithin = (chart, e, opts) => {
   let bestD = opts.maxDistance ?? 24;
   for (let i = 0; i < chart.data.datasets.length; i++) {
     const meta = chart.getDatasetMeta(i);
-    if (meta.hidden) continue;
+    // Inert datasets are drawn on top of measured points, and a tie would
+    // hand the hover to the decoration instead of the measurement under it.
+    if (meta.hidden || chart.data.datasets[i].__inert) continue;
     for (let j = 0; j < meta.data.length; j++) {
       const el = meta.data[j];
       const d = Math.hypot(el.x - x, el.y - y);

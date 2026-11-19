@@ -11,6 +11,7 @@ const CHROME = {
   textMuted: '--text-muted',
   dim: '--dim-mark',
   spare: '--spare-mark',
+  frontier: '--frontier',
 };
 
 let T = null;

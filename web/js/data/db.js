@@ -2,7 +2,7 @@
 // module never touches the DOM and never fetches anything itself.
 
 import { levelWord, windowLabel } from '../format.js';
-import { METRICS, paretoFront, ratio, speed } from './metrics.js';
+import { METRICS, ratio, speed } from './metrics.js';
 
 export class QueryError extends Error {}
 
@@ -437,7 +437,6 @@ function runQuery(all, q, db) {
   }
   const series = [...groups.values()].map((g) => {
     g.points.sort((a, b) => cmpBy(a, b, pointKey));
-    if (q.metric) paretoFront(g.points, q.metric, 'ratio');
     g.parts = q.seriesBy.map((d) => dimLabel(d, g.dims[d], db, g.sample, g.points));
     // A part can be empty: a series with no source thread count, beside one
     // that has it, has nothing to say about it.

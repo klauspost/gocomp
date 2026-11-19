@@ -33,6 +33,9 @@
   --spare-mark: #898781;
   --border: rgba(11, 11, 11, 0.09);
   --wash: rgba(11, 11, 11, 0.045);
+  /* The Pareto frontier is a wide wash behind the series, not another line:
+     every line on the chart already means one codec. */
+  --frontier: rgba(11, 11, 11, 0.1);
   --fill: #14130f;      /* selected chip: neutral, so it cannot read as data */
   --on-fill: #fcfcfb;
 
@@ -88,6 +91,7 @@
     --spare-mark: #898781;
     --border: rgba(255, 255, 255, 0.09);
     --wash: rgba(255, 255, 255, 0.06);
+    --frontier: rgba(255, 255, 255, 0.14);
     --fill: #f2f0ec;
     --on-fill: #14130f;
 
@@ -130,6 +134,7 @@
   --spare-mark: #898781;
   --border: rgba(255, 255, 255, 0.09);
   --wash: rgba(255, 255, 255, 0.06);
+  --frontier: rgba(255, 255, 255, 0.14);
   --fill: #f2f0ec;
   --on-fill: #14130f;
 

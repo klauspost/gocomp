@@ -92,6 +92,11 @@ export function createControls(host, db, onChange) {
         { v: true, label: 'Log' },
       ], state.logSpeed, (v) => onChange({ logSpeed: v })));
 
+      add(segment('Pareto frontier', [
+        { v: false, label: 'Off' },
+        { v: true, label: 'On' },
+      ], state.frontier, (v) => onChange({ frontier: v })));
+
       if (state.op !== 'c' && d.ops.includes('d')) {
         add(single('Decode source', ['own', 'all'], state.srcPolicy,
           (v) => onChange({ srcPolicy: v }), (v) => (v === 'own'

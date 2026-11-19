@@ -58,17 +58,19 @@ export function ratio(op, inBytes, outBytes) {
   return c ? u / c : 0;
 }
 
-// paretoFront marks the points no other point beats on both axes.
-export function paretoFront(points, xKey, yKey) {
-  const sorted = [...points].sort((a, b) => b[xKey] - a[xKey]);
-  let bestY = -Infinity;
-  for (const p of sorted) {
-    if (p[yKey] > bestY) {
-      p.frontier = true;
-      bestY = p[yKey];
-    } else {
-      p.frontier = false;
+// paretoFronts returns, per slice, the points no other point in it beats on
+// both axes, in ascending x. Ratio depends on the corpus and speed on the CPU,
+// thread count and harness, so a front never spans those; codec, level,
+// window, versions and the encoder a decoder read are the choices it ranks. Query rows are shared between
+// queries, so membership is returned rather than stamped on them.
+export function paretoFronts(points, xKey, yKey) {
+  const slices = Map.groupBy(points, (p) =>
+    [p.corpus, p.machine, p.threads, p.bench, p.variant].join('|'));
+  return [...slices.values()].map((ps) => {
+    const front = [];
+    for (const p of ps.toSorted((a, b) => b[yKey] - a[yKey] || b[xKey] - a[xKey])) {
+      if (!front.length || p[xKey] > front.at(-1)[xKey]) front.push(p);
     }
-  }
-  return points;
+    return front;
+  });
 }
