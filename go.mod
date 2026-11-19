@@ -14,11 +14,11 @@ require (
 	github.com/charmbracelet/lipgloss v1.1.0
 	github.com/dsnet/compress v0.0.1
 	github.com/golang/snappy v1.0.0
-	github.com/klauspost/compress v1.20.3
+	github.com/klauspost/compress v1.20.4
 	github.com/klauspost/cpuid/v2 v2.4.1
-	github.com/klauspost/pgzip v1.2.7
+	github.com/klauspost/pgzip v1.3.0
 	github.com/klauspost/stdgozstd v0.0.0-20260722174150-eb4821197265
-	github.com/minio/minlz v1.2.1
+	github.com/minio/minlz v1.2.5-0.20261113115215-7c9a1627c7e4
 	github.com/pbnjay/memory v0.0.0-20210728143218-7b4eea64cf58
 	github.com/pierrec/lz4/v4 v4.1.30
 	github.com/ulikunitz/xz v0.5.17
@@ -340,6 +340,6 @@ tool (
 	mvdan.cc/gofumpt
 )
 
-// mzsimd measures unreleased SIMD work: minio/minlz PR 86. Its commit is only
-// on a branch of the fork, so github.com/minio/minlz cannot resolve it.
-replace github.com/minio/minlz => github.com/klauspost/minlz v0.0.0-20261028084727-42632ae72c40
+// The ultra levels are in minio/minlz PR 113, whose commit is only on a branch
+// of the fork, so github.com/minio/minlz cannot resolve it.
+replace github.com/minio/minlz => github.com/klauspost/minlz v0.0.0-20261119134826-475f62408375

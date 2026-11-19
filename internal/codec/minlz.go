@@ -13,17 +13,19 @@ var minlzLevels = []Level{
 	{N: minlz.LevelFastest, Name: "fastest"},
 	{N: minlz.LevelBalanced, Name: "balanced"},
 	{N: minlz.LevelSmallest, Name: "smallest"},
+	{N: minlz.LevelUltra, Name: "ultra", Slow: true},
 }
 
 // mzBlkLevels drops only LevelUncompressed; the block API supports superfast.
 var mzBlkLevels = append([]Level{minlzLevels[0]}, minlzLevels[2:]...)
 
-// Smallest has no delta level: it always tries both literal modes.
+// Smallest and ultra have no delta level: they always try both literal modes.
 var mzSIMDLevels = []Level{
 	{N: minlz.LevelSuperFastSIMD, Name: "superfast"},
 	{N: minlz.LevelFastestSIMD, Name: "fastest"},
 	{N: minlz.LevelBalancedSIMD, Name: "balanced"},
 	{N: minlz.LevelSmallestSIMD, Name: "smallest"},
+	{N: minlz.LevelUltraSIMD, Name: "ultra", Slow: true},
 	{N: minlz.LevelSuperFastSIMD | minlz.LevelSIMDDelta, Name: "superfast-delta", Class: Special},
 	{N: minlz.LevelFastestSIMD | minlz.LevelSIMDDelta, Name: "fastest-delta", Class: Special},
 	{N: minlz.LevelBalancedSIMD | minlz.LevelSIMDDelta, Name: "balanced-delta", Class: Special},
