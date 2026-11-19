@@ -1,6 +1,6 @@
 {
  "schema": 3,
- "generated": "2026-11-02T11:13:52Z",
+ "generated": "2026-11-19T15:18:05Z",
  "formats": [
   {
    "id": "brotli",
@@ -789,6 +789,12 @@
       "n": 3,
       "name": "smallest",
       "window": 2097152
+     },
+     {
+      "n": 8,
+      "name": "ultra",
+      "slow": true,
+      "window": 2097152
      }
     ]
    },
@@ -829,6 +835,11 @@
      {
       "n": 3,
       "name": "smallest"
+     },
+     {
+      "n": 8,
+      "name": "ultra",
+      "slow": true
      }
     ]
    },
@@ -872,6 +883,12 @@
      {
       "n": 7,
       "name": "smallest",
+      "window": 2097152
+     },
+     {
+      "n": 9,
+      "name": "ultra",
+      "slow": true,
       "window": 2097152
      },
      {
@@ -931,6 +948,11 @@
      {
       "n": 7,
       "name": "smallest"
+     },
+     {
+      "n": 9,
+      "name": "ultra",
+      "slow": true
      },
      {
       "n": 260,
@@ -1742,7 +1764,7 @@
     "name": "Windows",
     "version": "10.0.26200"
    },
-   "mem_total": 66156654592
+   "mem_total": 66189271040
   }
  },
  "runs": [
@@ -1817,7 +1839,8 @@
     "github.com/minio/minlz": [
      "",
      "v1.2.0",
-     "v1.2.1"
+     "v1.2.1",
+     "v1.2.5-0.20261113115215-7c9a1627c7e4"
     ],
     "github.com/pierrec/lz4/v4": [
      "v4.1.30"
@@ -1836,11 +1859,11 @@
     "goos": "windows",
     "numcpu": "32"
    },
-   "n_encode": 573,
-   "n_decode": 717,
-   "merges": 28,
+   "n_encode": 695,
+   "n_decode": 839,
+   "merges": 32,
    "created": "2026-09-23T18:47:02Z",
-   "updated": "2026-11-01T18:22:16Z"
+   "updated": "2026-11-19T15:18:05Z"
   },
   {
    "id": "279midoswyzse",
@@ -2065,7 +2088,8 @@
     "github.com/minio/minlz": [
      "",
      "v1.2.0",
-     "v1.2.1"
+     "v1.2.1",
+     "v1.2.5-0.20261113115215-7c9a1627c7e4"
     ],
     "github.com/pierrec/lz4/v4": [
      "v4.1.30"
@@ -2084,11 +2108,11 @@
     "goos": "windows",
     "numcpu": "32"
    },
-   "n_encode": 568,
-   "n_decode": 725,
-   "merges": 23,
+   "n_encode": 690,
+   "n_decode": 847,
+   "merges": 27,
    "created": "2026-09-23T12:50:53Z",
-   "updated": "2026-11-01T16:30:52Z"
+   "updated": "2026-11-19T15:12:01Z"
   },
   {
    "id": "11u1m7jbmgnj2",
@@ -2162,7 +2186,8 @@
     "github.com/minio/minlz": [
      "",
      "v1.2.0",
-     "v1.2.1"
+     "v1.2.1",
+     "v1.2.5-0.20261113115215-7c9a1627c7e4"
     ],
     "github.com/pierrec/lz4/v4": [
      "v4.1.30"
@@ -2181,11 +2206,11 @@
     "goos": "windows",
     "numcpu": "32"
    },
-   "n_encode": 596,
-   "n_decode": 781,
-   "merges": 25,
+   "n_encode": 716,
+   "n_decode": 901,
+   "merges": 27,
    "created": "2026-09-23T09:14:25Z",
-   "updated": "2026-11-01T16:49:14Z"
+   "updated": "2026-11-13T14:00:52Z"
   },
   {
    "id": "3oq2v0l2upbad",
@@ -2299,7 +2324,8 @@
     "github.com/minio/minlz": [
      "",
      "v1.2.0",
-     "v1.2.1"
+     "v1.2.1",
+     "v1.2.5-0.20261113115215-7c9a1627c7e4"
     ],
     "github.com/pierrec/lz4/v4": [
      "v4.1.30"
@@ -2318,11 +2344,11 @@
     "goos": "windows",
     "numcpu": "32"
    },
-   "n_encode": 569,
-   "n_decode": 642,
-   "merges": 18,
+   "n_encode": 689,
+   "n_decode": 762,
+   "merges": 20,
    "created": "2026-09-23T20:03:09Z",
-   "updated": "2026-11-01T19:06:24Z"
+   "updated": "2026-11-13T19:55:15Z"
   },
   {
    "id": "2wf8aucf2e0yy",
@@ -2517,7 +2543,8 @@
     "github.com/minio/minlz": [
      "",
      "v1.2.0",
-     "v1.2.1"
+     "v1.2.1",
+     "v1.2.5-0.20261113115215-7c9a1627c7e4"
     ],
     "github.com/pierrec/lz4/v4": [
      "v4.1.30"
@@ -2536,11 +2563,11 @@
     "goos": "windows",
     "numcpu": "32"
    },
-   "n_encode": 568,
-   "n_decode": 725,
-   "merges": 30,
+   "n_encode": 688,
+   "n_decode": 845,
+   "merges": 32,
    "created": "2026-09-23T14:18:57Z",
-   "updated": "2026-11-01T16:20:46Z"
+   "updated": "2026-11-13T12:19:27Z"
   },
   {
    "id": "tdzj047s0fbw",
@@ -2695,7 +2722,8 @@
     "github.com/minio/minlz": [
      "",
      "v1.2.0",
-     "v1.2.1"
+     "v1.2.1",
+     "v1.2.5-0.20261113115215-7c9a1627c7e4"
     ],
     "github.com/pierrec/lz4/v4": [
      "v4.1.30"
@@ -2714,11 +2742,11 @@
     "goos": "windows",
     "numcpu": "32"
    },
-   "n_encode": 501,
-   "n_decode": 642,
-   "merges": 18,
+   "n_encode": 623,
+   "n_decode": 764,
+   "merges": 22,
    "created": "2026-09-23T20:29:38Z",
-   "updated": "2026-11-01T19:25:07Z"
+   "updated": "2026-11-19T15:08:57Z"
   },
   {
    "id": "1yc3fcmtobxif",
@@ -2791,7 +2819,8 @@
     "github.com/minio/minlz": [
      "",
      "v1.2.0",
-     "v1.2.1"
+     "v1.2.1",
+     "v1.2.5-0.20261113115215-7c9a1627c7e4"
     ],
     "github.com/pierrec/lz4/v4": [
      "v4.1.30"
@@ -2810,11 +2839,11 @@
     "goos": "windows",
     "numcpu": "32"
    },
-   "n_encode": 558,
-   "n_decode": 705,
-   "merges": 22,
+   "n_encode": 680,
+   "n_decode": 827,
+   "merges": 26,
    "created": "2026-09-23T16:55:20Z",
-   "updated": "2026-11-01T16:58:37Z"
+   "updated": "2026-11-19T15:12:46Z"
   },
   {
    "id": "3f2k5dbrkacmb",
@@ -2969,7 +2998,8 @@
     "github.com/minio/minlz": [
      "",
      "v1.2.0",
-     "v1.2.1"
+     "v1.2.1",
+     "v1.2.5-0.20261113115215-7c9a1627c7e4"
     ],
     "github.com/pierrec/lz4/v4": [
      "v4.1.30"
@@ -2988,11 +3018,11 @@
     "goos": "windows",
     "numcpu": "32"
    },
-   "n_encode": 558,
-   "n_decode": 705,
-   "merges": 21,
+   "n_encode": 678,
+   "n_decode": 825,
+   "merges": 23,
    "created": "2026-09-23T17:04:27Z",
-   "updated": "2026-11-01T17:04:26Z"
+   "updated": "2026-11-13T15:25:45Z"
   },
   {
    "id": "fz7hu0hctp0e",
@@ -3173,7 +3203,8 @@
     "github.com/minio/minlz": [
      "",
      "v1.2.0",
-     "v1.2.1"
+     "v1.2.1",
+     "v1.2.5-0.20261113115215-7c9a1627c7e4"
     ],
     "github.com/pierrec/lz4/v4": [
      "v4.1.30"
@@ -3192,11 +3223,11 @@
     "goos": "windows",
     "numcpu": "32"
    },
-   "n_encode": 558,
-   "n_decode": 705,
-   "merges": 21,
+   "n_encode": 680,
+   "n_decode": 827,
+   "merges": 25,
    "created": "2026-09-23T17:26:21Z",
-   "updated": "2026-11-01T17:22:21Z"
+   "updated": "2026-11-19T15:10:50Z"
   },
   {
    "id": "1g8lbvpe6a8xt",
@@ -3377,7 +3408,8 @@
     "github.com/minio/minlz": [
      "",
      "v1.2.0",
-     "v1.2.1"
+     "v1.2.1",
+     "v1.2.5-0.20261113115215-7c9a1627c7e4"
     ],
     "github.com/pierrec/lz4/v4": [
      "v4.1.30"
@@ -3396,11 +3428,11 @@
     "goos": "windows",
     "numcpu": "32"
    },
-   "n_encode": 546,
-   "n_decode": 703,
-   "merges": 21,
+   "n_encode": 666,
+   "n_decode": 823,
+   "merges": 23,
    "created": "2026-09-23T14:24:21Z",
-   "updated": "2026-11-01T16:21:48Z"
+   "updated": "2026-11-13T12:29:12Z"
   },
   {
    "id": "2vrmjqwnll1kv",
@@ -3473,7 +3505,8 @@
     "github.com/minio/minlz": [
      "",
      "v1.2.0",
-     "v1.2.1"
+     "v1.2.1",
+     "v1.2.5-0.20261113115215-7c9a1627c7e4"
     ],
     "github.com/pierrec/lz4/v4": [
      "v4.1.30"
@@ -3492,11 +3525,11 @@
     "goos": "windows",
     "numcpu": "32"
    },
-   "n_encode": 506,
-   "n_decode": 658,
-   "merges": 26,
+   "n_encode": 626,
+   "n_decode": 778,
+   "merges": 28,
    "created": "2026-09-24T07:29:59Z",
-   "updated": "2026-11-01T17:24:03Z"
+   "updated": "2026-11-13T16:15:04Z"
   },
   {
    "id": "h4frqvsi6o03",
@@ -3610,7 +3643,8 @@
     "github.com/minio/minlz": [
      "",
      "v1.2.0",
-     "v1.2.1"
+     "v1.2.1",
+     "v1.2.5-0.20261113115215-7c9a1627c7e4"
     ],
     "github.com/pierrec/lz4/v4": [
      "v4.1.30"
@@ -3629,11 +3663,11 @@
     "goos": "windows",
     "numcpu": "32"
    },
-   "n_encode": 472,
-   "n_decode": 600,
-   "merges": 16,
+   "n_encode": 592,
+   "n_decode": 720,
+   "merges": 18,
    "created": "2026-09-24T08:41:15Z",
-   "updated": "2026-11-01T20:04:57Z"
+   "updated": "2026-11-13T21:59:28Z"
   },
   {
    "id": "2wja8uxhdkrii",
@@ -3788,7 +3822,8 @@
     "github.com/minio/minlz": [
      "",
      "v1.2.0",
-     "v1.2.1"
+     "v1.2.1",
+     "v1.2.5-0.20261113115215-7c9a1627c7e4"
     ],
     "github.com/pierrec/lz4/v4": [
      "v4.1.30"
@@ -3807,11 +3842,11 @@
     "goos": "windows",
     "numcpu": "32"
    },
-   "n_encode": 568,
-   "n_decode": 725,
-   "merges": 24,
+   "n_encode": 688,
+   "n_decode": 845,
+   "merges": 26,
    "created": "2026-09-23T14:42:37Z",
-   "updated": "2026-11-01T16:24:50Z"
+   "updated": "2026-11-13T12:40:41Z"
   },
   {
    "id": "1r4vnyb1pg1jj",
@@ -3876,7 +3911,8 @@
      "v1.2.7"
     ],
     "github.com/minio/minlz": [
-     ""
+     "",
+     "v1.2.5-0.20261113115215-7c9a1627c7e4"
     ],
     "github.com/pierrec/lz4/v4": [
      "v4.1.30"
@@ -3895,11 +3931,11 @@
     "goos": "windows",
     "numcpu": "32"
    },
-   "n_encode": 454,
-   "n_decode": 504,
-   "merges": 16,
+   "n_encode": 574,
+   "n_decode": 624,
+   "merges": 18,
    "created": "2026-10-13T10:34:25Z",
-   "updated": "2026-11-01T16:26:12Z"
+   "updated": "2026-11-13T12:47:49Z"
   },
   {
    "id": "2rs0cn96b813x",
@@ -4002,7 +4038,8 @@
     "github.com/minio/minlz": [
      "",
      "v1.2.0",
-     "v1.2.1"
+     "v1.2.1",
+     "v1.2.5-0.20261113115215-7c9a1627c7e4"
     ],
     "github.com/pierrec/lz4/v4": [
      "v4.1.30"
@@ -4021,11 +4058,11 @@
     "goos": "windows",
     "numcpu": "32"
    },
-   "n_encode": 316,
-   "n_decode": 344,
-   "merges": 7,
+   "n_encode": 436,
+   "n_decode": 464,
+   "merges": 9,
    "created": "2026-09-24T12:18:45Z",
-   "updated": "2026-10-31T16:58:55Z"
+   "updated": "2026-11-14T00:28:34Z"
   },
   {
    "id": "3g92xqq7iucwc",
