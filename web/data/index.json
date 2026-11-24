@@ -1,6 +1,6 @@
 {
  "schema": 3,
- "generated": "2026-11-19T15:18:05Z",
+ "generated": "2026-11-24T12:30:00Z",
  "formats": [
   {
    "id": "brotli",
@@ -341,6 +341,11 @@
      {
       "n": 9,
       "name": "9"
+     },
+     {
+      "n": 10,
+      "name": "ultra",
+      "slow": true
      }
     ]
    },
@@ -484,6 +489,11 @@
      {
       "n": 9,
       "name": "9"
+     },
+     {
+      "n": 10,
+      "name": "ultra",
+      "slow": true
      }
     ]
    },
@@ -1336,6 +1346,12 @@
       "n": 4,
       "name": "best",
       "window": 8388608
+     },
+     {
+      "n": 5,
+      "name": "ultra",
+      "slow": true,
+      "window": 8388608
      }
     ]
    },
@@ -1827,7 +1843,10 @@
     "github.com/klauspost/compress": [
      "v1.20.0",
      "v1.20.1",
-     "v1.20.3"
+     "v1.20.3",
+     "v1.20.5-0.20261119105852-4aeb7d1ae7b0",
+     "v1.20.6-0.20261122160837-2133677674d2",
+     "v1.20.6-0.20261123180907-6576e836af9d"
     ],
     "github.com/klauspost/pgzip": [
      "v1.2.6",
@@ -1859,11 +1878,11 @@
     "goos": "windows",
     "numcpu": "32"
    },
-   "n_encode": 695,
-   "n_decode": 839,
-   "merges": 32,
+   "n_encode": 772,
+   "n_decode": 918,
+   "merges": 38,
    "created": "2026-09-23T18:47:02Z",
-   "updated": "2026-11-19T15:18:05Z"
+   "updated": "2026-11-24T10:06:49Z"
   },
   {
    "id": "279midoswyzse",
@@ -1918,17 +1937,26 @@
    "goamd64": "v1",
    "bench": "1",
    "threads": [
+    1,
+    4,
+    8,
     16
    ],
    "windows": [
     0,
-    4194304
+    65536,
+    524288,
+    1048576,
+    2097152,
+    4194304,
+    8388608
    ],
    "codecs": [
     "gzkp",
     "gzstd",
     "lz4",
     "minlz",
+    "mzsimd",
     "pgzip",
     "s2",
     "s2s",
@@ -1942,7 +1970,10 @@
      "v1.0.0"
     ],
     "github.com/klauspost/compress": [
-     "v1.20.0"
+     "v1.20.0",
+     "v1.20.5-0.20261119105852-4aeb7d1ae7b0",
+     "v1.20.6-0.20261122160837-2133677674d2",
+     "v1.20.6-0.20261123180907-6576e836af9d"
     ],
     "github.com/klauspost/pgzip": [
      "v1.2.6"
@@ -1951,6 +1982,7 @@
      "v0.0.0-20260722174150-eb4821197265"
     ],
     "github.com/minio/minlz": [
+     "",
      "v1.2.0"
     ],
     "github.com/pierrec/lz4/v4": [
@@ -1970,11 +2002,11 @@
     "goos": "windows",
     "numcpu": "32"
    },
-   "n_encode": 35,
-   "n_decode": 63,
-   "merges": 0,
+   "n_encode": 114,
+   "n_decode": 142,
+   "merges": 6,
    "created": "2026-09-24T09:05:11Z",
-   "updated": "2026-09-24T09:05:11Z"
+   "updated": "2026-11-24T10:27:33Z"
   },
   {
    "id": "1kjhv4qq85yix",
@@ -2076,7 +2108,10 @@
     "github.com/klauspost/compress": [
      "v1.20.0",
      "v1.20.1",
-     "v1.20.3"
+     "v1.20.3",
+     "v1.20.5-0.20261119105852-4aeb7d1ae7b0",
+     "v1.20.6-0.20261122160837-2133677674d2",
+     "v1.20.6-0.20261123180907-6576e836af9d"
     ],
     "github.com/klauspost/pgzip": [
      "v1.2.6",
@@ -2108,11 +2143,11 @@
     "goos": "windows",
     "numcpu": "32"
    },
-   "n_encode": 690,
-   "n_decode": 847,
-   "merges": 27,
+   "n_encode": 767,
+   "n_decode": 926,
+   "merges": 34,
    "created": "2026-09-23T12:50:53Z",
-   "updated": "2026-11-19T15:12:01Z"
+   "updated": "2026-11-24T08:25:36Z"
   },
   {
    "id": "11u1m7jbmgnj2",
@@ -2174,7 +2209,10 @@
     "github.com/klauspost/compress": [
      "v1.20.0",
      "v1.20.1",
-     "v1.20.3"
+     "v1.20.3",
+     "v1.20.5-0.20261119105852-4aeb7d1ae7b0",
+     "v1.20.6-0.20261122160837-2133677674d2",
+     "v1.20.6-0.20261123180907-6576e836af9d"
     ],
     "github.com/klauspost/pgzip": [
      "v1.2.6",
@@ -2206,11 +2244,11 @@
     "goos": "windows",
     "numcpu": "32"
    },
-   "n_encode": 716,
-   "n_decode": 901,
-   "merges": 27,
+   "n_encode": 795,
+   "n_decode": 980,
+   "merges": 33,
    "created": "2026-09-23T09:14:25Z",
-   "updated": "2026-11-13T14:00:52Z"
+   "updated": "2026-11-24T09:10:47Z"
   },
   {
    "id": "3oq2v0l2upbad",
@@ -2312,7 +2350,10 @@
     "github.com/klauspost/compress": [
      "v1.20.0",
      "v1.20.1",
-     "v1.20.3"
+     "v1.20.3",
+     "v1.20.5-0.20261119105852-4aeb7d1ae7b0",
+     "v1.20.6-0.20261122160837-2133677674d2",
+     "v1.20.6-0.20261123180907-6576e836af9d"
     ],
     "github.com/klauspost/pgzip": [
      "v1.2.6",
@@ -2344,11 +2385,11 @@
     "goos": "windows",
     "numcpu": "32"
    },
-   "n_encode": 689,
-   "n_decode": 762,
-   "merges": 20,
+   "n_encode": 768,
+   "n_decode": 841,
+   "merges": 26,
    "created": "2026-09-23T20:03:09Z",
-   "updated": "2026-11-13T19:55:15Z"
+   "updated": "2026-11-24T10:48:36Z"
   },
   {
    "id": "2wf8aucf2e0yy",
@@ -2404,6 +2445,8 @@
    "bench": "1",
    "threads": [
     1,
+    4,
+    8,
     16
    ],
    "windows": [
@@ -2436,7 +2479,10 @@
     "github.com/klauspost/compress": [
      "v1.20.0",
      "v1.20.1",
-     "v1.20.3"
+     "v1.20.3",
+     "v1.20.5-0.20261119105852-4aeb7d1ae7b0",
+     "v1.20.6-0.20261122160837-2133677674d2",
+     "v1.20.6-0.20261123180907-6576e836af9d"
     ],
     "github.com/klauspost/pgzip": [
      "v1.2.6"
@@ -2466,11 +2512,62 @@
     "goos": "windows",
     "numcpu": "32"
    },
-   "n_encode": 192,
-   "n_decode": 220,
-   "merges": 3,
+   "n_encode": 271,
+   "n_decode": 299,
+   "merges": 9,
    "created": "2026-09-24T10:31:57Z",
-   "updated": "2026-10-16T12:16:12Z"
+   "updated": "2026-11-24T11:17:33Z"
+  },
+  {
+   "id": "3bpcm8vt4kcz5",
+   "file": "runs/enwik8-3bpcm8vt4kcz5.json",
+   "corpus": "enwik8",
+   "kind": "file",
+   "machine": "1omrle93",
+   "go": "go1.27.1",
+   "goos": "windows",
+   "goarch": "amd64",
+   "goamd64": "v1",
+   "bench": "1",
+   "threads": [
+    1,
+    16
+   ],
+   "windows": [
+    0,
+    65536,
+    524288,
+    1048576,
+    4194304
+   ],
+   "codecs": [
+    "minlz",
+    "mzsimd",
+    "zskp"
+   ],
+   "libs": {
+    "github.com/klauspost/compress": [
+     "v1.20.5-0.20261119105852-4aeb7d1ae7b0"
+    ],
+    "github.com/minio/minlz": [
+     ""
+    ]
+   },
+   "variant": {
+    "cgo": "true",
+    "corpus_hash": "e5cbe56bb1579db8",
+    "goamd64": "v1",
+    "goarch": "amd64",
+    "gogc": "100",
+    "gomemlimit": "0",
+    "goos": "windows",
+    "numcpu": "32"
+   },
+   "n_encode": 10,
+   "n_decode": 10,
+   "merges": 3,
+   "created": "2026-11-21T11:45:27Z",
+   "updated": "2026-11-21T20:59:41Z"
   },
   {
    "id": "27kchhl47tzdx",
@@ -2531,7 +2628,10 @@
     "github.com/klauspost/compress": [
      "v1.20.0",
      "v1.20.1",
-     "v1.20.3"
+     "v1.20.3",
+     "v1.20.5-0.20261119105852-4aeb7d1ae7b0",
+     "v1.20.6-0.20261122160837-2133677674d2",
+     "v1.20.6-0.20261123180907-6576e836af9d"
     ],
     "github.com/klauspost/pgzip": [
      "v1.2.6",
@@ -2563,11 +2663,11 @@
     "goos": "windows",
     "numcpu": "32"
    },
-   "n_encode": 688,
-   "n_decode": 845,
-   "merges": 32,
+   "n_encode": 824,
+   "n_decode": 981,
+   "merges": 41,
    "created": "2026-09-23T14:18:57Z",
-   "updated": "2026-11-13T12:19:27Z"
+   "updated": "2026-11-24T08:03:59Z"
   },
   {
    "id": "tdzj047s0fbw",
@@ -2710,7 +2810,10 @@
     "github.com/klauspost/compress": [
      "v1.20.0",
      "v1.20.1",
-     "v1.20.3"
+     "v1.20.3",
+     "v1.20.5-0.20261119105852-4aeb7d1ae7b0",
+     "v1.20.6-0.20261122160837-2133677674d2",
+     "v1.20.6-0.20261123180907-6576e836af9d"
     ],
     "github.com/klauspost/pgzip": [
      "v1.2.6",
@@ -2742,11 +2845,11 @@
     "goos": "windows",
     "numcpu": "32"
    },
-   "n_encode": 623,
-   "n_decode": 764,
-   "merges": 22,
+   "n_encode": 716,
+   "n_decode": 843,
+   "merges": 29,
    "created": "2026-09-23T20:29:38Z",
-   "updated": "2026-11-19T15:08:57Z"
+   "updated": "2026-11-24T11:33:45Z"
   },
   {
    "id": "1yc3fcmtobxif",
@@ -2807,7 +2910,10 @@
     "github.com/klauspost/compress": [
      "v1.20.0",
      "v1.20.1",
-     "v1.20.3"
+     "v1.20.3",
+     "v1.20.5-0.20261119105852-4aeb7d1ae7b0",
+     "v1.20.6-0.20261122160837-2133677674d2",
+     "v1.20.6-0.20261123180907-6576e836af9d"
     ],
     "github.com/klauspost/pgzip": [
      "v1.2.6",
@@ -2839,11 +2945,11 @@
     "goos": "windows",
     "numcpu": "32"
    },
-   "n_encode": 680,
-   "n_decode": 827,
-   "merges": 26,
+   "n_encode": 757,
+   "n_decode": 906,
+   "merges": 32,
    "created": "2026-09-23T16:55:20Z",
-   "updated": "2026-11-19T15:12:46Z"
+   "updated": "2026-11-24T09:19:35Z"
   },
   {
    "id": "3f2k5dbrkacmb",
@@ -2986,7 +3092,10 @@
     "github.com/klauspost/compress": [
      "v1.20.0",
      "v1.20.1",
-     "v1.20.3"
+     "v1.20.3",
+     "v1.20.5-0.20261119105852-4aeb7d1ae7b0",
+     "v1.20.6-0.20261122160837-2133677674d2",
+     "v1.20.6-0.20261123180907-6576e836af9d"
     ],
     "github.com/klauspost/pgzip": [
      "v1.2.6",
@@ -3018,11 +3127,11 @@
     "goos": "windows",
     "numcpu": "32"
    },
-   "n_encode": 678,
-   "n_decode": 825,
-   "merges": 23,
+   "n_encode": 757,
+   "n_decode": 904,
+   "merges": 29,
    "created": "2026-09-23T17:04:27Z",
-   "updated": "2026-11-13T15:25:45Z"
+   "updated": "2026-11-24T09:26:41Z"
   },
   {
    "id": "fz7hu0hctp0e",
@@ -3191,7 +3300,10 @@
     "github.com/klauspost/compress": [
      "v1.20.0",
      "v1.20.1",
-     "v1.20.3"
+     "v1.20.3",
+     "v1.20.5-0.20261119105852-4aeb7d1ae7b0",
+     "v1.20.6-0.20261122160837-2133677674d2",
+     "v1.20.6-0.20261123180907-6576e836af9d"
     ],
     "github.com/klauspost/pgzip": [
      "v1.2.6",
@@ -3223,11 +3335,11 @@
     "goos": "windows",
     "numcpu": "32"
    },
-   "n_encode": 680,
-   "n_decode": 827,
-   "merges": 25,
+   "n_encode": 757,
+   "n_decode": 906,
+   "merges": 31,
    "created": "2026-09-23T17:26:21Z",
-   "updated": "2026-11-19T15:10:50Z"
+   "updated": "2026-11-24T09:40:00Z"
   },
   {
    "id": "1g8lbvpe6a8xt",
@@ -3396,7 +3508,10 @@
     "github.com/klauspost/compress": [
      "v1.20.0",
      "v1.20.1",
-     "v1.20.3"
+     "v1.20.3",
+     "v1.20.5-0.20261119105852-4aeb7d1ae7b0",
+     "v1.20.6-0.20261122160837-2133677674d2",
+     "v1.20.6-0.20261123180907-6576e836af9d"
     ],
     "github.com/klauspost/pgzip": [
      "v1.2.6",
@@ -3428,11 +3543,11 @@
     "goos": "windows",
     "numcpu": "32"
    },
-   "n_encode": 666,
-   "n_decode": 823,
-   "merges": 23,
+   "n_encode": 745,
+   "n_decode": 902,
+   "merges": 29,
    "created": "2026-09-23T14:24:21Z",
-   "updated": "2026-11-13T12:29:12Z"
+   "updated": "2026-11-24T08:07:49Z"
   },
   {
    "id": "2vrmjqwnll1kv",
@@ -3493,7 +3608,10 @@
     "github.com/klauspost/compress": [
      "v1.20.0",
      "v1.20.1",
-     "v1.20.3"
+     "v1.20.3",
+     "v1.20.5-0.20261119105852-4aeb7d1ae7b0",
+     "v1.20.6-0.20261122160837-2133677674d2",
+     "v1.20.6-0.20261123180907-6576e836af9d"
     ],
     "github.com/klauspost/pgzip": [
      "v1.2.6",
@@ -3525,11 +3643,11 @@
     "goos": "windows",
     "numcpu": "32"
    },
-   "n_encode": 626,
-   "n_decode": 778,
-   "merges": 28,
+   "n_encode": 705,
+   "n_decode": 857,
+   "merges": 34,
    "created": "2026-09-24T07:29:59Z",
-   "updated": "2026-11-13T16:15:04Z"
+   "updated": "2026-11-24T09:42:40Z"
   },
   {
    "id": "h4frqvsi6o03",
@@ -3631,7 +3749,9 @@
     "github.com/klauspost/compress": [
      "v1.20.0",
      "v1.20.1",
-     "v1.20.3"
+     "v1.20.3",
+     "v1.20.5-0.20261119105852-4aeb7d1ae7b0",
+     "v1.20.6-0.20261123180907-6576e836af9d"
     ],
     "github.com/klauspost/pgzip": [
      "v1.2.6",
@@ -3663,11 +3783,11 @@
     "goos": "windows",
     "numcpu": "32"
    },
-   "n_encode": 592,
-   "n_decode": 720,
-   "merges": 18,
+   "n_encode": 671,
+   "n_decode": 799,
+   "merges": 24,
    "created": "2026-09-24T08:41:15Z",
-   "updated": "2026-11-13T21:59:28Z"
+   "updated": "2026-11-24T11:51:41Z"
   },
   {
    "id": "2wja8uxhdkrii",
@@ -3810,7 +3930,10 @@
     "github.com/klauspost/compress": [
      "v1.20.0",
      "v1.20.1",
-     "v1.20.3"
+     "v1.20.3",
+     "v1.20.5-0.20261119105852-4aeb7d1ae7b0",
+     "v1.20.6-0.20261122160837-2133677674d2",
+     "v1.20.6-0.20261123180907-6576e836af9d"
     ],
     "github.com/klauspost/pgzip": [
      "v1.2.6",
@@ -3842,11 +3965,11 @@
     "goos": "windows",
     "numcpu": "32"
    },
-   "n_encode": 688,
-   "n_decode": 845,
-   "merges": 26,
+   "n_encode": 767,
+   "n_decode": 924,
+   "merges": 32,
    "created": "2026-09-23T14:42:37Z",
-   "updated": "2026-11-13T12:40:41Z"
+   "updated": "2026-11-24T08:12:11Z"
   },
   {
    "id": "1r4vnyb1pg1jj",
@@ -3905,7 +4028,10 @@
     ],
     "github.com/klauspost/compress": [
      "v1.20.1",
-     "v1.20.3"
+     "v1.20.3",
+     "v1.20.5-0.20261119105852-4aeb7d1ae7b0",
+     "v1.20.6-0.20261122160837-2133677674d2",
+     "v1.20.6-0.20261123180907-6576e836af9d"
     ],
     "github.com/klauspost/pgzip": [
      "v1.2.7"
@@ -3931,11 +4057,11 @@
     "goos": "windows",
     "numcpu": "32"
    },
-   "n_encode": 574,
-   "n_decode": 624,
-   "merges": 18,
+   "n_encode": 653,
+   "n_decode": 703,
+   "merges": 24,
    "created": "2026-10-13T10:34:25Z",
-   "updated": "2026-11-13T12:47:49Z"
+   "updated": "2026-11-24T08:13:49Z"
   },
   {
    "id": "2rs0cn96b813x",
@@ -4026,7 +4152,9 @@
     ],
     "github.com/klauspost/compress": [
      "v1.20.0",
-     "v1.20.3"
+     "v1.20.3",
+     "v1.20.5-0.20261119105852-4aeb7d1ae7b0",
+     "v1.20.6-0.20261123180907-6576e836af9d"
     ],
     "github.com/klauspost/pgzip": [
      "v1.2.6",
@@ -4058,11 +4186,11 @@
     "goos": "windows",
     "numcpu": "32"
    },
-   "n_encode": 436,
-   "n_decode": 464,
-   "merges": 9,
+   "n_encode": 515,
+   "n_decode": 543,
+   "merges": 15,
    "created": "2026-09-24T12:18:45Z",
-   "updated": "2026-11-14T00:28:34Z"
+   "updated": "2026-11-24T12:30:00Z"
   },
   {
    "id": "3g92xqq7iucwc",
