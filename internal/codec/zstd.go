@@ -13,6 +13,7 @@ var zstdLevels = []Level{
 	{N: int(zstd.SpeedDefault), Name: "default"},
 	{N: int(zstd.SpeedBetterCompression), Name: "better"},
 	{N: int(zstd.SpeedBestCompression), Name: "best"},
+	{N: int(zstd.SpeedUltraCompression), Name: "ultra", Slow: true},
 }
 
 func init() {

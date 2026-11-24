@@ -45,7 +45,8 @@ func init() {
 
 	RegisterEnc(Enc{
 		ID: "flkp", Name: "deflate", Impl: "klauspost/compress", Format: FmtDeflate,
-		Module: kpCompress, Kinds: bothKinds, Levels: deflateLevels(true, 5),
+		Module: kpCompress, Kinds: bothKinds,
+		Levels: append(deflateLevels(true, 5), Level{N: flkp.UltraCompression, Name: "ultra", Slow: true}),
 		New: func(lvl int, o Opts) (Encoder, error) {
 			if lvl == statelessLevel {
 				// StatelessDeflate is the one-shot form; NewStatelessWriter has no

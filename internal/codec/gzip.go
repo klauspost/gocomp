@@ -65,7 +65,8 @@ func init() {
 
 	RegisterEnc(Enc{
 		ID: "gzkp", Name: "gzip", Impl: "klauspost/compress", Format: FmtGzip,
-		Module: kpCompress, Kinds: bothKinds, Levels: deflateLevels(true, 5),
+		Module: kpCompress, Kinds: bothKinds,
+		Levels: append(deflateLevels(true, 5), Level{N: gzkp.UltraCompression, Name: "ultra", Slow: true}),
 		New: func(lvl int, o Opts) (Encoder, error) {
 			w, err := gzkp.NewWriterLevel(nil, lvl)
 			if err != nil {

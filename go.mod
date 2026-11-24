@@ -14,17 +14,21 @@ require (
 	github.com/charmbracelet/lipgloss v1.1.0
 	github.com/dsnet/compress v0.0.1
 	github.com/golang/snappy v1.0.0
-	github.com/klauspost/compress v1.20.4
+	github.com/klauspost/compress v1.20.6-0.20261123180907-6576e836af9d
 	github.com/klauspost/cpuid/v2 v2.4.1
 	github.com/klauspost/pgzip v1.3.0
 	github.com/klauspost/stdgozstd v0.0.0-20260722174150-eb4821197265
-	github.com/minio/minlz v1.2.5-0.20261113115215-7c9a1627c7e4
+	github.com/minio/minlz v1.3.0
 	github.com/pbnjay/memory v0.0.0-20210728143218-7b4eea64cf58
 	github.com/pierrec/lz4/v4 v4.1.30
 	github.com/ulikunitz/xz v0.5.17
 	github.com/zeebo/xxh3 v1.1.1-0.20260908150653-f7225998cebf
 	golang.org/x/sys v0.48.0
 )
+
+// The ultra levels are in minio/minlz PR 113, whose commit is only on a branch
+// of the fork, so github.com/minio/minlz cannot resolve it.
+replace github.com/minio/minlz => github.com/klauspost/minlz v0.0.0-20261119134826-475f62408375
 
 require (
 	4d63.com/gocheckcompilerdirectives v1.4.0 // indirect
@@ -339,7 +343,3 @@ tool (
 	github.com/golangci/golangci-lint/v2/cmd/golangci-lint
 	mvdan.cc/gofumpt
 )
-
-// The ultra levels are in minio/minlz PR 113, whose commit is only on a branch
-// of the fork, so github.com/minio/minlz cannot resolve it.
-replace github.com/minio/minlz => github.com/klauspost/minlz v0.0.0-20261119134826-475f62408375
