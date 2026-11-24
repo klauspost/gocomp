@@ -384,6 +384,15 @@ function runQuery(all, q, db) {
   rows = rows.filter((r) => (!libs.length || libs.includes(r.lib) || lib?.has(r))
     && (!gos.length || gos.includes(r.go) || go?.has(r)));
 
+  // A decoder at one thread count can have read zstd sources encoded at
+  // several, and splitting on that drew a second line per codec nobody asked
+  // for -- ultra alone was only encoded at 16. Each point instead reads the
+  // source encoded at its own thread count, or the closest. Along a thread
+  // axis the bytes must stay the same for a speed-up to mean anything, so
+  // there each source keeps its own line.
+  const oneSrc = q.op === 'd' && !(q.pointBy ?? []).includes('threads');
+  if (oneSrc) rows = closestSrc(rows);
+
   // A series line only means something within one corpus at one thread count,
   // measured the same way. Whichever of those actually vary in the result join
   // the series key, so a line never connects unrelated slices; entityBy keeps
@@ -393,9 +402,14 @@ function runQuery(all, q, db) {
   // meaningful, whatever else the card plots. Nor is one through two windows
   // -- a level curve that steps between block sizes is two settings drawn as
   // one -- or through two inputs a decoder read.
+  // A decode row has no level of its own; it sits at its source's, which is a
+  // codec as well as a level: under srcPolicy "all" one decoder reads several
+  // codecs' output. Not the src string, which puts "gzkp-10" between "gzkp-1"
+  // and "gzkp-2".
+  const levelDims = (ks) => ks.flatMap((k) => (k === 'level' && q.op === 'd' ? ['srcCodec', 'srcLevel'] : [k]));
   const seriesBy = [...q.seriesBy];
-  for (const d of [...(q.autoSplit ?? ['corpus', 'threads']), 'window', 'srcThreads', ...ENV_SPLIT]) {
-    if (seriesBy.includes(d)) continue;
+  for (const d of [...levelDims(q.autoSplit ?? ['corpus', 'threads']), 'window', 'srcThreads', ...ENV_SPLIT]) {
+    if (seriesBy.includes(d) || (d === 'srcThreads' && oneSrc)) continue;
     // A source thread count of 0 means the source does not have one, so it
     // never needs telling apart from zstd's.
     if (new Set(rows.map((r) => r[d]).filter((v) => d !== 'srcThreads' || v)).size > 1) seriesBy.push(d);
@@ -425,7 +439,7 @@ function runQuery(all, q, db) {
     g.points.push(r);
   }
 
-  const pointKey = q.pointBy ?? ['level'];
+  const pointKey = levelDims(q.pointBy ?? ['level']);
   const ent = q.entityBy ?? q.seriesBy[0];
   // The legend names an entity across all of its series, so a default window
   // is sized from every row the entity covers.
@@ -480,6 +494,20 @@ function newest(rows, part, cmp) {
     if (!cur || cmp(r, cur) > 0) best.set(k, r);
   }
   return new Set(best.values());
+}
+
+// closestSrc keeps, of the rows differing only in the thread count their source
+// was encoded at, the one closest to the decoder's own; a tie goes to fewer.
+function closestSrc(rows) {
+  const dist = (r) => Math.abs(r.srcThreads - r.threads);
+  const best = new Map();
+  for (const r of rows) {
+    const k = [r.corpus, r.machine, r.go, r.bench, r.variant, r.lib, r.srcLibVer,
+      r.codec, r.window, r.threads, r.src].join('|');
+    const cur = best.get(k);
+    if (!cur || dist(r) < dist(cur) || (dist(r) === dist(cur) && r.srcThreads < cur.srcThreads)) best.set(k, r);
+  }
+  return [...best.values()];
 }
 
 // cmpVer orders on the numbers in a version string, so v1.9.0 sorts below
@@ -538,6 +566,10 @@ function dimLabel(d, v, db, row, points) {
   }
   if (d === 'variant') return variantLabel(v);
   if (d === 'level') return row?.levelName || String(v);
+  // A decoder reading its own codec's output is the usual case; the line
+  // already names that codec.
+  if (d === 'srcCodec') return v === row?.codec ? '' : `from ${v}`;
+  if (d === 'srcLevel') return levelWord(db.codecs.get(row?.srcCodec), v);
   return String(v);
 }
 
